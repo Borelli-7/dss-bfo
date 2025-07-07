@@ -88,4 +88,48 @@ class TimestampGenerationTimeNotAfterCertificateExpirationCheckTest extends Abst
         assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
     }
 
+    @Test
+    void sameTimeTest() {
+        Date datetime = new Date();
+
+        XmlTimestamp xmlTimestamp = new XmlTimestamp();
+        xmlTimestamp.setProductionTime(datetime);
+
+        LevelConstraint constraint = new LevelConstraint();
+        constraint.setLevel(Level.FAIL);
+
+        XmlValidationProcessBasicSignature result = new XmlValidationProcessBasicSignature();
+        TimestampGenerationTimeNotAfterCertificateExpirationCheck tgtnacec = new TimestampGenerationTimeNotAfterCertificateExpirationCheck<>(
+                i18nProvider, result, new TimestampWrapper(xmlTimestamp), datetime,  new LevelConstraintWrapper(constraint));
+        tgtnacec.execute();
+
+        List<XmlConstraint> constraints = result.getConstraint();
+        assertEquals(1, constraints.size());
+        assertEquals(XmlStatus.OK, constraints.get(0).getStatus());
+    }
+
+    @Test
+    void contentTstMillisecondAfterTest() {
+        Date revocationTime = new Date();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(revocationTime);
+        calendar.add(Calendar.MILLISECOND, 1);
+
+        XmlTimestamp xmlTimestamp = new XmlTimestamp();
+        xmlTimestamp.setProductionTime(calendar.getTime());
+
+        LevelConstraint constraint = new LevelConstraint();
+        constraint.setLevel(Level.FAIL);
+
+        XmlValidationProcessBasicSignature result = new XmlValidationProcessBasicSignature();
+        TimestampGenerationTimeNotAfterCertificateExpirationCheck tgtnacec = new TimestampGenerationTimeNotAfterCertificateExpirationCheck<>(
+                i18nProvider, result, new TimestampWrapper(xmlTimestamp), revocationTime,  new LevelConstraintWrapper(constraint));
+        tgtnacec.execute();
+
+        List<XmlConstraint> constraints = result.getConstraint();
+        assertEquals(1, constraints.size());
+        assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
+    }
+
 }

@@ -842,11 +842,12 @@ public class SimpleReportBuilder {
 			max = maxTimestampExtensionPeriod;
 		}
 
-		return max;
+		return ensureMaxExtensionTimeIsAfterValidationTime(max);
 	}
 
 	private Date getMaxExtensionPeriodForTimestampList(List<TimestampWrapper> timestampList) {
 		Date max = null;
+
 		for (TimestampWrapper timestampWrapper : timestampList) {
 			if (!isValidConclusion(timestampWrapper.getId())) {
 				continue;
@@ -857,7 +858,17 @@ public class SimpleReportBuilder {
 			}
 		}
 
-		return max;
+		return ensureMaxExtensionTimeIsAfterValidationTime(max);
+	}
+
+	private Date ensureMaxExtensionTimeIsAfterValidationTime(Date maxExtensionTime) {
+		if (maxExtensionTime == null) {
+			return null;
+		}
+		if (currentTime != null && currentTime.before(maxExtensionTime)) {
+			return maxExtensionTime;
+		}
+		return null;
 	}
 
 	private boolean isValidConclusion(String tokenId) {

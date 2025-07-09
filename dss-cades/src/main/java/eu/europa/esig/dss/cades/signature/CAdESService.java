@@ -156,7 +156,7 @@ public class CAdESService extends
 
 		final CustomContentSigner customContentSigner = new CustomContentSigner(signatureAlgorithm.getJCEId(), signatureValue.getValue());
 		final CMS originalCms = getOriginalCMS(toSignDocument, parameters);
-		if (originalCms == null && SignaturePackaging.DETACHED.equals(packaging) && Utils.isCollectionEmpty(parameters.getDetachedContents())) {
+		if (originalCms == null && SignaturePackaging.DETACHED.equals(packaging)) {
 			parameters.getContext().setDetachedContents(Collections.singletonList(toSignDocument));
 		}
 		final DSSDocument contentToSign = getContentToSign(toSignDocument, parameters, originalCms);
@@ -208,17 +208,15 @@ public class CAdESService extends
 	private DSSDocument getContentToSign(final DSSDocument toSignDocument, final CAdESSignatureParameters parameters,
 										 final CMS originalCms) {
 		final List<DSSDocument> detachedContents = parameters.getDetachedContents();
-		if (Utils.isCollectionNotEmpty(detachedContents)) {
+		if (originalCms == null) {
+			return toSignDocument;
+		} else if (Utils.isCollectionNotEmpty(detachedContents)) {
 			// * CAdES only can sign one document
 			// * ASiC-S -> the document to sign or package.zip
 			// * ASiC-E -> ASiCManifest
 			return detachedContents.get(0);
 		} else {
-			if (originalCms == null) {
-				return toSignDocument;
-			} else {
-				return getSignedContent(originalCms);
-			}
+			return getSignedContent(originalCms);
 		}
 	}
 

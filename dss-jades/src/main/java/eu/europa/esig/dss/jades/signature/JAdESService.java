@@ -139,12 +139,8 @@ public class JAdESService extends AbstractSignatureService<JAdESSignatureParamet
 	@Override
 	public ToBeSigned getDataToSign(DSSDocument toSignDocument, JAdESSignatureParameters parameters) {
 		Objects.requireNonNull(toSignDocument, "toSignDocument cannot be null!");
-		Objects.requireNonNull(parameters, "SignatureParameters cannot be null!");
-		
-		assertSigningCertificateValid(parameters);
-		
-		JAdESBuilder jadesBuilder = getJAdESBuilder(parameters, Collections.singletonList(toSignDocument));
-		return jadesBuilder.buildDataToBeSigned();
+
+		return getDataToSign(Collections.singletonList(toSignDocument), parameters);
 	}
 
 	@Override

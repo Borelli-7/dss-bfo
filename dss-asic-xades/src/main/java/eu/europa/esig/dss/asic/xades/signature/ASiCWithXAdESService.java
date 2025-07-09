@@ -176,7 +176,7 @@ public class ASiCWithXAdESService extends AbstractASiCSignatureService<ASiCWithX
 
 		for (DSSDocument signature : signatureDocuments) {
 			XAdESSignatureParameters xadesParameters = getXAdESParameters(parameters, Collections.emptyList(), openDocument);
-			xadesParameters.setDetachedContents(detachedContents);
+			xadesParameters.getContext().setDetachedContents(detachedContents);
 
 			DSSDocument extendedDocument = getXAdESService().extendDocument(signature, xadesParameters);
 			extendedDocument.setName(signature.getName());

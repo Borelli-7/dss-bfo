@@ -110,6 +110,7 @@ import eu.europa.esig.dss.model.x509.revocation.ocsp.OCSP;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.simplereport.SimpleReport;
 import eu.europa.esig.dss.simplereport.SimpleReportFacade;
+import eu.europa.esig.dss.simplereport.jaxb.XmlCertificateChain;
 import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.SignatureCertificateSource;
 import eu.europa.esig.dss.spi.policy.BasicASN1SignaturePolicyValidator;
@@ -1740,7 +1741,10 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 				assertNull(simpleReport.getSubIndication(sigId));
 				assertTrue(Utils.isCollectionEmpty(simpleReport.getAdESValidationErrors(sigId)));
 
-				assertNotNull(simpleReport.getExtensionPeriodMax(sigId));
+				if (!createdWithTrustAnchor(simpleReport.getCertificateChain(sigId))
+						&& !timestampedWithTrustAnchor(simpleReport.getSignatureTimestamps(sigId))) {
+					assertNotNull(simpleReport.getExtensionPeriodMax(sigId));
+				}
 				++numberOfValidSignatures;
 
 			} else {
@@ -1748,7 +1752,8 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 				assertNotNull(subIndication);
 				assertFalse(Utils.isCollectionEmpty(simpleReport.getAdESValidationErrors(sigId)));
 
-				if (SubIndication.TRY_LATER.equals(subIndication)) {
+				if (SubIndication.TRY_LATER.equals(subIndication) && !createdWithTrustAnchor(simpleReport.getCertificateChain(sigId))
+						&& !timestampedWithTrustAnchor(simpleReport.getSignatureTimestamps(sigId))) {
 					assertNotNull(simpleReport.getExtensionPeriodMax(sigId));
 				}
 			}
@@ -1783,7 +1788,9 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 				assertTrue(Utils.isCollectionNotEmpty(simpleReport.getAdESValidationErrors(tstId)));
 			} else {
 				assertTrue(Utils.isCollectionNotEmpty(simpleReport.getSignatureScopes(tstId)));
-				assertNotNull(simpleReport.getExtensionPeriodMax(tstId));
+				if (!createdWithTrustAnchor(simpleReport.getCertificateChain(tstId))) {
+					assertNotNull(simpleReport.getExtensionPeriodMax(tstId));
+				}
 			}
 			assertNotNull(simpleReport.getTimestampQualification(tstId));
 		}
@@ -1799,11 +1806,28 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 				assertTrue(Utils.isCollectionNotEmpty(simpleReport.getAdESValidationErrors(erId)));
 			} else {
 				assertTrue(Utils.isCollectionNotEmpty(simpleReport.getSignatureScopes(erId)));
-				assertNotNull(simpleReport.getExtensionPeriodMax(erId));
+				if (!timestampedWithTrustAnchor(simpleReport.getEvidenceRecordTimestamps(erId))) {
+					assertNotNull(simpleReport.getExtensionPeriodMax(erId));
+				}
 			}
 		}
 
 		assertNotNull(simpleReport.getValidationTime());
+	}
+
+	private boolean createdWithTrustAnchor(XmlCertificateChain xmlCertificateChain) {
+		if (xmlCertificateChain != null && Utils.isCollectionNotEmpty(xmlCertificateChain.getCertificate())) {
+			eu.europa.esig.dss.simplereport.jaxb.XmlCertificate xmlCertificate = xmlCertificateChain.getCertificate().get(0);
+			return xmlCertificate.isTrusted();
+		}
+		return false;
+	}
+
+	private boolean timestampedWithTrustAnchor(List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> xmlTimestampList) {
+		if (Utils.isCollectionNotEmpty(xmlTimestampList)) {
+			return xmlTimestampList.stream().anyMatch(t -> createdWithTrustAnchor(t.getCertificateChain()));
+		}
+		return false;
 	}
 
 	protected void verifyDetailedReport(DetailedReport detailedReport) {

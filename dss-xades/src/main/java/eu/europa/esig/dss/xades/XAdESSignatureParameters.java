@@ -308,12 +308,12 @@ public class XAdESSignatureParameters extends AbstractSignatureParameters<XAdEST
 	 * @return a list of {@link DSSReference}s
 	 */
 	public List<DSSReference> getReferences() {
+		XAdESProfileParameters context = getContext();
+		if (context != null && Utils.isCollectionNotEmpty(context.getReferences())) {
+			return context.getReferences();
+		}
 		if (Utils.isCollectionNotEmpty(dssReferences)) {
 			return dssReferences;
-		}
-		XAdESProfileParameters context = getContext();
-		if (context != null) {
-			return context.getReferences();
 		}
 		return null;
 	}

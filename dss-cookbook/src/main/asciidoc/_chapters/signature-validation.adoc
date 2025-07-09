@@ -335,6 +335,16 @@ NOTE: The cryptographic suite, when provided, overwrites all configuration for v
 
 When loaded from a file explicitly in the `DocumentValidator`, the cryptographic suite will be applied globally with a `FAIL` execution level of the cryptographic checks. In order to apply a cryptographic suite conditionally based on a content or execution level, please see <<ValidationPolicyLoader>> configuration.
 
+WARNING: The 4.2.9.2 "Algorithm-usage" element as defined in ETSI TS 119 322 currently is not supported. For the applicability rules of a cryptographic suite based on the validation context, please refer to the information above.
+
+In DSS versions `6.3` and earlier, signature algorithm validation is not performed holistically. Instead, DSS validates the digest algorithm and the encryption algorithm with the given key size independently. Because of this, when processing a cryptographic suite file, the following rules apply:
+
+ * *Digest Algorithms*: Only constraints that explicitly reference the digest algorithm are considered and extracted.
+ * *Encryption Algorithms*: Both, constraints explicitly referencing the encryption algorithm, and signature algorithm constraints that embed the encryption algorithm in question
+are extracted. If multiple expiration dates are defined across these constraints, the latest expiration date is used during validation.
+
+NOTE: In case of conflicting constraints in the cryptographic suite, the “first come, first served” rule is applied.
+
 [[ValidationPolicyLoader]]
 ==== Validation Policy Loader
 

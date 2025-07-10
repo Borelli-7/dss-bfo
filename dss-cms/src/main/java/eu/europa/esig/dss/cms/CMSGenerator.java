@@ -118,7 +118,7 @@ public interface CMSGenerator {
 
     /**
      * Loads the available {@code CMSGenerator} based on the loaded module in the classpath.
-     * One of the 'dss-cades-cms' or 'dss-cades-cms-stream' shall be defined in the list of dependencies.
+     * One of the 'dss-cms-object' or 'dss-cms-stream' shall be defined in the list of dependencies.
      *
      * @return {@link CMSGenerator} implementation
      */

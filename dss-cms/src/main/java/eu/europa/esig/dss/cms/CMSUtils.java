@@ -65,7 +65,7 @@ public final class CMSUtils {
         Iterator<ICMSUtils> iterator = loader.iterator();
         if (!iterator.hasNext()) {
             throw new ExceptionInInitializerError(
-                    "No implementation found for ICMSUtils in classpath, please choose between dss-cades-cms or dss-cades-cms-stream");
+                    "No implementation found for ICMSUtils in classpath, please choose between dss-cms-object or dss-cms-stream");
         }
         impl = iterator.next();
     }

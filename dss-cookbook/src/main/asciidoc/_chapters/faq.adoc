@@ -28,7 +28,7 @@ This chapter covers the most frequently asked questions and issues occurring in 
 </dependencies>
 ----
 
-|v6.3                      a|"No implementation found for ICMSUtils in classpath, please choose between dss-cades-cms or dss-cades-cms-stream" exception is returned.    a|Since version `6.3` DSS provides two alternative implementations for CMS object handling. If CMS processing is required by the application (such as a use of `dss-cades`, `dss-pades` or `dss-asic-cades` modules), one of the implementations shall be added. In order to get back to the behavior familiar by previous versions of DSS, the module `dss-cms-object` should be added within the list of dependencies:
+|v6.3                      a|"No implementation found for ICMSUtils in classpath, please choose between dss-cms-object or dss-cms-stream" exception is returned.    a|Since version `6.3` DSS provides two alternative implementations for CMS object handling. If CMS processing is required by the application (such as a use of `dss-cades`, `dss-pades` or `dss-asic-cades` modules), one of the implementations shall be added. In order to get back to the behavior familiar by previous versions of DSS, the module `dss-cms-object` should be added within the list of dependencies:
 
 [source,xml]
 .pom.xml

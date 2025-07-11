@@ -738,7 +738,7 @@ public class SimpleReportBuilder {
 
 		final List<List<CertificateWrapper>> chains = new ArrayList<>();
 		chains.add(token.getCertificateChain());
-		List<RelatedRevocationWrapper> relatedRevocations = token.foundRevocations().getRelatedRevocationData();
+		List<RelatedRevocationWrapper> relatedRevocations = getRelatedRevocations(token);
 		for (RevocationWrapper revocation : relatedRevocations) {
 			chains.add(revocation.getCertificateChain());
 		}
@@ -760,6 +760,13 @@ public class SimpleReportBuilder {
 		return min;
 	}
 
+	private List<RelatedRevocationWrapper> getRelatedRevocations(AbstractTokenProxy token) {
+		// Returns a list of revocation data protected by a timestamp.
+		// Other revocation data do not need to be processed.
+		return token.foundRevocations().getRelatedRevocationData().stream()
+				.filter(r -> poe.getLowestPOE(r.getId()).isTokenProvided()).collect(Collectors.toList());
+	}
+
 	private Date getMinExtensionPeriodForTimestampList(List<TimestampWrapper> timestampList) {
 		Date min = null;
 
@@ -778,9 +785,11 @@ public class SimpleReportBuilder {
 	private Date getMinExtensionPeriodForChain(List<CertificateWrapper> certificateChain, Date usageTime) {
 		Date min = null;
 		for (CertificateWrapper certificateWrapper : certificateChain) {
+			if (certificateWrapper.isTrusted() || certificateWrapper.isSelfSigned()) {
+				break;
+			}
 
-			if (!certificateWrapper.isTrusted() && !certificateWrapper.isSelfSigned() &&
-					Utils.isCollectionNotEmpty(certificateWrapper.getCertificateRevocationData())) {
+			if (Utils.isCollectionNotEmpty(certificateWrapper.getCertificateRevocationData())) {
 				Date lastTrustedUsage;
 				if (usageTime != null) {
 					lastTrustedUsage = usageTime;

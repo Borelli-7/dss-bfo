@@ -130,9 +130,15 @@ public class CMSObjectUtils implements ICMSUtils {
 
     @Override
     public CMS replaceSigners(CMS cms, SignerInformationStore newSignerStore) {
-        CMSSignedDataObject cmsSignedDataObject = toCMSSignedDataObject(cms);
-        CMSSignedData cmsSignedData = CMSSignedData.replaceSigners(cmsSignedDataObject.getCMSSignedData(), newSignerStore);
-        return new CMSSignedDataObject(cmsSignedData);
+        try {
+            CMSSignedDataObject cmsSignedDataObject = toCMSSignedDataObject(cms);
+            CMSSignedData cmsSignedData = CMSSignedData.replaceSigners(cmsSignedDataObject.getCMSSignedData(), newSignerStore);
+            return new CMSSignedDataObject(cmsSignedData);
+
+        } catch (Exception e) {
+            throw new DSSException(String.format("Unable to replace signerInfo of CMS SignedData. " +
+                    "Corrupted content has been provided. Reason : %s", e.getMessage()), e);
+        }
     }
 
     @Override
@@ -145,8 +151,10 @@ public class CMSObjectUtils implements ICMSUtils {
             CMSSignedData cmsSignedData = CMSSignedData.replaceCertificatesAndCRLs(cmsSignedDataObject.getCMSSignedData(),
                     certificates, attributeCertificates, newCRLStore);
             return new CMSSignedDataObject(cmsSignedData);
-        } catch (CMSException e) {
-            throw new DSSException(String.format("Unable to replace content of CMS SignedData. Reason : %s", e.getMessage()), e);
+
+        } catch (Exception e) {
+            throw new DSSException(String.format("Unable to replace validation content of CMS SignedData. " +
+                    "Corrupted content has been provided. Reason : %s", e.getMessage()), e);
         }
     }
 
@@ -171,14 +179,20 @@ public class CMSObjectUtils implements ICMSUtils {
 
     @Override
     public CMS populateDigestAlgorithmSet(CMS cms, Collection<AlgorithmIdentifier> digestAlgorithmsToAdd) {
-        CMSSignedDataObject cmsSignedDataObject = toCMSSignedDataObject(cms);
-        CMSSignedData cmsSignedData = cmsSignedDataObject.getCMSSignedData();
-        for (AlgorithmIdentifier asn1ObjectIdentifier : digestAlgorithmsToAdd) {
-            if (!cmsSignedData.getDigestAlgorithmIDs().contains(asn1ObjectIdentifier)) {
-                cmsSignedData = CMSSignedData.addDigestAlgorithm(cmsSignedData, asn1ObjectIdentifier);
+        try {
+            CMSSignedDataObject cmsSignedDataObject = toCMSSignedDataObject(cms);
+            CMSSignedData cmsSignedData = cmsSignedDataObject.getCMSSignedData();
+            for (AlgorithmIdentifier asn1ObjectIdentifier : digestAlgorithmsToAdd) {
+                if (!cmsSignedData.getDigestAlgorithmIDs().contains(asn1ObjectIdentifier)) {
+                    cmsSignedData = CMSSignedData.addDigestAlgorithm(cmsSignedData, asn1ObjectIdentifier);
+                }
             }
+            return new CMSSignedDataObject(cmsSignedData);
+
+        } catch (Exception e) {
+            throw new DSSException(String.format("Unable to populate digest algorithms within CMS SignedData. " +
+                    "Corrupted content has been provided. Reason : %s", e.getMessage()), e);
         }
-        return new CMSSignedDataObject(cmsSignedData);
     }
 
     private static CMSSignedDataObject toCMSSignedDataObject(CMS cms) {

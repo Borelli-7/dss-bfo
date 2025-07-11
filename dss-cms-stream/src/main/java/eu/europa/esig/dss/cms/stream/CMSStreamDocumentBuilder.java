@@ -133,8 +133,8 @@ public class CMSStreamDocumentBuilder {
 
         try {
             final DSSCMSSignedDataStreamGenerator generator = new DSSCMSSignedDataStreamGenerator();
-            generator.addSigners(cms.getSignerInfos());
-            generator.addCertificates(cms.getCertificates()); // required for digest re-computation
+            addSigners(generator, cms);
+            addCertificates(generator, cms); // required for digest re-computation
 
             if (!skipUnsignedAttributes) {
                 addDigestAlgorithmIDs(generator, cms);
@@ -152,14 +152,50 @@ public class CMSStreamDocumentBuilder {
     }
 
     /**
+     * Adds signers from {@code CMS} to a {@code DSSCMSSignedDataStreamGenerator}
+     *
+     * @param generator {@link DSSCMSSignedDataStreamGenerator} to extend
+     * @param cms {@link CMS}
+     */
+    protected void addSigners(final DSSCMSSignedDataStreamGenerator generator, CMS cms) {
+        try {
+            generator.addSigners(cms.getSignerInfos());
+        } catch (Exception e) {
+            throw new DSSException(String.format("Unable to replace signerInfo of CMS SignedData. " +
+                    "Corrupted content has been provided. Reason : %s", e.getMessage()), e);
+        }
+    }
+
+    /**
+     * Adds SignedData.certificates from {@code CMS} to a {@code DSSCMSSignedDataStreamGenerator}
+     *
+     * @param generator {@link DSSCMSSignedDataStreamGenerator} to extend
+     * @param cms {@link CMS}
+     */
+    protected void addCertificates(final DSSCMSSignedDataStreamGenerator generator, CMS cms) {
+        try {
+            generator.addCertificates(cms.getCertificates());
+        } catch (Exception e) {
+            throw new DSSException(String.format("Unable to replace validation content of CMS SignedData (certificates). " +
+                    "Corrupted content has been provided. Reason : %s", e.getMessage()), e);
+        }
+    }
+
+    /**
      * Adds digest algorithms IDs from {@code CMS} to a {@code DSSCMSSignedDataStreamGenerator}
      *
      * @param generator {@link DSSCMSSignedDataStreamGenerator} to extend
      * @param cms {@link CMS}
      */
     protected void addDigestAlgorithmIDs(final DSSCMSSignedDataStreamGenerator generator, CMS cms) {
-        if (cms.getDigestAlgorithmIDs() != null) {
-            generator.addDigestAlgorithmIDs(cms.getDigestAlgorithmIDs());
+        try {
+            if (cms.getDigestAlgorithmIDs() != null) {
+                generator.addDigestAlgorithmIDs(cms.getDigestAlgorithmIDs());
+            }
+
+        } catch (Exception e) {
+            throw new DSSException(String.format("Unable to populate digest algorithms within CMS SignedData. " +
+                    "Corrupted content has been provided. Reason : %s", e.getMessage()), e);
         }
     }
 
@@ -171,8 +207,14 @@ public class CMSStreamDocumentBuilder {
      * @throws CMSException if an exception occurs
      */
     protected void addAttributeCertificates(final DSSCMSSignedDataStreamGenerator generator, CMS cms) throws CMSException {
-        if (cms.getAttributeCertificates() != null) {
-            generator.addAttributeCertificates(cms.getAttributeCertificates());
+        try {
+            if (cms.getAttributeCertificates() != null) {
+                generator.addAttributeCertificates(cms.getAttributeCertificates());
+            }
+
+        } catch (Exception e) {
+            throw new DSSException(String.format("Unable to replace validation content of CMS SignedData (attribute certificates). " +
+                    "Corrupted content has been provided. Reason : %s", e.getMessage()), e);
         }
     }
 
@@ -184,8 +226,14 @@ public class CMSStreamDocumentBuilder {
      * @throws CMSException if an exception occurs
      */
     protected void addCRLs(final DSSCMSSignedDataStreamGenerator generator, CMS cms) throws CMSException {
-        if (cms.getCRLs() != null) {
-            generator.addCRLs(cms.getCRLs());
+        try {
+            if (cms.getCRLs() != null) {
+                generator.addCRLs(cms.getCRLs());
+            }
+
+        } catch (Exception e) {
+            throw new DSSException(String.format("Unable to replace validation content of CMS SignedData (CRLs). " +
+                    "Corrupted content has been provided. Reason : %s", e.getMessage()), e);
         }
     }
 
@@ -196,8 +244,14 @@ public class CMSStreamDocumentBuilder {
      * @param cms {@link CMS}
      */
     protected void addOCSPResponses(final DSSCMSSignedDataStreamGenerator generator, CMS cms) {
-        if (cms.getOcspResponseStore() != null) {
-            generator.addOtherRevocationInfo(id_ri_ocsp_response, cms.getOcspResponseStore());
+        try {
+            if (cms.getOcspResponseStore() != null) {
+                generator.addOtherRevocationInfo(id_ri_ocsp_response, cms.getOcspResponseStore());
+            }
+
+        } catch (Exception e) {
+            throw new DSSException(String.format("Unable to replace validation content of CMS SignedData (OCSP responses). " +
+                    "Corrupted content has been provided. Reason : %s", e.getMessage()), e);
         }
     }
 
@@ -208,8 +262,14 @@ public class CMSStreamDocumentBuilder {
      * @param cms {@link CMS}
      */
     protected void addOCSPBasicStore(final DSSCMSSignedDataStreamGenerator generator, CMS cms) {
-        if (cms.getOcspBasicStore() != null) {
-            generator.addOtherRevocationInfo(id_pkix_ocsp_basic, cms.getOcspBasicStore());
+        try {
+            if (cms.getOcspBasicStore() != null) {
+                generator.addOtherRevocationInfo(id_pkix_ocsp_basic, cms.getOcspBasicStore());
+            }
+
+        } catch (Exception e) {
+            throw new DSSException(String.format("Unable to replace validation content of CMS SignedData (OCSP basic store). " +
+                    "Corrupted content has been provided. Reason : %s", e.getMessage()), e);
         }
     }
 

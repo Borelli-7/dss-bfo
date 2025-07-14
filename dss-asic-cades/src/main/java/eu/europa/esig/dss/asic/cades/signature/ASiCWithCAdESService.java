@@ -485,6 +485,7 @@ public class ASiCWithCAdESService extends AbstractASiCSignatureService<ASiCWithC
 												  ASiCContainerEvidenceRecordParameters parameters) {
 		Objects.requireNonNull(evidenceRecordDocument, "The evidence record document cannot be null!");
 		Objects.requireNonNull(parameters, "Parameters cannot be null!");
+		Objects.requireNonNull(parameters.getContainerType(), "ASiCContainerType must be defined!");
 		if (Utils.isCollectionEmpty(documents)) {
 			throw new IllegalArgumentException("List of documents cannot be empty!");
 		}

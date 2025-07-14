@@ -76,6 +76,7 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.crypto.signers.PlainDSAEncoding;
 import org.bouncycastle.crypto.signers.StandardDSAEncoding;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.BigIntegers;
 import org.slf4j.Logger;
@@ -465,16 +466,16 @@ public final class DSSASN1Utils {
 	 * @return the ASN.1 algorithm identifier structure
 	 */
 	public static AlgorithmIdentifier getAlgorithmIdentifier(DigestAlgorithm digestAlgorithm) {
-
-		/*
-		 * The recommendation (cf. RFC 3380 section 2.1) is to omit the parameter for SHA-1, but some implementations
-		 * still expect a
-		 * NULL there. Therefore we always include a NULL parameter even with SHA-1, despite the recommendation, because
-		 * the RFC
-		 * states that implementations SHOULD support it as well anyway
-		 */
-		final ASN1ObjectIdentifier asn1ObjectIdentifier = new ASN1ObjectIdentifier(digestAlgorithm.getOid());
-		return new AlgorithmIdentifier(asn1ObjectIdentifier, DERNull.INSTANCE);
+		// See {@link <a href="https://github.com/bcgit/bc-java/commit/131c39e5d86da9b4e23d48588ce095c13626a129">BC contribution</a>}
+		// Fixes {@link <a href="https://ec.europa.eu/digital-building-blocks/tracker/browse/DSS-3651">DSS-3651</a>}
+		if (DigestAlgorithm.SHAKE256_512 == digestAlgorithm) {
+			// Special case, requiring the parameter definition. BC handles only the signature algorithm properly.
+			ASN1ObjectIdentifier asn1OID = new ASN1ObjectIdentifier(DigestAlgorithm.SHAKE256_512.getOid());
+			return new AlgorithmIdentifier(asn1OID, new ASN1Integer(512));
+		} else {
+			// General handling
+			return new DefaultDigestAlgorithmIdentifierFinder().find(digestAlgorithm.getOid());
+		}
 	}
 
 	/**

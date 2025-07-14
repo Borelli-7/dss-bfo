@@ -219,7 +219,7 @@ public class CMSStreamUtils implements ICMSUtils {
      */
     public void writeSignedDataDigestAlgorithmsEncoded(CMS cms, OutputStream os) throws IOException {
         DSSDocument cmsDocument = getCMSDocument(cms);
-        // we need to preserve the original order, that is why we extract the original set of certificates
+        // we need to preserve the original order, that is why we extract the original set of digest algorithms
         ASN1Set digestAlgorithms = getSignedDataDigestAlgorithms(cmsDocument);
         if (digestAlgorithms == null) {
             return;
@@ -355,7 +355,7 @@ public class CMSStreamUtils implements ICMSUtils {
     @Override
     public void writeSignedDataCRLsEncoded(CMS cms, OutputStream os) throws IOException {
         DSSDocument cmsDocument = getCMSDocument(cms);
-        // we need to preserve the original order, that is why we extract the original set of certificates
+        // we need to preserve the original order, that is why we extract the original set of CRLs
         ASN1Set crls = getSignedDataCRLs(cmsDocument);
         if (crls == null) {
             return;
@@ -415,7 +415,7 @@ public class CMSStreamUtils implements ICMSUtils {
      */
     public void writeSignedDataSignerInfosEncoded(CMS cms, OutputStream os) throws IOException {
         DSSDocument cmsDocument = getCMSDocument(cms);
-        // we need to preserve the original order, that is why we extract the original set of certificates
+        // we need to preserve the original order, that is why we extract the original set of SignerInfos
         ASN1Set signerInfos = getSignedDataSignerInfos(cmsDocument);
         if (signerInfos == null) {
             return;

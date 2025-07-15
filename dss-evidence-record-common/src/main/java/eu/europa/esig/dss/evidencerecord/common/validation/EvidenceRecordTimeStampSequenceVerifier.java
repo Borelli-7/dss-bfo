@@ -109,10 +109,12 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
                 DSSMessageDigest lastMessageDigest = DSSMessageDigest.createEmptyDigest();
 
                 List<? extends DigestValueGroup> hashTree = getHashTree(archiveTimeStamp.getHashTree(), detachedContents,
-                        manifestFile, archiveTimeStampChain, lastTimeStampHash, lastTimeStampSequenceHash);
+                        manifestFile, archiveTimeStampChain, archiveTimeStamp, lastTimeStampHash, lastTimeStampSequenceHash);
                 for (DigestValueGroup digestValueGroup : hashTree) {
+
                     // Validation of first HashTree/Sequence
                     if (lastMessageDigest.isEmpty()) {
+
                         // execute for all time-stamps in order to create reference validations
                         List<ReferenceValidation> archiveDataObjectValidations =
                                 validateArchiveDataObjects(digestValueGroup, archiveTimeStampChain, lastTimeStampSequenceHash, detachedContents, manifestFile);
@@ -146,9 +148,12 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
                         if (!checkHashTreeValidity(archiveTimeStamp, archiveTimeStampChain)) {
                             archiveDataObjectValidations.forEach(r -> r.setIntact(false));
                         }
+
                     }
+
                     // Validation of each followingHashTree/Sequence
                     lastMessageDigest = computeDigestValueGroupHash(digestAlgorithm, digestValueGroup, lastMessageDigest);
+
                 }
 
                 // Validate time-stamp
@@ -177,13 +182,15 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
      * @param detachedContents a list of {@link DSSDocument}s, provided to the validation as a detached content
      * @param manifestFile {@link ManifestFile} when present
      * @param archiveTimeStampChain {@link ArchiveTimeStampChainObject} archive time-stamp chain containing the time-stamp
+     * @param archiveTimeStamp {@link ArchiveTimeStampObject} current archive time-stamp
      * @param lastTimeStampHash {@link DSSMessageDigest} digest of the previous archive-time-stamp, when applicable
      * @param lastTimeStampSequenceHash {@link DSSMessageDigest} digest of the previous archive-time-stamp-sequence, when applicable
      * @return a list of {@link DigestValueGroup}, representing a HashTree to be used for an archive-time-stamp validation
      */
     protected List<? extends DigestValueGroup> getHashTree(
             List<? extends DigestValueGroup> originalHashTree, List<DSSDocument> detachedContents, ManifestFile manifestFile,
-            ArchiveTimeStampChainObject archiveTimeStampChain, DSSMessageDigest lastTimeStampHash, DSSMessageDigest lastTimeStampSequenceHash) {
+            ArchiveTimeStampChainObject archiveTimeStampChain, ArchiveTimeStampObject archiveTimeStamp,
+            DSSMessageDigest lastTimeStampHash, DSSMessageDigest lastTimeStampSequenceHash) {
         List<? extends DigestValueGroup> hashTree;
         if (Utils.isCollectionNotEmpty(originalHashTree)) {
             hashTree = new ArrayList<>(originalHashTree);
@@ -221,6 +228,17 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
                 } else {
                     LOG.warn("Unable to determine original data object for omitted hashTree. " +
                             "{} manifest entries provided instead of one.", Utils.collectionSize(manifestFile.getEntries()));
+                    digestValues.add(DSSUtils.EMPTY_BYTE_ARRAY);
+                }
+
+            } else if (evidenceRecord.isEmbedded()) {
+                EmbeddedEvidenceRecordHelper embeddedEvidenceRecordHelper = evidenceRecord.getEmbeddedEvidenceRecordHelper();
+                if (embeddedEvidenceRecordHelper.isAbsentHashtreeSupported()) {
+                    LOG.info("Embedded evidence record with omitted reduced hashtree found. Use timestamp's message-imprint as a virtual reduced hashtree.");
+                    digestValues.add(archiveTimeStamp.getTimestampToken().getMessageImprint().getValue());
+                } else {
+                    LOG.warn("Presence of the reduced hashtree is required for embedded evidence records by the current implementation! " +
+                            "Unable to determine the original data.");
                     digestValues.add(DSSUtils.EMPTY_BYTE_ARRAY);
                 }
 

@@ -111,4 +111,9 @@ public class CAdESEmbeddedEvidenceRecordHelper extends AbstractEmbeddedEvidenceR
         return true;
     }
 
+    @Override
+    public boolean isAbsentHashtreeSupported() {
+        return true;
+    }
+
 }

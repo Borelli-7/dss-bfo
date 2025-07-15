@@ -103,4 +103,14 @@ public interface EmbeddedEvidenceRecordHelper {
      */
     boolean isEncodingSelectionSupported();
 
+    /**
+     * Gets whether the embedded evidence records without the reduced hashtree are supported
+     * by the current signature implementation.
+     * This method resolves the difference on processing between CAdES (TS 119 122-3) and XAdES (TS 119 132-3)
+     * embedded evidence records, with the CAdES allowing omitted reduced hashtree, while XAdES requiring such.
+     *
+     * @return whether the absent reduced hashtree is supported by the current implementation
+     */
+    boolean isAbsentHashtreeSupported();
+
 }

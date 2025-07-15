@@ -73,4 +73,9 @@ public class XAdESEmbeddedEvidenceRecordHelper extends AbstractEmbeddedEvidenceR
         return false;
     }
 
+    @Override
+    public boolean isAbsentHashtreeSupported() {
+        return false;
+    }
+
 }

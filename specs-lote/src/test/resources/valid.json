@@ -1,0 +1,54 @@
+{
+   "LoTE" : {
+      "SchemeInformation": {
+         "LoTEVersionIdentifier": 1,
+         "LoTESequenceNumber": 42,
+         "SchemeOperatorName": [
+            "Example Scheme Operator"
+         ],
+         "ListIssueDateTime": "2025-07-16T12:00:00Z",
+         "nextUpdate": "2025-08-16T12:00:00Z"
+      },
+      "TrustedEntitiesList": [
+         {
+            "TrustedEntityInformation": {
+               "TEName": [
+                  "Example Trusted Entity"
+               ],
+               "TETradeName": [
+                  "https://example.org/tradename"
+               ],
+               "TEAddress": {
+                  "TEPostalAddress": {
+                     "streetAddress": "123 Example Street",
+                     "addressCountry": "FR"
+                  },
+                  "TEElectronicAddress": {
+                     "emailAddress": "contact@example.org",
+                     "website": "https://example.org"
+                  }
+               },
+               "TEInformationURI": [
+                  "https://example.org/info"
+               ]
+            },
+            "TrustedEntityServices": [
+               {
+                  "ServiceInformation": {
+                     "ServiceName": "Signing Service",
+                     "ServiceDigitalIdentity": {
+                        "X509Certificates": [
+                           {
+                              "val": "c2FtcGxlY2VydGlmaWNhdGU=",
+                              "encoding": "https://example.org/encoding",
+                              "specRef": "Ref"
+                           }
+                        ]
+                     }
+                  }
+               }
+            ]
+         }
+      ]
+   }
+}

@@ -20,12 +20,12 @@
                ],
                "TEAddress": {
                   "TEPostalAddress": {
-                     "streetAddress": "123 Example Street",
-                     "addressCountry": "FR"
+                     "StreetAddress": "123 Example Street",
+                     "CountryName": "FR"
                   },
                   "TEElectronicAddress": {
-                     "emailAddress": "contact@example.org",
-                     "website": "https://example.org"
+                     "EmailAddress": "contact@example.org",
+                     "Website": "https://example.org"
                   }
                },
                "TEInformationURI": [

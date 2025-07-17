@@ -59,34 +59,46 @@
     "SchemeOperatorAddress": {
       "type": "object",
       "properties": {
-        "SchemeOperatorPostalAddress": { "$ref": "#/definitions/PostalAddress" },
-        "SchemeOperatorElectronicAddress": { "$ref": "#/definitions/ElectronicAddress" }
+        "SchemeOperatorPostalAddress": { "$ref": "#/definitions/PostalAddresses" },
+        "SchemeOperatorElectronicAddress": { "$ref": "#/definitions/ElectronicAddresses" }
       },
       "required": [ "SchemeOperatorPostalAddress", "SchemeOperatorElectronicAddress" ],
       "additionalProperties": false
     },
 
+    "PostalAddresses": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/PostalAddress"},
+      "minItems": 1
+    },
+
     "PostalAddress": {
       "type": "object",
       "properties":{
-        "streetAddress": {"type": "string"},
-        "addressLocality": {"type": "string"},
-        "addressStateOrProvince": {"type": "string"},
-        "postalCode": {"type": "string"},
-        "addressCountry": {"type": "string"}
+        "StreetAddress": {"type": "string"},
+        "Locality": {"type": "string"},
+        "StateOrProvince": {"type": "string"},
+        "PostalCode": {"type": "string"},
+        "CountryName": {"type": "string"}
       },
-      "required": [ "streetAddress", "addressCountry" ],
+      "required": [ "StreetAddress", "CountryName" ],
       "additionalProperties": false
+    },
+
+    "ElectronicAddresses": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/ElectronicAddress"},
+      "minItems": 1
     },
 
     "ElectronicAddress": {
       "type": "object",
       "properties":{
-        "emailAddress": {"type": "string", "format": "email"},
-        "website": {"type": "string", "format": "uri"},
-        "telephoneNumber": {"type": "string", "format": "uri"}
+        "EmailAddress": {"type": "string", "format": "email"},
+        "Website": {"type": "string", "format": "uri"},
+        "TelephoneNumber": {"type": "string", "format": "uri"}
       },
-      "required": [ "emailAddress", "website" ],
+      "required": [ "EmailAddress", "Website" ],
       "additionalProperties": false
     },
 

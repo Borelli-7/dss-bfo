@@ -475,7 +475,11 @@
       "format": "uri"
     },
     "ServiceName": {
-      "type": "string"
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/multiLangString"
+      },
+      "minItems": 1
     },
     "ServiceStatus": {
       "type": "string",

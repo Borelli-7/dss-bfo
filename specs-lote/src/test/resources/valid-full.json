@@ -186,7 +186,13 @@
         "TrustedEntityServices": [
           {
             "ServiceInformation": {
-              "ServiceName": "Signature Qualifiée",
+              "ServiceName": [
+                {
+                  "lang":  "en",
+                "value":  "Signature Qualifiée"
+                }
+
+              ],
               "ServiceDigitalIdentity": {
                 "X509Certificates": [
                   {
@@ -213,7 +219,13 @@
               ]
             },
             "ServiceHistory": {
-              "ServiceName": "Signature Qualifiée",
+              "ServiceName": [
+                {
+                  "lang":  "en",
+                  "value":  "Signature Qualifiée"
+                }
+
+              ],
               "ServiceDigitalIdentity": {
                 "X509Certificates": [
                   {

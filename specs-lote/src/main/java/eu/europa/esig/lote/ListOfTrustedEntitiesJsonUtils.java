@@ -33,10 +33,15 @@ import java.util.Map;
 public final class ListOfTrustedEntitiesJsonUtils extends JSONSchemaAbstractUtils {
 
     /** LoTE schema URI */
-    private static final String SCHEMA_URI =  "http://uri.etsi.org/19602/ExplicitScheme/JSONSchema";
+    private static final String SCHEMA_URI =  "19602_json_schema.json";
+
+    private static final String EXTENSION_SCHEMA_URI =  "19602_json_schema_sie.json";
 
     /** LoTE schema's location */
     private static final String SCHEMA_LOCATION = "/schema/19602_json_schema.json";
+
+    /** LoTE Extension schema's location */
+    private static final String EXTENSION_SCHEMA_LOCATION = "/schema/19602_json_schema_sie.json";
 
     /** Singleton instance */
     private static ListOfTrustedEntitiesJsonUtils singleton;
@@ -69,6 +74,7 @@ public final class ListOfTrustedEntitiesJsonUtils extends JSONSchemaAbstractUtil
     public Map<URI, String> getSchemaDefinitions() {
         Map<URI, String> definitions = getJSONSchemaDefinitions();
         definitions.put(URI.create(SCHEMA_URI), SCHEMA_LOCATION);
+        definitions.put(URI.create(EXTENSION_SCHEMA_URI), EXTENSION_SCHEMA_LOCATION);
         return definitions;
     }
 

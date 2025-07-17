@@ -90,6 +90,14 @@
                 }
               ],
               "X509SubjectName": "CN=TrustService, O=Other LoTE",
+              "PublicKeyValue": {
+                "kty": "RSA",
+                "use": "sig",
+                "kid": "example-key-1",
+                "alg": "RS256",
+                "n": "sXchK8OZq6Ki1GmP6i5mtcO3Gi4lCG9rm-YqgYkmGld0b0AYa1V5fCqQhMd5W-QjlIR1B2WwQkp8nfb-JQaTjijV0EFMrnRWVVzGpi6eCeYQjXrTV_5eZ6X8OgGoGiRytN2ozGEoRDe8rDd2xl7U3PAXF3fjhA8Eo0IQqU3O96t8",
+                "e": "AQAB"
+              },
               "X509SKI": "MII12345678BASE64==",
               "OtherId": "1234567890"
             }

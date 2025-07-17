@@ -306,6 +306,9 @@
         "X509SubjectName": {
           "type": "string"
         },
+        "PublicKeyValue": {
+          "$ref": "rfcs/rfc7517.json#/definitions/jwk"
+        },
         "X509SKI": {
           "type": "string",
           "contentEncoding": "base64"

@@ -9,6 +9,7 @@
         "SchemeInformation": { "$ref": "#/definitions/SchemeInformation" },
         "TrustedEntitiesList": { "$ref": "#/definitions/TrustedEntitiesList" }
       },
+      "required": [ "SchemeInformation" ],
       "additionalProperties": false
     },
 
@@ -29,11 +30,11 @@
         "HistoricalInformationPeriod": { "$ref": "#/definitions/HistoricalInformationPeriod" },
         "PointerToOtherLoTE": { "$ref": "#/definitions/PointerToOtherLoTE" },
         "ListIssueDateTime": { "$ref": "#/definitions/ListIssueDateTime" },
-        "nextUpdate": { "$ref": "#/definitions/nextUpdate" },
+        "NextUpdate": { "$ref": "#/definitions/NextUpdate" },
         "DistributionPoints": { "$ref": "#/definitions/DistributionPoints" },
         "SchemeExtensions": { "$ref": "#/definitions/SchemeExtensions" }
       },
-      "required": [ "LoTEVersionIdentifier", "LoTESequenceNumber", "SchemeOperatorName", "ListIssueDateTime", "nextUpdate" ],
+      "required": [ "LoTEVersionIdentifier", "LoTESequenceNumber", "SchemeOperatorName", "ListIssueDateTime", "NextUpdate" ],
       "additionalProperties": false
     },
 
@@ -50,9 +51,29 @@
       "format": "uri"
     },
 
+    "multiLangString": {
+      "type": "object",
+      "properties": {
+        "lang": { "type": "string" },
+        "value": { "type": "string" }
+      },
+      "required": [ "lang", "value" ],
+      "additionalProperties": false
+    },
+
+    "NonEmptyMultiLangURI": {
+      "type": "object",
+      "properties": {
+        "lang": { "type": "string" },
+        "uriValue": { "type": "string", "format" : "uri", "minLength" : 1 }
+      },
+      "required": [ "lang", "uriValue" ],
+      "additionalProperties": false
+    },
+
     "SchemeOperatorName": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": {"$ref": "#/definitions/multiLangString"},
       "minItems": 1
     },
 
@@ -75,13 +96,14 @@
     "PostalAddress": {
       "type": "object",
       "properties":{
+        "lang": {"type": "string"},
         "StreetAddress": {"type": "string"},
         "Locality": {"type": "string"},
         "StateOrProvince": {"type": "string"},
         "PostalCode": {"type": "string"},
-        "CountryName": {"type": "string"}
+        "Country": {"type": "string"}
       },
-      "required": [ "StreetAddress", "CountryName" ],
+      "required": [ "lang", "StreetAddress", "Country" ],
       "additionalProperties": false
     },
 
@@ -92,25 +114,20 @@
     },
 
     "ElectronicAddress": {
-      "type": "object",
-      "properties":{
-        "EmailAddress": {"type": "string", "format": "email"},
-        "Website": {"type": "string", "format": "uri"},
-        "TelephoneNumber": {"type": "string", "format": "uri"}
-      },
-      "required": [ "EmailAddress", "Website" ],
-      "additionalProperties": false
+      "type": "array",
+      "items": {"$ref": "#/definitions/NonEmptyMultiLangURI"},
+      "minItems": 1
     },
 
     "SchemeName": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": {"$ref": "#/definitions/multiLangString"},
       "minItems": 1
     },
 
     "SchemeInformationURI": {
       "type": "array",
-      "items": {"type": "string", "format": "uri"},
+      "items": {"$ref": "#/definitions/NonEmptyMultiLangURI"},
       "minItems": 1
     },
 
@@ -121,13 +138,14 @@
 
     "SchemeTypeCommunityRules": {
       "type": "array",
-      "items": {"type": "string", "format": "uri"},
+      "items": {"$ref": "#/definitions/NonEmptyMultiLangURI"},
       "minItems": 1
     },
 
     "SchemeTerritory": {
       "type": "string",
-      "format": "uri"
+      "minLength" : 2,
+      "maxLength" : 2
     },
 
     "PolicyOrLegalNotice": {
@@ -135,8 +153,11 @@
       "oneOf":[
         {
           "items": {
-            "type": "string", "format": "uri"
-          }
+            "type": "object",
+            "properties":{
+              "LoTEPolicy": {"$ref": "#/definitions/NonEmptyMultiLangURI"}
+            },
+            "required": [ "LoTEPolicy" ] }
         },
         {
           "items": {
@@ -226,7 +247,7 @@
       "format": "date-time"
     },
 
-    "nextUpdate": {
+    "NextUpdate": {
       "type": "string",
       "format": "date-time"
     },
@@ -362,13 +383,13 @@
 
     "TEName": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": { "$ref": "#/definitions/multiLangString"},
       "minItems": 1
     },
 
     "TETradeName": {
       "type": "array",
-      "items": {"type": "string", "format": "uri"},
+      "items": {"$ref": "#/definitions/multiLangString"},
       "minItems": 1
     },
 
@@ -384,7 +405,7 @@
 
     "TEInformationURI": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": { "$ref": "#/definitions/NonEmptyMultiLangURI"},
       "minItems": 1
     },
 

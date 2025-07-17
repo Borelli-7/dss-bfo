@@ -4,32 +4,48 @@
          "LoTEVersionIdentifier": 1,
          "LoTESequenceNumber": 42,
          "SchemeOperatorName": [
-            "Example Scheme Operator"
+            { "lang":  "en",
+            "value": "Example Scheme Operator"
+            }
          ],
          "ListIssueDateTime": "2025-07-16T12:00:00Z",
-         "nextUpdate": "2025-08-16T12:00:00Z"
+         "NextUpdate": "2025-08-16T12:00:00Z"
       },
       "TrustedEntitiesList": [
          {
             "TrustedEntityInformation": {
                "TEName": [
-                  "Example Trusted Entity"
+                  {"lang": "en",
+                  "value": "Example Trusted Entity"
+                  },
                ],
                "TETradeName": [
-                  "https://example.org/tradename"
+                  {
+                     "lang":  "en",
+                     "value" :  "trade name"
+                  }
                ],
                "TEAddress": {
                   "TEPostalAddress": {
+                     "lang" : "en",
                      "StreetAddress": "123 Example Street",
-                     "CountryName": "FR"
+                     "Country": "FR"
                   },
-                  "TEElectronicAddress": {
-                     "EmailAddress": "contact@example.org",
-                     "Website": "https://example.org"
-                  }
+                  "TEElectronicAddress": [
+                     {
+                        "lang": "en",
+                        "uriValue" : "https://example.org"
+                     },
+                     {
+                        "lang": "en",
+                        "uriValue" : "mailto:contact@example.org"
+                     }
+                  ]
                },
                "TEInformationURI": [
-                  "https://example.org/info"
+                  {"lang": "en",
+                  "uriValue" :  "https://example.org/info"
+                  }
                ]
             },
             "TrustedEntityServices": [

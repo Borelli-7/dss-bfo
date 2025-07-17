@@ -43,6 +43,17 @@ class ListOfTrustedEntitiesJsonUtilsTest {
     }
 
     @Test
+    void validTestEmptyTE() {
+        InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/valid-emptyTE.json");
+        JsonObjectWrapper jsonObject = new JSONParser().parse(is);
+
+        assertNotNull(jsonObject);
+
+        List<String> errors = ListOfTrustedEntitiesJsonUtils.getInstance().validateAgainstSchema(jsonObject);
+        assertTrue(errors.isEmpty(), errors.toString());
+    }
+
+    @Test
     void invalidTest() {
         InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/invalid.json");
         JsonObjectWrapper jsonObject = new JSONParser().parse(is);

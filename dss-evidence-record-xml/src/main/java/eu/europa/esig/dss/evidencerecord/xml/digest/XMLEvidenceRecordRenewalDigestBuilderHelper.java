@@ -37,7 +37,6 @@ import eu.europa.esig.dss.spi.DSSMessageDigestCalculator;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.xml.utils.DomUtils;
 import eu.europa.esig.dss.xml.utils.XMLCanonicalizer;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -98,8 +97,8 @@ public class XMLEvidenceRecordRenewalDigestBuilderHelper extends AbstractEvidenc
      */
     public DSSMessageDigest buildArchiveTimeStampSequenceDigest(DigestAlgorithm digestAlgorithm, String canonicalizationMethod,
                                                                 int archiveTimeStampChainOrder) {
-        Document documentCopy = createDocumentCopy();
-        Element archiveTimeStampSequence = DomUtils.getElement(documentCopy.getDocumentElement(), XMLERSPath.ARCHIVE_TIME_STAMP_SEQUENCE_PATH);
+        Element evidenceRecordElementCopy = createEvidenceRecordElementCopy();
+        Element archiveTimeStampSequence = DomUtils.getElement(evidenceRecordElementCopy, XMLERSPath.ARCHIVE_TIME_STAMP_SEQUENCE_PATH);
         NodeList childNodes = archiveTimeStampSequence.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node node = childNodes.item(i);
@@ -131,15 +130,10 @@ public class XMLEvidenceRecordRenewalDigestBuilderHelper extends AbstractEvidenc
         return null;
     }
 
-    private Document createDocumentCopy() {
+    private Element createEvidenceRecordElementCopy() {
         XmlEvidenceRecord xmlEvidenceRecord = (XmlEvidenceRecord) evidenceRecord;
         Element evidenceRecordElement = xmlEvidenceRecord.getEvidenceRecordElement();
-        Node originalRoot = evidenceRecordElement.getOwnerDocument().getDocumentElement();
-
-        Document documentCopy = DomUtils.buildDOM();
-        Node copiedRoot = documentCopy.importNode(originalRoot, true);
-        documentCopy.appendChild(copiedRoot);
-        return documentCopy;
+        return DomUtils.createDeepCopy(evidenceRecordElement);
     }
 
 }

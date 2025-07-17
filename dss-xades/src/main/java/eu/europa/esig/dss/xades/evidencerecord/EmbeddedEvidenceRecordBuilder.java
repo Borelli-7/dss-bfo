@@ -32,7 +32,6 @@ import eu.europa.esig.dss.spi.validation.CertificateVerifier;
 import eu.europa.esig.dss.spi.validation.CertificateVerifierBuilder;
 import eu.europa.esig.dss.spi.validation.SignatureValidationAlerter;
 import eu.europa.esig.dss.spi.validation.SignatureValidationContext;
-import eu.europa.esig.dss.spi.validation.analyzer.DefaultDocumentAnalyzer;
 import eu.europa.esig.dss.spi.validation.analyzer.evidencerecord.EvidenceRecordAnalyzer;
 import eu.europa.esig.dss.spi.validation.analyzer.evidencerecord.EvidenceRecordAnalyzerFactory;
 import eu.europa.esig.dss.spi.x509.evidencerecord.EvidenceRecord;
@@ -45,12 +44,14 @@ import eu.europa.esig.dss.xades.validation.XAdESAttribute;
 import eu.europa.esig.dss.xades.validation.XAdESSignature;
 import eu.europa.esig.dss.xades.validation.XAdESUnsignedSigProperties;
 import eu.europa.esig.dss.xades.validation.XMLDocumentAnalyzer;
+import eu.europa.esig.dss.xml.utils.DOMDocument;
 import eu.europa.esig.dss.xml.utils.DomUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -84,20 +85,19 @@ public class EmbeddedEvidenceRecordBuilder extends ExtensionBuilder {
         Objects.requireNonNull(evidenceRecordDocument, "Evidence record document must be provided!");
         Objects.requireNonNull(parameters, "XAdESEvidenceRecordIncorporationParameters must be provided!");
 
-        final XMLDocumentAnalyzer documentAnalyzer = initDocumentAnalyzer(signatureDocument, parameters.getDetachedContents());
-
-        XAdESSignature signature = getXAdESSignature(documentAnalyzer, parameters.getSignatureId());
+        XAdESSignature signature = getXAdESSignature(signatureDocument, parameters.getSignatureId(), parameters.getDetachedContents());
         return addEvidenceRecord(signature, evidenceRecordDocument, parameters);
     }
 
     /**
      * Gets a signature to incorporate evidence record into
      *
-     * @param documentAnalyzer {@link DefaultDocumentAnalyzer}
+     * @param signatureDocument {@link DSSDocument}
      * @param signatureId {@link String} identifier of a signature to return
      * @return {@link XAdESSignature}
      */
-    protected XAdESSignature getXAdESSignature(DefaultDocumentAnalyzer documentAnalyzer, String signatureId) {
+    protected XAdESSignature getXAdESSignature(DSSDocument signatureDocument, String signatureId, List<DSSDocument> detachedContent) {
+        final XMLDocumentAnalyzer documentAnalyzer = initDocumentAnalyzer(signatureDocument, detachedContent);
         if (signatureId != null) {
             AdvancedSignature signature = documentAnalyzer.getSignatureById(signatureId);
             if (signature == null) {
@@ -134,38 +134,71 @@ public class EmbeddedEvidenceRecordBuilder extends ExtensionBuilder {
         ensureUnsignedProperties();
         ensureUnsignedSignatureProperties();
 
-        XAdESAttribute unsignedAttribute = getUnsignedAttributeToEmbed(xadesSignature, parameters);
+        XAdESAttribute unsignedAttribute = getUnsignedAttributeToEmbed(parameters);
         EvidenceRecord evidenceRecord = getEvidenceRecord(evidenceRecordDocument, xadesSignature, unsignedAttribute, parameters);
-        assertEvidenceRecordValid(evidenceRecord, unsignedAttribute, parameters);
 
         Element sealingEvidenceRecordElement = getSealingEvidenceRecordElement(unsignedAttribute, parameters);
 
+        Element evidenceRecordElement;
         switch (evidenceRecord.getEvidenceRecordType()) {
             case XML_EVIDENCE_RECORD:
                 Document erDom = DomUtils.buildDOM(evidenceRecordDocument);
-                DomUtils.adoptChildren(sealingEvidenceRecordElement, erDom);
+                List<Node> nodes = DomUtils.adoptChildren(sealingEvidenceRecordElement, erDom);
+                evidenceRecordElement = getEvidenceRecordElement(nodes);
                 break;
+
             case ASN1_EVIDENCE_RECORD:
                 String base64EncodedER = Utils.toBase64(evidenceRecord.getEncoded());
-                DomUtils.addTextElement(documentDom, sealingEvidenceRecordElement, parameters.getXadesERNamespace(),
+                evidenceRecordElement = DomUtils.addTextElement(documentDom, sealingEvidenceRecordElement, parameters.getXadesERNamespace(),
                         XAdESEvidencerecordNamespaceElement.ASN1_EVIDENCE_RECORD, base64EncodedER);
                 break;
+
             default:
                 throw new UnsupportedOperationException(String.format("The Evidence Record type '%s' is not supported!",
                         evidenceRecord.getEvidenceRecordType()));
         }
 
+        /*
+         * In case of XAdES embedded ER, we need to first embed the ER within signature before its validation,
+         * to ensure correct namespace processing on canonicalization.
+         * The signature and all the related data shall be re-initialized for a proper ER validation.
+         */
+        if (EvidenceRecordTypeEnum.XML_EVIDENCE_RECORD == evidenceRecord.getEvidenceRecordType()) {
+            DOMDocument signatureDocument = new DOMDocument(evidenceRecordElement.getOwnerDocument());
+            xadesSignature = getXAdESSignature(signatureDocument, parameters.getSignatureId(), parameters.getDetachedContents());
+            xadesSignature = initializeSignatureBuilder(xadesSignature);
+            unsignedAttribute = getLastSealingEvidenceRecordAttribute();
+
+            evidenceRecordDocument = new DOMDocument(evidenceRecordElement);
+            evidenceRecord = getEvidenceRecord(evidenceRecordDocument, xadesSignature, unsignedAttribute, parameters);
+        }
+
+        assertEvidenceRecordValid(evidenceRecord, unsignedAttribute, parameters);
+
         return createXmlDocument();
     }
 
-    private XAdESAttribute getUnsignedAttributeToEmbed(XAdESSignature signature, XAdESEvidenceRecordIncorporationParameters parameters) {
+    private Element getEvidenceRecordElement(Collection<Node> nodes) {
+        for (Node node : nodes) {
+            if (Node.ELEMENT_NODE == node.getNodeType() && XAdESEvidencerecordNamespaceElement.EVIDENCE_RECORD.isSameTagName(node.getLocalName())) {
+                return (Element) node;
+            }
+        }
+        throw new IllegalStateException("No EvidenceRecord element found!");
+    }
+
+    private XAdESAttribute getUnsignedAttributeToEmbed(XAdESEvidenceRecordIncorporationParameters parameters) {
         if (parameters.isParallelEvidenceRecord()) {
-            XAdESUnsignedSigProperties unsignedSigProperties = new XAdESUnsignedSigProperties(unsignedSignaturePropertiesDom, signature.getXAdESPaths());
-            return XAdESSignatureUtils.getLastSealingEvidenceRecordAttribute(unsignedSigProperties);
+            return getLastSealingEvidenceRecordAttribute();
         } else {
             // new XAdESAttribute to be created
             return null;
         }
+    }
+
+    private XAdESAttribute getLastSealingEvidenceRecordAttribute() {
+        XAdESUnsignedSigProperties unsignedSigProperties = new XAdESUnsignedSigProperties(unsignedSignaturePropertiesDom, xadesPath);
+        return XAdESSignatureUtils.getLastSealingEvidenceRecordAttribute(unsignedSigProperties);
     }
 
     private EvidenceRecord getEvidenceRecord(DSSDocument evidenceRecordDocument, XAdESSignature signature,

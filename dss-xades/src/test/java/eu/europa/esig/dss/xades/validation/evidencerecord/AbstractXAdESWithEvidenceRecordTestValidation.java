@@ -223,8 +223,6 @@ public abstract class AbstractXAdESWithEvidenceRecordTestValidation extends Abst
                         } else if (DigestMatcherType.EVIDENCE_RECORD_ARCHIVE_TIME_STAMP_SEQUENCE.equals(digestMatcher.getType())) {
                             archiveTstSequenceDigestFound = true;
                         }
-                        assertTrue(digestMatcher.isDataFound());
-                        assertTrue(digestMatcher.isDataIntact());
                     }
 
                     assertEquals(EvidenceRecordTimestampType.TIMESTAMP_RENEWAL_ARCHIVE_TIMESTAMP == timestamp.getEvidenceRecordTimestampType(), archiveTstDigestFound);

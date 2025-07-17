@@ -67,7 +67,7 @@ import eu.europa.esig.dss.xades.validation.XAdESSignature;
 import eu.europa.esig.dss.xades.validation.XAdESSignedDataObjectProperties;
 import eu.europa.esig.dss.xades.validation.XAdESUnsignedSigProperties;
 import eu.europa.esig.dss.xades.validation.scope.XAdESTimestampScopeFinder;
-import eu.europa.esig.dss.xml.utils.DomUtils;
+import eu.europa.esig.dss.xml.utils.DOMDocument;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -407,7 +407,7 @@ public class XAdESTimestampSource extends SignatureTimestampSource<XAdESSignatur
 
 	private DSSDocument getEvidenceRecordDocument(Element encapsulatedEvidenceRecord) {
 		if (XAdESEvidencerecordNamespaceElement.EVIDENCE_RECORD.isSameTagName(encapsulatedEvidenceRecord.getLocalName())) {
-			return new InMemoryDocument(DomUtils.serializeNode(encapsulatedEvidenceRecord));
+			return new DOMDocument(encapsulatedEvidenceRecord);
 
 		} else if (XAdESEvidencerecordNamespaceElement.ASN1_EVIDENCE_RECORD.isSameTagName(encapsulatedEvidenceRecord.getLocalName())) {
 			String base64EncodedEvidenceRecord = encapsulatedEvidenceRecord.getTextContent();

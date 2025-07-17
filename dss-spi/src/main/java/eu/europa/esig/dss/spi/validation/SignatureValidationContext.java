@@ -1340,8 +1340,7 @@ public class SignatureValidationContext implements ValidationContext {
 	protected TokenStatus allTimestampsValid() {
 		TokenStatus status = new TokenStatus();
 		for (TimestampToken timestampToken : processedTimestamps) {
-			if (!timestampToken.isSignatureIntact() || !timestampToken.isMessageImprintDataFound() ||
-					!timestampToken.isMessageImprintDataIntact()) {
+			if (!timestampToken.isValid()) {
 				status.addRelatedTokenAndErrorMessage(timestampToken, "Signature is not intact!");
 			}
 		}

@@ -1316,6 +1316,7 @@ public final class DSSXMLUtils {
      * @return {@link Element}
      */
 	public static Element ensureNamespacesDefined(Document document, String elementId, String xpathString) {
+		// TODO : consider switching to DomUtils#createDeepCopy method
 		final byte[] serializedDoc = DomUtils.serializeNode(document);
 		Document recreatedDocument = DomUtils.buildDOM(serializedDoc);
 		Element element = recreatedDocument.getDocumentElement();

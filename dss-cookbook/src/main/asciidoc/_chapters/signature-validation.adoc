@@ -827,6 +827,8 @@ The following classes are provided:
 
 * `XMLEvidenceRecordRenewalDigestBuilder` (part of `dss-evidence-record-xml` module) - creates digest for time-stamp or hash-tree renewal of an RFC 6283 XMLERS Evidence Record (cf. <<R23>>).
 
+NOTE: On renewal of an XMLERS embedded within another XML document (e.g. an existing XAdES signature), it is recommended to use a `DOMDocument` implementation of `DSSDocument` instantiated with the evidence record's `Element` directly extracted from the main XML document. This will ensure the namespaces are properly gathered during the canonicalization process in case of an inclusive canonicalization method. Otherwise, please use an exclusive canonicalization method, whether possible.
+
 [source,java,indent=0]
 .Hash computation for an XMLERS Evidence record renewal
 ----

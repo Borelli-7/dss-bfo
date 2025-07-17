@@ -51,63 +51,65 @@
                   {
                      "OtherAssociatedBodiesExtensions": [
                         {
-                           "AssociatedBodyName": [
-                              {
-                                 "lang": "fr",
-                                 "value": "Ministère de la Transition Numérique"
-                              },
-                              {
-                                 "lang": "en",
-                                 "value": "Ministry of Digital Transformation"
-                              }
-                           ],
-                           "AssociatedBodyTradeName": [
-                              {
-                                 "lang": "fr",
-                                 "value": "MinTN"
-                              },
-                              {
-                                 "lang": "en",
-                                 "value": "MinDT"
-                              }
-                           ],
-                           "AssociatedBodyAddress": {
-                              "AssociatedBodyPostalAddress": {
-                                 "lang": "fr",
-                                 "StreetAddress": "10 avenue de la République",
-                                 "Locality": "Paris",
-                                 "StateOrProvince": "Île-de-France",
-                                 "PostalCode": "75011",
-                                 "Country": "FR"
-                              },
-                              "AssociatedBodyElectronicAddress": [
+                           "AssociatedBody": {
+                              "AssociatedBodyName": [
                                  {
                                     "lang": "fr",
-                                    "uriValue": "mailto:contact@mintn.gouv.fr"
+                                    "value": "Ministère de la Transition Numérique"
                                  },
                                  {
                                     "lang": "en",
-                                    "uriValue": "mailto:info@mindt.gov.fr"
+                                    "value": "Ministry of Digital Transformation"
+                                 }
+                              ],
+                              "AssociatedBodyTradeName": [
+                                 {
+                                    "lang": "fr",
+                                    "value": "MinTN"
+                                 },
+                                 {
+                                    "lang": "en",
+                                    "value": "MinDT"
+                                 }
+                              ],
+                              "AssociatedBodyAddress": {
+                                 "AssociatedBodyPostalAddress": {
+                                    "lang": "fr",
+                                    "StreetAddress": "10 avenue de la République",
+                                    "Locality": "Paris",
+                                    "StateOrProvince": "Île-de-France",
+                                    "PostalCode": "75011",
+                                    "Country": "FR"
+                                 },
+                                 "AssociatedBodyElectronicAddress": [
+                                    {
+                                       "lang": "fr",
+                                       "uriValue": "mailto:contact@mintn.gouv.fr"
+                                    },
+                                    {
+                                       "lang": "en",
+                                       "uriValue": "mailto:info@mindt.gov.fr"
+                                    }
+                                 ]
+                              },
+                              "AssociatedBodyInformationURI": [
+                                 {
+                                    "lang": "fr",
+                                    "uriValue": "https://www.mintn.gouv.fr/informations"
+                                 },
+                                 {
+                                    "lang": "en",
+                                    "uriValue": "https://www.mindt.gov.fr/info"
+                                 }
+                              ],
+                              "AssociatedBodyTypeIdentifier": "http://public.europa.eu/entity/associated-body-type/public-authority",
+                              "AssociatedBodyInformationExtensions": [
+                                 {
+                                    "key": "domain",
+                                    "value": "E-Government Services"
                                  }
                               ]
-                           },
-                           "AssociatedBodyInformationURI": [
-                              {
-                                 "lang": "fr",
-                                 "uriValue": "https://www.mintn.gouv.fr/informations"
-                              },
-                              {
-                                 "lang": "en",
-                                 "uriValue": "https://www.mindt.gov.fr/info"
-                              }
-                           ],
-                           "AssociatedBodyTypeIdentifier": "http://public.europa.eu/entity/associated-body-type/public-authority",
-                           "AssociatedBodyInformationExtensions": [
-                              {
-                                 "key": "domain",
-                                 "value": "E-Government Services"
-                              }
-                           ]
+                           }
                         }
                      ]
                   }

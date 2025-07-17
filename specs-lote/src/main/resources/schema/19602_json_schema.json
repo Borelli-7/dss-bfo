@@ -234,7 +234,7 @@
         "SchemeTerritory": { "$ref": "#/definitions/SchemeTerritory" },
         "MimeType": { "$ref": "#/definitions/MimeType" }
       },
-      "required": ["val"],
+      "required": ["LoTEType","SchemeOperatorName", "MimeType" ],
       "additionalProperties": false
     },
 

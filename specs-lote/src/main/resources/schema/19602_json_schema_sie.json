@@ -5,11 +5,17 @@
 
     "OtherAssociatedBodiesExtension": {
       "type": "array",
-      "items": {"$ref":"#/definitions/AssociatedBody "},
+      "items": {"$ref":"#/definitions/AssociatedBodies"},
       "minItems": 1
     },
 
-    "AssociatedBodyInformation": {
+    "AssociatedBodies": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/AssociatedBody"},
+      "minItems": 1
+    },
+
+    "AssociatedBody": {
       "type": "object",
       "properties": {
         "AssociatedBodyName" : { "$ref": "#/definitions/AssociatedBodyName" },

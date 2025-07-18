@@ -127,20 +127,87 @@ class CryptographicSuiteJsonWrapperTest {
 
     @Test
     void getAcceptableDigestAlgorithmsWithDuplicateAlgorithmsTest() {
-        List<JsonValue> algorithmsList = new ArrayList<>();
-        algorithmsList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, "2030-01-01"));
-        algorithmsList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, null)); // Duplicate
-
-        JsonArray algorithmsArray = new JsonArray(algorithmsList);
         Map<JsonString, JsonValue> securitySuitabilityPolicyMap = new HashMap<>();
-        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), algorithmsArray);
-        JsonObject jsonObject = new JsonObject(securitySuitabilityPolicyMap);
 
-        CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(jsonObject));
-        Map<DigestAlgorithm, Date> digestAlgorithmsWithExpirationDates = cryptographicSuite.getAcceptableDigestAlgorithmsWithExpirationDates();
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, "2021-01-01")
+        )));
 
-        // Expected: the last one (null expiration) overrides
-        assertEquals(Collections.singletonMap(DigestAlgorithm.SHA256, null), digestAlgorithmsWithExpirationDates);
+        CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT+0"));
+        calendar.clear();
+
+        Map<DigestAlgorithm, Date> expected = new HashMap<>();
+
+        calendar.set(2021, Calendar.JANUARY, 1);
+        expected.put(DigestAlgorithm.SHA224, calendar.getTime());
+
+        assertEquals(expected, cryptographicSuite.getAcceptableDigestAlgorithmsWithExpirationDates());
+
+        // duplicate entries test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, "2021-01-01"),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, "2029-01-01")
+        )));
+
+        expected = new HashMap<>();
+
+        calendar.set(2029, Calendar.JANUARY, 1);
+        expected.put(DigestAlgorithm.SHA224, calendar.getTime());
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, cryptographicSuite.getAcceptableDigestAlgorithmsWithExpirationDates());
+
+        // opposite test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, "2029-01-01"),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, "2021-01-01")
+        )));
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, cryptographicSuite.getAcceptableDigestAlgorithmsWithExpirationDates());
+
+        // null test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, "2021-01-01"),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, "2029-01-01"),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, null)
+        )));
+
+        expected = new HashMap<>();
+
+        expected.put(DigestAlgorithm.SHA224, null);
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, cryptographicSuite.getAcceptableDigestAlgorithmsWithExpirationDates());
+
+        // opposite null test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, null),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, "2021-01-01"),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, "2029-01-01")
+        )));
+
+        expected = new HashMap<>();
+
+        expected.put(DigestAlgorithm.SHA224, null);
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, cryptographicSuite.getAcceptableDigestAlgorithmsWithExpirationDates());
     }
 
     @Test
@@ -488,6 +555,158 @@ class CryptographicSuiteJsonWrapperTest {
         expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 0), null);
 
         assertEquals(expectedMap, new HashMap<>(encryptionAlgorithmsWithExpirationDates));
+    }
+
+    @Test
+    void dss3655RsaTest() {
+        Map<JsonString, JsonValue> securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.RSA_SHA224, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(1900, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.RSA, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2025-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH))),
+                        new EvaluationType(null, Arrays.asList(new ParameterType(4096, MODULES_LENGTH)))
+                )))
+        ));
+
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+        cal.clear();
+        Map<EncryptionAlgorithmWithMinKeySize, Date> expected = new HashMap<>();
+
+        cal.set(2010, Calendar.AUGUST, 1);
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 786), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1024), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1536), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1900), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 3000), cal.getTime());
+
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 4096), null);
+
+        CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates());
+
+        // Opposite order test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.RSA_SHA224, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(1900, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.RSA, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2025-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH))),
+                        new EvaluationType(null, Arrays.asList(new ParameterType(4096, MODULES_LENGTH)))
+                )))
+        ));
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates());
+    }
+
+    @Test
+    void dss3655EcdsaTest() {
+        Map<JsonString, JsonValue> securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.ECDSA_SHA224, Arrays.asList(
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(160, PLENGTH),
+                                new ParameterType(160, QLENGTH))),
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(163, PLENGTH),
+                                new ParameterType(163, QLENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(
+                                new ParameterType(224, PLENGTH),
+                                new ParameterType(224, QLENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.ECDSA, Arrays.asList(
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(160, PLENGTH),
+                                new ParameterType(160, QLENGTH))),
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(163, PLENGTH),
+                                new ParameterType(163, QLENGTH))),
+                        new EvaluationType("2021-01-01", Arrays.asList(
+                                new ParameterType(256, PLENGTH),
+                                new ParameterType(256, QLENGTH))),
+                        new EvaluationType(null, Arrays.asList(
+                                new ParameterType(384, PLENGTH),
+                                new ParameterType(384, QLENGTH)))
+                )))
+        ));
+
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+        cal.clear();
+        Map<EncryptionAlgorithmWithMinKeySize, Date> expected = new HashMap<>();
+
+        cal.set(2012, Calendar.AUGUST, 1);
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 160), cal.getTime());
+        cal.set(2012, Calendar.AUGUST, 1);
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 163), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 224), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 256), cal.getTime());
+
+        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 384), null);
+
+        CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates());
+
+        // Opposite order test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.ECDSA, Arrays.asList(
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(160, PLENGTH),
+                                new ParameterType(160, QLENGTH))),
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(163, PLENGTH),
+                                new ParameterType(163, QLENGTH))),
+                        new EvaluationType("2021-01-01", Arrays.asList(
+                                new ParameterType(256, PLENGTH),
+                                new ParameterType(256, QLENGTH))),
+                        new EvaluationType(null, Arrays.asList(
+                                new ParameterType(384, PLENGTH),
+                                new ParameterType(384, QLENGTH)))
+                )),
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.ECDSA_SHA224, Arrays.asList(
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(160, PLENGTH),
+                                new ParameterType(160, QLENGTH))),
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(163, PLENGTH),
+                                new ParameterType(163, QLENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(
+                                new ParameterType(224, PLENGTH),
+                                new ParameterType(224, QLENGTH)))
+                )))
+        ));
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates());
     }
 
     @Test

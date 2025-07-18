@@ -42,6 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  * This class wraps an ETSI TS 119 312/322 XML cryptographic suite policy
@@ -84,6 +85,12 @@ public class CryptographicSuiteXmlWrapper extends Abstract19322CryptographicSuit
             }
 
             Date endDate = getDigestAlgorithmEndDate(algorithmType.getEvaluation());
+            if (digestAlgorithmsMap.containsKey(digestAlgorithm)) {
+                Date currentEndDate = digestAlgorithmsMap.get(digestAlgorithm);
+                if (currentEndDate == null || (endDate != null && currentEndDate.after(endDate))) {
+                    endDate = currentEndDate;
+                }
+            }
             digestAlgorithmsMap.put(digestAlgorithm, endDate);
 
         }
@@ -157,7 +164,7 @@ public class CryptographicSuiteXmlWrapper extends Abstract19322CryptographicSuit
 
     @Override
     protected Map<EncryptionAlgorithmWithMinKeySize, Date> buildAcceptableEncryptionAlgorithmsWithExpirationDates() {
-        final Map<EncryptionAlgorithmWithMinKeySize, Date> encryptionAlgorithmsMap = new LinkedHashMap<>();
+        final Map<EncryptionAlgorithm, TreeMap<Integer, Date>> encryptionAlgorithmWithKeySizesMap = new LinkedHashMap<>();
         for (AlgorithmType algorithmType : securitySuitabilityPolicy.getAlgorithm()) {
             AlgorithmIdentifierType algorithmIdentifier = algorithmType.getAlgorithmIdentifier();
             EncryptionAlgorithm encryptionAlgorithm = getEncryptionAlgorithm(algorithmIdentifier);
@@ -165,12 +172,45 @@ public class CryptographicSuiteXmlWrapper extends Abstract19322CryptographicSuit
                 continue;
             }
 
+            TreeMap<Integer, Date> keySizeMap = encryptionAlgorithmWithKeySizesMap.getOrDefault(encryptionAlgorithm, new TreeMap<>());
+
             Map<Integer, Date> endDatesMap = getEncryptionAlgorithmKeySizeEndDates(encryptionAlgorithm, algorithmType.getEvaluation());
             for (Map.Entry<Integer, Date> entry : endDatesMap.entrySet()) {
-                EncryptionAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize = new EncryptionAlgorithmWithMinKeySize(encryptionAlgorithm, entry.getKey());
-                encryptionAlgorithmsMap.put(encryptionAlgorithmWithMinKeySize, entry.getValue());
+                Integer keySize = entry.getKey();
+                Date keySizeEndDate = entry.getValue();
+
+                // if there is an entry with a longer deprecation date, we need to re-use the existing entry. See RFC 5698
+                Map.Entry<Integer, Date> floorEntry = keySizeMap.floorEntry(keySize);
+                if (floorEntry != null) {
+                    Date currentEndDate = floorEntry.getValue();
+                    if (currentEndDate == null || (keySizeEndDate != null && currentEndDate.after(keySizeEndDate))) {
+                        keySizeEndDate = currentEndDate;
+                    }
+                }
+
+                // evaluate existing keySize entries, and "extend" with a longer expiration date, if applicable
+                Map.Entry<Integer, Date> higherEntry = keySizeMap.higherEntry(keySize);
+                if (higherEntry != null) {
+                    Date currentEndDate = higherEntry.getValue();
+                    if (currentEndDate != null && (keySizeEndDate == null || currentEndDate.before(keySizeEndDate))) {
+                        keySizeMap.put(higherEntry.getKey(), keySizeEndDate);
+                    }
+                }
+
+                keySizeMap.put(keySize, keySizeEndDate);
+
             }
 
+            encryptionAlgorithmWithKeySizesMap.put(encryptionAlgorithm, keySizeMap);
+        }
+
+
+        final Map<EncryptionAlgorithmWithMinKeySize, Date> encryptionAlgorithmsMap = new LinkedHashMap<>();
+        for (Map.Entry<EncryptionAlgorithm, TreeMap<Integer, Date>> entry : encryptionAlgorithmWithKeySizesMap.entrySet()) {
+            EncryptionAlgorithm encryptionAlgorithm = entry.getKey();
+            for (Map.Entry<Integer, Date> keySizeEntry : entry.getValue().entrySet()) {
+                encryptionAlgorithmsMap.put(new EncryptionAlgorithmWithMinKeySize(encryptionAlgorithm, keySizeEntry.getKey()), keySizeEntry.getValue());
+            }
         }
         return encryptionAlgorithmsMap;
     }

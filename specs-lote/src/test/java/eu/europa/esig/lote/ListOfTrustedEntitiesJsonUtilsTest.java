@@ -54,6 +54,17 @@ class ListOfTrustedEntitiesJsonUtilsTest {
     }
 
     @Test
+    void mockPID() {
+        InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/Mock_PID_Provider_List_v0.0.1-fixed.json");
+        JsonObjectWrapper jsonObject = new JSONParser().parse(is);
+
+        assertNotNull(jsonObject);
+
+        List<String> errors = ListOfTrustedEntitiesJsonUtils.getInstance().validateAgainstSchema(jsonObject);
+        assertTrue(errors.isEmpty(), errors.toString());
+    }
+
+    @Test
     void validTestEmptyTE() {
         InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/valid-emptyTE.json");
         JsonObjectWrapper jsonObject = new JSONParser().parse(is);

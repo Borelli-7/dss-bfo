@@ -124,6 +124,8 @@ public class PdfObjectModificationsFilter {
             return true;
         } else if (isMetaDataChange(objectModification)) {
             return true;
+        } else if (isStructTreeRootChange(objectModification)) {
+            return true;
         }
         return false;
     }
@@ -444,19 +446,48 @@ public class PdfObjectModificationsFilter {
         return PAdESConstants.METADATA_NAME.equals(key) || PAdESConstants.METADATA_NAME.equals(parentKey);
     }
 
+    private boolean isStructTreeRootChange(ObjectModification objectModification) {
+        /*
+         * The validation of the StructTreeRoot modifications is aligned with "allowed to be modified" changes,
+         * of the <a href="https://github.com/itext/itext-java/blob/9.2.0/sign/src/main/java/com/itextpdf/signatures/validation/DocumentRevisionsValidator.java#L687">iText library</a>.
+         */
+        boolean isStructTreeRoot = false;
+        List<String> keyChain = objectModification.getObjectTree().getKeyChain();
+        PdfObjectModificationType actionType = objectModification.getActionType();
+        for (String key : keyChain) {
+            if (PAdESConstants.STRUCT_TREE_ROOT_NAME.equals(key)) {
+                isStructTreeRoot = true;
+
+            } else if (isStructTreeRoot && isOneOf(key,
+                    PAdESConstants.STRUCT_TREE_ROOT_ID_TREE_NAME,
+                    PAdESConstants.STRUCT_TREE_ROOT_PARENT_TREE_NAME,
+                    PAdESConstants.STRUCT_TREE_ROOT_PARENT_TREE_NEXT_KEY_NAME)) {
+                return true;
+
+            } else if (isStructTreeRoot && PAdESConstants.STRUCT_TREE_ROOT_K_NAME.equals(key) &&
+                    (PdfObjectModificationType.CREATION == actionType || PdfObjectModificationType.DELETION == actionType)) {
+                return true;
+
+            } else {
+                isStructTreeRoot = false;
+            }
+        }
+        return false;
+    }
+
     private boolean isAcroFormDictionaryChange(ObjectModification objectModification) {
         boolean containsAcroForm = false;
-        boolean containsResourseDict = false;
+        boolean containsResourceDict = false;
         List<String> keyChain = objectModification.getObjectTree().getKeyChain();
         for (String key : keyChain) {
             if (PAdESConstants.ACRO_FORM_NAME.equals(key)) {
                 containsAcroForm = true;
             } else if (isOneOf(key, PAdESConstants.DOCUMENT_APPEARANCE_NAME,
                     PAdESConstants.DOCUMENT_RESOURCES_NAME, PAdESConstants.SIG_FLAGS_NAME)) {
-                containsResourseDict = true;
+                containsResourceDict = true;
             }
         }
-        return containsAcroForm && containsResourseDict;
+        return containsAcroForm && containsResourceDict;
     }
 
     private boolean isSignatureEmptyFieldFontCreation(ObjectModification objectModification) {

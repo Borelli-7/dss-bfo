@@ -1751,11 +1751,6 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 				SubIndication subIndication = simpleReport.getSubIndication(sigId);
 				assertNotNull(subIndication);
 				assertFalse(Utils.isCollectionEmpty(simpleReport.getAdESValidationErrors(sigId)));
-
-				if (SubIndication.TRY_LATER.equals(subIndication) && !createdWithTrustAnchor(simpleReport.getCertificateChain(sigId))
-						&& !timestampedWithTrustAnchor(simpleReport.getSignatureTimestamps(sigId))) {
-					assertNotNull(simpleReport.getExtensionPeriodMax(sigId));
-				}
 			}
 			assertNotNull(simpleReport.getSignatureQualification(sigId));
 

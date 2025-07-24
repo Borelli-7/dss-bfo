@@ -22,13 +22,17 @@ package eu.europa.esig.dss.model.policy;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.enumerations.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +40,8 @@ import java.util.stream.Collectors;
  *
  */
 public abstract class Abstract19322CryptographicSuite implements CryptographicSuite {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Abstract19322CryptographicSuite.class);
 
     /** Key size parameter used by RSA algorithms */
     protected static final String MODULES_LENGTH_PARAMETER = "moduluslength";
@@ -49,11 +55,11 @@ public abstract class Abstract19322CryptographicSuite implements CryptographicSu
     /** Defines global execution level of the cryptographic rules */
     private Level globalLevel = Level.FAIL;
 
-    /** Defines execution level of the acceptability of encryption algorithms check */
-    private Level acceptableEncryptionAlgorithmsLevel;
+    /** Defines execution level of the acceptability of signature algorithms check */
+    private Level acceptableSignatureAlgorithmsLevel;
 
-    /** Defines execution level of the acceptability of the  encryption algorithms' key length check */
-    private Level acceptableEncryptionAlgorithmsMinKeySizeLevel;
+    /** Defines execution level of the acceptability of the signature algorithms' key length check */
+    private Level acceptableSignatureAlgorithmsMinKeySizeLevel;
 
     /** Defines execution level of the acceptability of digest algorithms check */
     private Level acceptableDigestAlgorithmsLevel;
@@ -67,17 +73,17 @@ public abstract class Abstract19322CryptographicSuite implements CryptographicSu
     /** Cached list of acceptable digest algorithms */
     private List<DigestAlgorithm> acceptableDigestAlgorithms;
 
-    /** Cached list of acceptable encryption algorithms */
-    private List<EncryptionAlgorithm> acceptableEncryptionAlgorithms;
+    /** Cached list of acceptable signature algorithms */
+    private List<SignatureAlgorithm> acceptableSignatureAlgorithms;
 
-    /** Cached list of acceptable encryption algorithms with corresponding minimum key sizes */
-    private List<EncryptionAlgorithmWithMinKeySize> acceptableEncryptionAlgorithmsWithMinKeySizes;
+    /** Cached list of acceptable signature algorithms with corresponding minimum key sizes */
+    private List<SignatureAlgorithmWithMinKeySize> acceptableSignatureAlgorithmsWithMinKeySizes;
 
     /** Cached list of acceptable digest algorithms with their expiration dates */
     private Map<DigestAlgorithm, Date> acceptableDigestAlgorithmsWithExpirationDates;
 
-    /** Cached list of acceptable encryption algorithms with their expiration dates */
-    private Map<EncryptionAlgorithmWithMinKeySize, Date> acceptableEncryptionAlgorithmsWithExpirationDates;
+    /** Cached list of acceptable signature algorithms with their expiration dates */
+    private Map<SignatureAlgorithmWithMinKeySize, Date> acceptableSignatureAlgorithmsWithExpirationDates;
 
     /**
      * Default constructor
@@ -107,23 +113,23 @@ public abstract class Abstract19322CryptographicSuite implements CryptographicSu
     }
 
     @Override
-    public Level getAcceptableEncryptionAlgorithmsLevel() {
-        return getLevel(acceptableEncryptionAlgorithmsLevel);
+    public Level getAcceptableSignatureAlgorithmsLevel() {
+        return getLevel(acceptableSignatureAlgorithmsLevel);
     }
 
     @Override
-    public void setAcceptableEncryptionAlgorithmsLevel(Level acceptableEncryptionAlgorithmsLevel) {
-        this.acceptableEncryptionAlgorithmsLevel = acceptableEncryptionAlgorithmsLevel;
+    public void setAcceptableSignatureAlgorithmsLevel(Level acceptableSignatureAlgorithmsLevel) {
+        this.acceptableSignatureAlgorithmsLevel = acceptableSignatureAlgorithmsLevel;
     }
 
     @Override
-    public Level getAcceptableEncryptionAlgorithmsMiniKeySizeLevel() {
-        return getLevel(acceptableEncryptionAlgorithmsMinKeySizeLevel);
+    public Level getAcceptableSignatureAlgorithmsMiniKeySizeLevel() {
+        return getLevel(acceptableSignatureAlgorithmsMinKeySizeLevel);
     }
 
     @Override
-    public void setAcceptableEncryptionAlgorithmsMiniKeySizeLevel(Level acceptableEncryptionAlgorithmsMiniKeySizeLevel) {
-        this.acceptableEncryptionAlgorithmsMinKeySizeLevel = acceptableEncryptionAlgorithmsMiniKeySizeLevel;
+    public void setAcceptableSignatureAlgorithmsMiniKeySizeLevel(Level acceptableSignatureAlgorithmsMiniKeySizeLevel) {
+        this.acceptableSignatureAlgorithmsMinKeySizeLevel = acceptableSignatureAlgorithmsMiniKeySizeLevel;
     }
 
     @Override
@@ -160,31 +166,31 @@ public abstract class Abstract19322CryptographicSuite implements CryptographicSu
     }
 
     @Override
-    public List<EncryptionAlgorithm> getAcceptableEncryptionAlgorithms() {
-        if (acceptableEncryptionAlgorithms == null) {
-            acceptableEncryptionAlgorithms = getAcceptableEncryptionAlgorithmsWithMinKeySizes().stream()
-                    .map(EncryptionAlgorithmWithMinKeySize::getEncryptionAlgorithm).collect(Collectors.toList());
+    public List<SignatureAlgorithm> getAcceptableSignatureAlgorithms() {
+        if (acceptableSignatureAlgorithms == null) {
+            acceptableSignatureAlgorithms = getAcceptableSignatureAlgorithmsWithMinKeySizes().stream()
+                    .map(SignatureAlgorithmWithMinKeySize::getSignatureAlgorithm).collect(Collectors.toList());
         }
-        return acceptableEncryptionAlgorithms;
+        return acceptableSignatureAlgorithms;
     }
 
     @Override
-    public List<EncryptionAlgorithmWithMinKeySize> getAcceptableEncryptionAlgorithmsWithMinKeySizes() {
-        if (acceptableEncryptionAlgorithmsWithMinKeySizes == null) {
-            Map<EncryptionAlgorithm, Integer> encryptionAlgorithmWithMinKeySizesMap = new EnumMap<>(EncryptionAlgorithm.class);
-            for (EncryptionAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize : getAcceptableEncryptionAlgorithmsWithExpirationDates().keySet()) {
-                EncryptionAlgorithm encryptionAlgorithm = encryptionAlgorithmWithMinKeySize.getEncryptionAlgorithm();
-                int keySize = encryptionAlgorithmWithMinKeySize.getMinKeySize();
-                Integer minKeySize = encryptionAlgorithmWithMinKeySizesMap.get(encryptionAlgorithm);
+    public List<SignatureAlgorithmWithMinKeySize> getAcceptableSignatureAlgorithmsWithMinKeySizes() {
+        if (acceptableSignatureAlgorithmsWithMinKeySizes == null) {
+            Map<SignatureAlgorithm, Integer> signatureAlgorithmWithMinKeySizesMap = new EnumMap<>(SignatureAlgorithm.class);
+            for (SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize : getAcceptableSignatureAlgorithmsWithExpirationDates().keySet()) {
+                SignatureAlgorithm signatureAlgorithm = signatureAlgorithmWithMinKeySize.getSignatureAlgorithm();
+                int keySize = signatureAlgorithmWithMinKeySize.getMinKeySize();
+                Integer minKeySize = signatureAlgorithmWithMinKeySizesMap.get(signatureAlgorithm);
                 if (minKeySize == null || minKeySize > keySize) {
                     minKeySize = keySize;
                 }
-                encryptionAlgorithmWithMinKeySizesMap.put(encryptionAlgorithm, minKeySize);
+                signatureAlgorithmWithMinKeySizesMap.put(signatureAlgorithm, minKeySize);
             }
-            acceptableEncryptionAlgorithmsWithMinKeySizes = encryptionAlgorithmWithMinKeySizesMap.entrySet().stream()
-                    .map(e -> new EncryptionAlgorithmWithMinKeySize(e.getKey(), e.getValue())).collect(Collectors.toList());
+            acceptableSignatureAlgorithmsWithMinKeySizes = signatureAlgorithmWithMinKeySizesMap.entrySet().stream()
+                    .map(e -> new SignatureAlgorithmWithMinKeySize(e.getKey(), e.getValue())).collect(Collectors.toList());
         }
-        return acceptableEncryptionAlgorithmsWithMinKeySizes;
+        return acceptableSignatureAlgorithmsWithMinKeySizes;
     }
 
     @Override
@@ -196,11 +202,11 @@ public abstract class Abstract19322CryptographicSuite implements CryptographicSu
     }
 
     @Override
-    public Map<EncryptionAlgorithmWithMinKeySize, Date> getAcceptableEncryptionAlgorithmsWithExpirationDates() {
-        if (acceptableEncryptionAlgorithmsWithExpirationDates == null) {
-            acceptableEncryptionAlgorithmsWithExpirationDates = buildAcceptableEncryptionAlgorithmsWithExpirationDates();
+    public Map<SignatureAlgorithmWithMinKeySize, Date> getAcceptableSignatureAlgorithmsWithExpirationDates() {
+        if (acceptableSignatureAlgorithmsWithExpirationDates == null) {
+            acceptableSignatureAlgorithmsWithExpirationDates = buildAcceptableSignatureAlgorithmsWithExpirationDates();
         }
-        return acceptableEncryptionAlgorithmsWithExpirationDates;
+        return acceptableSignatureAlgorithmsWithExpirationDates;
     }
 
     /**
@@ -211,10 +217,82 @@ public abstract class Abstract19322CryptographicSuite implements CryptographicSu
     protected abstract Map<DigestAlgorithm, Date> buildAcceptableDigestAlgorithmsWithExpirationDates();
 
     /**
-     * Builds a list of acceptable encryption algorithms with their corresponding expiration times relatively the key sizes
+     * Builds a list of acceptable signature algorithms with their corresponding expiration times relatively the key sizes
      *
-     * @return a map between {@link EncryptionAlgorithmWithMinKeySize}s and their corresponding expiration {@link Date}s
+     * @return a map between {@link SignatureAlgorithmWithMinKeySize}s and their corresponding expiration {@link Date}s
      */
-    protected abstract Map<EncryptionAlgorithmWithMinKeySize, Date> buildAcceptableEncryptionAlgorithmsWithExpirationDates();
+    protected abstract Map<SignatureAlgorithmWithMinKeySize, Date> buildAcceptableSignatureAlgorithmsWithExpirationDates();
+
+    /**
+     * Finds a {@code SignatureAlgorithm} for the given {@code EncryptionAlgorithm} and {@code DigestAlgorithm} pair
+     *
+     * @param encryptionAlgorithm {@link EncryptionAlgorithm}
+     * @param digestAlgorithm {@link DigestAlgorithm}
+     * @return {@link SignatureAlgorithm}
+     */
+    protected SignatureAlgorithm findSignatureAlgorithm(EncryptionAlgorithm encryptionAlgorithm, DigestAlgorithm digestAlgorithm) {
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.getAlgorithm(encryptionAlgorithm, digestAlgorithm);
+        if (signatureAlgorithm == null) {
+            LOG.trace("Cannot find a SignatureAlgorithm for combination of {} with {}.", encryptionAlgorithm.getName(), digestAlgorithm.getName());
+        }
+        return signatureAlgorithm;
+    }
+
+    /**
+     * Populates the {@code keySizeMap} with the {@code endDatesMap} according to the RFC 5698 rules
+     * (i.e. the highest expiration Date takes precedence).
+     *
+     * @param keySizeMap a map of key sizes to be updated
+     * @param endDatesMap a map of key sizes to update with
+     */
+    protected void populateKeySizeMap(TreeMap<Integer, Date> keySizeMap, Map<Integer, Date> endDatesMap) {
+        for (Map.Entry<Integer, Date> entry : endDatesMap.entrySet()) {
+            Integer keySize = entry.getKey();
+            Date keySizeEndDate = entry.getValue();
+
+            // if there is an entry with a longer deprecation date, we need to re-use the existing entry. See RFC 5698
+            Map.Entry<Integer, Date> floorEntry = keySizeMap.floorEntry(keySize);
+            if (floorEntry != null) {
+                Date currentEndDate = floorEntry.getValue();
+                if (currentEndDate == null || (keySizeEndDate != null && currentEndDate.after(keySizeEndDate))) {
+                    keySizeEndDate = currentEndDate;
+                }
+            }
+
+            // evaluate existing keySize entries, and "extend" with a longer expiration date, if applicable
+            Map.Entry<Integer, Date> higherEntry = keySizeMap.higherEntry(keySize);
+            if (higherEntry != null) {
+                Date currentEndDate = higherEntry.getValue();
+                if (currentEndDate != null && (keySizeEndDate == null || currentEndDate.before(keySizeEndDate))) {
+                    keySizeMap.put(higherEntry.getKey(), keySizeEndDate);
+                }
+            }
+
+            keySizeMap.put(keySize, keySizeEndDate);
+        }
+    }
+
+    /**
+     * Returns the map with values changed to the "bottom" between the original values within the map and 
+     * the provided {@code expirationDate}
+     * 
+     * @param keySizeExpirationMap a map of key sizes to be updated
+     * @param expirationDate {@link Date} to update with
+     * @return updated key map
+     */
+    protected TreeMap<Integer, Date> getTreeMapWithBottomDates(TreeMap<Integer, Date> keySizeExpirationMap, Date expirationDate) {
+        if (expirationDate == null) {
+            return keySizeExpirationMap;
+        }
+        final TreeMap<Integer, Date> updatedKeySizeMap = new TreeMap<>();
+        for (Map.Entry<Integer, Date> keySizeWithDate : keySizeExpirationMap.entrySet()) {
+            Date keySizeExpiration = keySizeWithDate.getValue();
+            if (keySizeExpiration == null || keySizeExpiration.after(expirationDate)) {
+                keySizeExpiration = expirationDate;
+            }
+            updatedKeySizeMap.put(keySizeWithDate.getKey(), keySizeExpiration);
+        }
+        return updatedKeySizeMap;
+    }
 
 }

@@ -21,8 +21,8 @@
 package eu.europa.esig.dss.model.policy;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 
 import java.util.Date;
 import java.util.List;
@@ -49,18 +49,18 @@ public interface CryptographicSuite extends LevelRule {
     List<DigestAlgorithm> getAcceptableDigestAlgorithms();
 
     /**
-     * Gets a list of encryption algorithms accepted by the validation policy
+     * Gets a list of signature algorithms accepted by the validation policy
      *
-     * @return a list of {@link EncryptionAlgorithm}s
+     * @return a list of {@link SignatureAlgorithm}s
      */
-    List<EncryptionAlgorithm> getAcceptableEncryptionAlgorithms();
+    List<SignatureAlgorithm> getAcceptableSignatureAlgorithms();
 
     /**
-     * Gets a list of encryption algorithms together with their minimum used key sizes accepted by the validation policy
+     * Gets a list of signature algorithms together with their minimum used key sizes accepted by the validation policy
      *
-     * @return a list of {@link EncryptionAlgorithmWithMinKeySize}s
+     * @return a list of {@link SignatureAlgorithmWithMinKeySize}s
      */
-    List<EncryptionAlgorithmWithMinKeySize> getAcceptableEncryptionAlgorithmsWithMinKeySizes();
+    List<SignatureAlgorithmWithMinKeySize> getAcceptableSignatureAlgorithmsWithMinKeySizes();
 
     /**
      * Gets a map of supported digest algorithms with the corresponding expiration dates
@@ -70,11 +70,11 @@ public interface CryptographicSuite extends LevelRule {
     Map<DigestAlgorithm, Date> getAcceptableDigestAlgorithmsWithExpirationDates();
 
     /**
-     * Gets a map of supported encryption algorithms with the applicable key sizes with the corresponding expiration dates
+     * Gets a map of supported signature algorithms with the applicable key sizes with the corresponding expiration dates
      *
-     * @return a map between {@code EncryptionAlgorithmWithMinKeySize}s and expiration {@code Date}s
+     * @return a map between {@code SignatureAlgorithmWithMinKeySize}s and expiration {@code Date}s
      */
-    Map<EncryptionAlgorithmWithMinKeySize, Date> getAcceptableEncryptionAlgorithmsWithExpirationDates();
+    Map<SignatureAlgorithmWithMinKeySize, Date> getAcceptableSignatureAlgorithmsWithExpirationDates();
 
     /**
      * Sets the global execution level for the cryptographic suite constraints
@@ -104,14 +104,14 @@ public interface CryptographicSuite extends LevelRule {
      *
      * @return {@link Level}
      */
-    Level getAcceptableEncryptionAlgorithmsLevel();
+    Level getAcceptableSignatureAlgorithmsLevel();
 
     /**
-     * Sets the execution level for the acceptable encryption algorithms check
+     * Sets the execution level for the acceptable signature algorithms check
      *
-     * @param acceptableEncryptionAlgorithmsLevel {@link Level}
+     * @param acceptableSignatureAlgorithmsLevel {@link Level}
      */
-    void setAcceptableEncryptionAlgorithmsLevel(Level acceptableEncryptionAlgorithmsLevel);
+    void setAcceptableSignatureAlgorithmsLevel(Level acceptableSignatureAlgorithmsLevel);
 
     /**
      * Returns a level constraint for MiniPublicKeySize constraint if present,
@@ -119,14 +119,14 @@ public interface CryptographicSuite extends LevelRule {
      *
      * @return {@link Level}
      */
-    Level getAcceptableEncryptionAlgorithmsMiniKeySizeLevel();
+    Level getAcceptableSignatureAlgorithmsMiniKeySizeLevel();
 
     /**
-     * Sets the execution level for the acceptable minimum key sizes of encryption algorithms check
+     * Sets the execution level for the acceptable minimum key sizes of signature algorithms check
      *
-     * @param acceptableEncryptionAlgorithmsMiniKeySizeLevel {@link Level}
+     * @param acceptableSignatureAlgorithmsMiniKeySizeLevel {@link Level}
      */
-    void setAcceptableEncryptionAlgorithmsMiniKeySizeLevel(Level acceptableEncryptionAlgorithmsMiniKeySizeLevel);
+    void setAcceptableSignatureAlgorithmsMiniKeySizeLevel(Level acceptableSignatureAlgorithmsMiniKeySizeLevel);
 
     /**
      * Returns a level constraint for AlgoExpirationDate constraint if present,

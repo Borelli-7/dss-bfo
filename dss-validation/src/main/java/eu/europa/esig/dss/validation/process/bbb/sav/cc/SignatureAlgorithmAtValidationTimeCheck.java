@@ -22,20 +22,29 @@ package eu.europa.esig.dss.validation.process.bbb.sav.cc;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlMessage;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
+import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.validation.policy.CryptographicSuiteUtils;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
 
+import java.util.Date;
+
 /**
- * Check if EncryptionAlgorithm is acceptable
+ * Check SignatureAlgorithm at validation time
  */
-public class EncryptionAlgorithmReliableCheck extends AbstractCryptographicCheck {
+public class SignatureAlgorithmAtValidationTimeCheck extends AbstractCryptographicCheck {
 
 	/** The algorithm to check */
-	private final EncryptionAlgorithm encryptionAlgo;
+	private final SignatureAlgorithm signatureAlgorithm;
+
+	/** The used key size */
+	private final String keyLength;
+
+	/** Validation time */
+	private final Date validationDate;
 
 	/** The cryptographic rules */
 	private final CryptographicSuite cryptographicSuite;
@@ -44,32 +53,47 @@ public class EncryptionAlgorithmReliableCheck extends AbstractCryptographicCheck
 	 * Default constructor
 	 *
 	 * @param i18nProvider {@link I18nProvider}
-	 * @param encryptionAlgo {@link EncryptionAlgorithm}
+	 * @param signatureAlgorithm {@link SignatureAlgorithm}
+	 * @param keyLength {@link String}
+	 * @param validationDate {@link Date}
 	 * @param result {@link XmlCC}
 	 * @param position {@link MessageTag}
 	 * @param cryptographicSuite {@link CryptographicSuite}
 	 */
-	protected EncryptionAlgorithmReliableCheck(I18nProvider i18nProvider, EncryptionAlgorithm encryptionAlgo,
-											   XmlCC result, MessageTag position,
-											   CryptographicSuite cryptographicSuite) {
-		super(i18nProvider, result, position, ValidationProcessUtils.getLevelRule(cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel()));
-		this.encryptionAlgo = encryptionAlgo;
+	protected SignatureAlgorithmAtValidationTimeCheck(I18nProvider i18nProvider, SignatureAlgorithm signatureAlgorithm,
+													  String keyLength, Date validationDate, XmlCC result,
+													  MessageTag position, CryptographicSuite cryptographicSuite) {
+		super(i18nProvider, result, position, ValidationProcessUtils.getLevelRule(cryptographicSuite.getAlgorithmsExpirationDateLevel()));
+		this.signatureAlgorithm = signatureAlgorithm;
+		this.keyLength = keyLength;
+		this.validationDate = validationDate;
 		this.cryptographicSuite = cryptographicSuite;
 	}
 
 	@Override
 	protected boolean process() {
-		return CryptographicSuiteUtils.isEncryptionAlgorithmReliable(cryptographicSuite, encryptionAlgo);
+		Date expirationDate = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, signatureAlgorithm, keyLength);
+		return expirationDate == null || !expirationDate.before(validationDate);
+	}
+
+	@Override
+	protected Level getLevel() {
+		Date algoExpirationDate = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, signatureAlgorithm, keyLength);
+		Date cryptographicSuiteUpdateDate = cryptographicSuite.getCryptographicSuiteUpdateDate();
+		if (algoExpirationDate != null && cryptographicSuiteUpdateDate != null && cryptographicSuiteUpdateDate.before(algoExpirationDate)) {
+			return cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel();
+		}
+		return super.getLevel();
 	}
 	
 	@Override
 	protected XmlMessage buildConstraintMessage() {
-		return buildXmlMessage(MessageTag.ASCCM_EAA, getName(encryptionAlgo));
+		return buildXmlMessage(MessageTag.ASCCM_AR, getName(signatureAlgorithm));
 	}
 	
 	@Override
 	protected XmlMessage buildErrorMessage() {
-		return buildXmlMessage(MessageTag.ASCCM_EAA_ANS, getName(encryptionAlgo), position);
+		return buildXmlMessage(MessageTag.ASCCM_AR_ANS_AKSNR, getName(signatureAlgorithm), keyLength, position);
 	}
 
 }

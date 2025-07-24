@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
  * whether the revocation data has been extracted from a document or obtained from an online source.
  * The class verifies the consistency of the given revocation information and
  * applicability of the used cryptographic constraints used to create this token.
- *
+ * <p>
  * NOTE: It is not recommended to use a single instance of {@code RevocationDataVerifier}
  *       within different {@code CertificateVerifier}s, as it may lead to concurrency issues during the execution
  *       in multi-threaded environments.
@@ -111,18 +111,36 @@ public class RevocationDataVerifier {
 
     /**
      * A collection of Digest Algorithms to accept from CRL/OCSP responders.
-     * Note : revocation tokens created with digest algorithms other than listed in this collection will be skipped.
+     * Note : Since DSS 6.4, it is possible to define accepted algorithms either as a collection of
+     *        {@code eu.europa.esig.dss.enumerations.SignatureAlgorithm}s, using the {@code #setAcceptableSignatureAlgorithmKeyLength},
+     *        or as a combination of {@code eu.europa.esig.dss.enumerations.EncryptionAlgorithm}s and {@code eu.europa.esig.dss.enumerations.DigestAlgorithm}s.
+     *        Both definition will be used to validate the retrieved signature algorithm.
+     *        Other than those algorithms will be skipped.
      * Default : collection of algorithms is synchronized with ETSI 119 312 V1.4.2
      */
     private Collection<DigestAlgorithm> acceptableDigestAlgorithms;
 
     /**
-     * Map of acceptable Encryption Algorithms with a corresponding minimal acceptable key length for each algorithm.
-     * Note : revocation tokens created with encryption algorithms other than listed in this map or
-     *        with a key size smaller than defined in the map will be skipped.
+     * Map of acceptable Signature Algorithms with a corresponding minimal acceptable key length for each algorithm.
+     * Note : Since DSS 6.4, it is possible to define accepted algorithms either as a collection of
+     *        {@code eu.europa.esig.dss.enumerations.SignatureAlgorithm}s, using the {@code #setAcceptableSignatureAlgorithmKeyLength},
+     *        or as a combination of {@code eu.europa.esig.dss.enumerations.EncryptionAlgorithm}s and {@code eu.europa.esig.dss.enumerations.DigestAlgorithm}s.
+     *        Both definition will be used to validate the retrieved signature algorithm.
+     *        Other than those algorithms will be skipped.
      * Default : collection of algorithms is synchronized with ETSI 119 312 V1.4.2
      */
     private Map<EncryptionAlgorithm, Integer> acceptableEncryptionAlgorithmKeyLength;
+
+    /**
+     * Map of acceptable Signature Algorithms with a corresponding minimal acceptable key length for each algorithm.
+     * Note : Since DSS 6.4, it is possible to define accepted algorithms either as a collection of
+     *        {@code eu.europa.esig.dss.enumerations.SignatureAlgorithm}s, using the {@code #setAcceptableSignatureAlgorithmKeyLength},
+     *        or as a combination of {@code eu.europa.esig.dss.enumerations.EncryptionAlgorithm}s and {@code eu.europa.esig.dss.enumerations.DigestAlgorithm}s.
+     *        Both definition will be used to validate the retrieved signature algorithm.
+     *        Other than those algorithms will be skipped.
+     * Default : collection of algorithms is synchronized with ETSI 119 312 V1.4.2
+     */
+    private Map<SignatureAlgorithm, Integer> acceptableSignatureAlgorithmKeyLength;
 
     /**
      * Collection of certificate extension identifiers indicating the revocation check is not required for those certificates
@@ -253,7 +271,11 @@ public class RevocationDataVerifier {
 
     /**
      * Sets a collection of Digest Algorithms for acceptance.
-     * If a revocation token is signed with an algorithm other than listed in the collection, the token will be skipped.
+     * Note : Since DSS 6.4, it is possible to define accepted algorithms either as a collection of
+     *        {@code eu.europa.esig.dss.enumerations.SignatureAlgorithm}s, using the {@code #setAcceptableSignatureAlgorithmKeyLength},
+     *        or as a combination of {@code eu.europa.esig.dss.enumerations.EncryptionAlgorithm}s and {@code eu.europa.esig.dss.enumerations.DigestAlgorithm}s.
+     *        Both definition will be used to validate the retrieved signature algorithm.
+     *        Other than those algorithms will be skipped.
      * Default : collection of algorithms is synchronized with ETSI 119 312 V1.4.2
      *
      * @param acceptableDigestAlgorithms a collection if {@link DigestAlgorithm}s
@@ -267,6 +289,11 @@ public class RevocationDataVerifier {
      * Sets a map of acceptable Encryption Algorithms and their corresponding minimal key length values.
      * If a revocation token is signed with an algorithm other than listed in the collection or with a smaller key size,
      * than the token will be skipped.
+     * Note : Since DSS 6.4, it is possible to define accepted algorithms either as a collection of
+     *        {@code eu.europa.esig.dss.enumerations.SignatureAlgorithm}s, using the {@code #setAcceptableSignatureAlgorithmKeyLength},
+     *        or as a combination of {@code eu.europa.esig.dss.enumerations.EncryptionAlgorithm}s and {@code eu.europa.esig.dss.enumerations.DigestAlgorithm}s.
+     *        Both definition will be used to validate the retrieved signature algorithm.
+     *        Other than those algorithms will be skipped.
      * Default : collection of algorithms is synchronized with ETSI 119 312 V1.4.2
      *
      * @param acceptableEncryptionAlgorithmKeyLength a map of {@link EncryptionAlgorithm}s and
@@ -275,6 +302,25 @@ public class RevocationDataVerifier {
     public void setAcceptableEncryptionAlgorithmKeyLength(Map<EncryptionAlgorithm, Integer> acceptableEncryptionAlgorithmKeyLength) {
         Objects.requireNonNull(acceptableEncryptionAlgorithmKeyLength, "Map of Encryption Algorithms for acceptance cannot be null!");
         this.acceptableEncryptionAlgorithmKeyLength = acceptableEncryptionAlgorithmKeyLength;
+    }
+
+    /**
+     * Sets a map of acceptable Signature Algorithms and their corresponding minimal key length values.
+     * If a revocation token is signed with an algorithm other than listed in the collection or with a smaller key size,
+     * than the token will be skipped.
+     * Note : Since DSS 6.4, it is possible to define accepted algorithms either as a collection of
+     *        {@code eu.europa.esig.dss.enumerations.SignatureAlgorithm}s, using the {@code #setAcceptableSignatureAlgorithmKeyLength},
+     *        or as a combination of {@code eu.europa.esig.dss.enumerations.EncryptionAlgorithm}s and {@code eu.europa.esig.dss.enumerations.DigestAlgorithm}s.
+     *        Both definition will be used to validate the retrieved signature algorithm.
+     *        Other than those algorithms will be skipped.
+     * Default : collection of algorithms is synchronized with ETSI 119 312 V1.4.2
+     *
+     * @param acceptableSignatureAlgorithmKeyLength a map of {@link SignatureAlgorithm}s and
+     *                                              their corresponding minimal supported key lengths
+     */
+    public void setAcceptableSignatureAlgorithmKeyLength(Map<SignatureAlgorithm, Integer> acceptableSignatureAlgorithmKeyLength) {
+        Objects.requireNonNull(acceptableSignatureAlgorithmKeyLength, "Map of Signature Algorithms for acceptance cannot be null!");
+        this.acceptableSignatureAlgorithmKeyLength = acceptableSignatureAlgorithmKeyLength;
     }
 
     /**
@@ -583,20 +629,43 @@ public class RevocationDataVerifier {
      * @return TRUE if the signature algorithm used on revocation token creation, FALSE otherwise
      */
     protected boolean isAcceptableSignatureAlgorithm(RevocationToken<?> revocationToken, CertificateToken issuerCertificateToken) {
-        if (Utils.isCollectionEmpty(acceptableDigestAlgorithms)) {
-            LOG.info("No acceptable digest algorithms defined!");
-            return false;
-        }
-        if (Utils.isMapEmpty(acceptableEncryptionAlgorithmKeyLength)) {
-            LOG.info("No acceptable encryption algorithms defined!");
-            return false;
-        }
+        /*
+         * Code supports validation against both, explicit signature algorithm definition and
+         * a digest + encryption algorithm pairs
+         */
         SignatureAlgorithm signatureAlgorithm = revocationToken.getSignatureAlgorithm();
         if (signatureAlgorithm == null) {
             LOG.warn("Signature algorithm was not identified for an obtained revocation token '{}'!",
                     revocationToken.getDSSIdAsString());
             return false;
         }
+        if (issuerCertificateToken == null) {
+            LOG.warn("The issuer certificate token was not identified for revocation data with Id '{}'!",
+                    revocationToken.getDSSIdAsString());
+            return false;
+        }
+
+        if (Utils.isMapNotEmpty(acceptableSignatureAlgorithmKeyLength) ) {
+            Integer signatureAlgorithmMinKeySize = acceptableSignatureAlgorithmKeyLength.get(signatureAlgorithm);
+            if (signatureAlgorithmMinKeySize != null && isPublicKeySizeSupported(signatureAlgorithmMinKeySize, issuerCertificateToken)) {
+                return true;
+            }
+            // continue with Digest+Encryption algorithm pairs
+        }
+
+        if (Utils.isCollectionEmpty(acceptableDigestAlgorithms)) {
+            if (Utils.isMapEmpty(acceptableSignatureAlgorithmKeyLength)) {
+                LOG.info("No acceptable digest or signature algorithms defined!");
+            }
+            return false;
+
+        } else if (Utils.isMapEmpty(acceptableEncryptionAlgorithmKeyLength)) {
+            if (Utils.isMapEmpty(acceptableSignatureAlgorithmKeyLength)) {
+                LOG.info("No acceptable encryption or signature algorithms defined!");
+            }
+            return false;
+        }
+
         if (!acceptableDigestAlgorithms.contains(signatureAlgorithm.getDigestAlgorithm())) {
             LOG.warn("The used DigestAlgorithm {} is not acceptable for revocation token '{}'!",
                     signatureAlgorithm.getDigestAlgorithm(), revocationToken.getDSSIdAsString());
@@ -608,15 +677,18 @@ public class RevocationDataVerifier {
                     signatureAlgorithm.getEncryptionAlgorithm(), revocationToken.getDSSIdAsString());
             return false;
         }
-        int publicKeySize = issuerCertificateToken != null ? DSSPKUtils.getPublicKeySize(issuerCertificateToken.getPublicKey()) : -1;
+        return isPublicKeySizeSupported(encryptionAlgorithmMinKeySize, issuerCertificateToken);
+    }
+
+    private boolean isPublicKeySizeSupported(Integer minKeySize, CertificateToken certificateToken) {
+        int publicKeySize = DSSPKUtils.getPublicKeySize(certificateToken.getPublicKey());
         if (publicKeySize <= 0) {
-            LOG.warn("Key size used to sign revocation token '{}' cannot be identified!",
-                    revocationToken.getDSSIdAsString());
+            LOG.warn("Key size of the certificate token with Id '{}' cannot be identified!", certificateToken.getDSSIdAsString());
             return false;
         }
-        if (publicKeySize < encryptionAlgorithmMinKeySize) {
-            LOG.warn("The key size '{}' used to sign revocation token '{}' is smaller than minimal acceptable value '{}'!",
-                    publicKeySize, revocationToken.getDSSIdAsString(), encryptionAlgorithmMinKeySize);
+        if (publicKeySize < minKeySize) {
+            LOG.warn("The key size '{}' of the certificate token with Id '{}' is smaller than minimal acceptable value '{}'!",
+                    publicKeySize, certificateToken.getDSSIdAsString(), minKeySize);
             return false;
         }
         return true;

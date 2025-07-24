@@ -24,8 +24,8 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraint;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlStatus;
 import eu.europa.esig.dss.enumerations.Context;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.policy.CryptographicConstraintWrapper;
 import eu.europa.esig.dss.policy.jaxb.Algo;
 import eu.europa.esig.dss.policy.jaxb.AlgoExpirationDate;
@@ -40,7 +40,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
+class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
 
     @Test
     void valid() {
@@ -64,12 +64,17 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "2048", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "2048", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -79,7 +84,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
     }
 
     @Test
-    void invalid() {
+    void invalidKeySizeExpired() {
         CryptographicConstraint cryptographicConstraint = new CryptographicConstraint();
         cryptographicConstraint.setLevel(Level.FAIL);
 
@@ -98,6 +103,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setDate("2026");
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -105,7 +115,48 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "1024", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "1024", calendar.getTime(),
+                result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
+        eaovtc.execute();
+
+        List<XmlConstraint> constraints = result.getConstraint();
+        assertEquals(1, constraints.size());
+        assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
+    }
+
+    @Test
+    void invalidDigestAlgoExpired() {
+        CryptographicConstraint cryptographicConstraint = new CryptographicConstraint();
+        cryptographicConstraint.setLevel(Level.FAIL);
+
+        AlgoExpirationDate algoExpirationDate = new AlgoExpirationDate();
+        algoExpirationDate.setFormat("yyyy");
+
+        Algo rsa1000 = new Algo();
+        rsa1000.setValue("RSA");
+        rsa1000.setSize(1000);
+        rsa1000.setDate("2009");
+        algoExpirationDate.getAlgos().add(rsa1000);
+
+        Algo rsa1900 = new Algo();
+        rsa1900.setValue("RSA");
+        rsa1900.setSize(1900);
+        rsa1900.setDate("2026");
+        algoExpirationDate.getAlgos().add(rsa1900);
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2021");
+        algoExpirationDate.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(2022, Calendar.JANUARY, 1);
+
+        XmlCC result = new XmlCC();
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "2048", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -133,6 +184,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setSize(1900);
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -140,7 +196,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "2048", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "2048", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -163,6 +219,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1000.setDate("2009");
         algoExpirationDate.getAlgos().add(rsa1000);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -170,7 +231,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "2048", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "2048", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -198,6 +259,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setSize(1900);
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -205,7 +271,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "1024", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "1024", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -215,7 +281,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
     }
 
     @Test
-    void algoNotDefinedTest() {
+    void encryptionAlgoNotDefinedTest() {
         CryptographicConstraint cryptographicConstraint = new CryptographicConstraint();
         cryptographicConstraint.setLevel(Level.FAIL);
 
@@ -233,6 +299,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setSize(1900);
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2021");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -240,7 +311,47 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.DSA, "256", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.DSA_SHA256, "256", calendar.getTime(),
+                result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
+        eaovtc.execute();
+
+        List<XmlConstraint> constraints = result.getConstraint();
+        assertEquals(1, constraints.size());
+        assertEquals(XmlStatus.OK, constraints.get(0).getStatus());
+    }
+
+    @Test
+    void digestAlgoNotDefinedTest() {
+        CryptographicConstraint cryptographicConstraint = new CryptographicConstraint();
+        cryptographicConstraint.setLevel(Level.FAIL);
+
+        AlgoExpirationDate algoExpirationDate = new AlgoExpirationDate();
+        algoExpirationDate.setFormat("yyyy");
+
+        Algo rsa1000 = new Algo();
+        rsa1000.setValue("RSA");
+        rsa1000.setSize(1000);
+        rsa1000.setDate("2009");
+        algoExpirationDate.getAlgos().add(rsa1000);
+
+        Algo rsa1900 = new Algo();
+        rsa1900.setValue("RSA");
+        rsa1900.setSize(1900);
+        algoExpirationDate.getAlgos().add(rsa1900);
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(2022, Calendar.JANUARY, 1);
+
+        XmlCC result = new XmlCC();
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA512, "2048", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -270,6 +381,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setDate("2026");
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -277,7 +393,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "1024", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "1024", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -306,6 +422,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setDate("2026");
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -313,7 +434,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "1024", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "1024", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -341,6 +462,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setDate("2026");
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -348,7 +474,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "1024", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "1024", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -378,6 +504,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setDate("2026");
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -385,7 +516,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "1024", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "1024", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -415,6 +546,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setDate("2026");
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -422,7 +558,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "1024", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "1024", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 
@@ -452,6 +588,11 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setDate("2026");
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        sha256.setDate("2029");
+        algoExpirationDate.getAlgos().add(sha256);
+
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -459,7 +600,7 @@ class EncryptionAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         calendar.set(2022, Calendar.JANUARY, 1);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmAtValidationTimeCheck eaovtc = new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, EncryptionAlgorithm.RSA, "1024", calendar.getTime(),
+        SignatureAlgorithmAtValidationTimeCheck eaovtc = new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "1024", calendar.getTime(),
                 result, ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         eaovtc.execute();
 

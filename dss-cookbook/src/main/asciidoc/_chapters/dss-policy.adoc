@@ -2607,6 +2607,8 @@ The `<Cryptographic>` block defines list of acceptable digest and encryption alg
 
 * `AcceptableEncryptionAlgo` - this constraint defines a list of acceptable encryption algorithms. If a different encryption algorithm is used from the defined list, the check will fail.
 
+NOTE: Starting from DSS version `6.4`, the `Level` argument within the `AcceptableEncryptionAlgo` element, when defined, applies to the validation of the signature algorithm holistically.
+
 Default: `FAIL` (`RSA`, `DSA`, `ECDSA`, `PLAIN-ECDSA`)
 
 [source,xml,indent=0]
@@ -2646,6 +2648,8 @@ Default: `FAIL` (`RSA=1024`, `DSA=1024`, `ECDSA=160`, `PLAIN-ECDSA=160`)
 ----
 
 * `AcceptableDigestAlgo` - this constraint defines a list of acceptable digest algorithms. If a different digest algorithm is used from the defined list, the check will fail.
+
+NOTE: Starting from DSS version `6.4`, the `Level` argument within the `AcceptableDigestAlgo` element, when defined, applies only when a digest algorithm is validated independently of a signature algorithm (e.g. reference validation, timestamp message-imprint, etc.). For validation level change on validation of signature algorithms, please see `AcceptableEncryptionAlgo` element.
 
 Default: `FAIL` (`MD5`, `SHA1`, `SHA224`, `SHA256`, `SHA384`, `SHA512`, `SHA3-256`, `SHA3-384`, `SHA3-512`, `RIPEMD160`, `WHIRLPOOL`)
 

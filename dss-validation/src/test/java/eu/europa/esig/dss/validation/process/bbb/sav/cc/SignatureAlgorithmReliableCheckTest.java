@@ -24,8 +24,8 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraint;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlStatus;
 import eu.europa.esig.dss.enumerations.Context;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.policy.CryptographicConstraintWrapper;
 import eu.europa.esig.dss.policy.jaxb.Algo;
 import eu.europa.esig.dss.policy.jaxb.CryptographicConstraint;
@@ -38,7 +38,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class EncryptionAlgorithmReliableCheckTest extends AbstractTestCheck {
+class SignatureAlgorithmReliableCheckTest extends AbstractTestCheck {
 
     @Test
     void valid() {
@@ -53,8 +53,16 @@ class EncryptionAlgorithmReliableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmReliableCheck darc = new EncryptionAlgorithmReliableCheck(i18nProvider, EncryptionAlgorithm.RSA, result,
+        SignatureAlgorithmReliableCheck darc = new SignatureAlgorithmReliableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         darc.execute();
 
@@ -76,8 +84,16 @@ class EncryptionAlgorithmReliableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmReliableCheck darc = new EncryptionAlgorithmReliableCheck(i18nProvider, EncryptionAlgorithm.X25519, result,
+        SignatureAlgorithmReliableCheck darc = new SignatureAlgorithmReliableCheck(i18nProvider, SignatureAlgorithm.ED25519, result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         darc.execute();
 
@@ -97,10 +113,14 @@ class EncryptionAlgorithmReliableCheckTest extends AbstractTestCheck {
         rsa.setValue("RSA");
         listAlgo.getAlgos().add(rsa);
 
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
         cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
 
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmReliableCheck darc = new EncryptionAlgorithmReliableCheck(i18nProvider, EncryptionAlgorithm.RSA, result,
+        SignatureAlgorithmReliableCheck darc = new SignatureAlgorithmReliableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         darc.execute();
 
@@ -123,8 +143,16 @@ class EncryptionAlgorithmReliableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmReliableCheck darc = new EncryptionAlgorithmReliableCheck(i18nProvider, EncryptionAlgorithm.X25519, result,
+        SignatureAlgorithmReliableCheck darc = new SignatureAlgorithmReliableCheck(i18nProvider, SignatureAlgorithm.ED25519, result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         darc.execute();
 
@@ -146,8 +174,16 @@ class EncryptionAlgorithmReliableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmReliableCheck darc = new EncryptionAlgorithmReliableCheck(i18nProvider, EncryptionAlgorithm.X25519, result,
+        SignatureAlgorithmReliableCheck darc = new SignatureAlgorithmReliableCheck(i18nProvider, SignatureAlgorithm.ED25519, result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         darc.execute();
 
@@ -168,13 +204,67 @@ class EncryptionAlgorithmReliableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        EncryptionAlgorithmReliableCheck darc = new EncryptionAlgorithmReliableCheck(i18nProvider, EncryptionAlgorithm.X25519, result,
+        SignatureAlgorithmReliableCheck darc = new SignatureAlgorithmReliableCheck(i18nProvider, SignatureAlgorithm.ED25519, result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         darc.execute();
 
         List<XmlConstraint> constraints = result.getConstraint();
         assertEquals(0, constraints.size());
+    }
+
+    @Test
+    void noDigestAlgoTest() {
+        CryptographicConstraint cryptographicConstraint = new CryptographicConstraint();
+        cryptographicConstraint.setLevel(Level.FAIL);
+
+        ListAlgo listAlgo = new ListAlgo();
+
+        Algo rsa = new Algo();
+        rsa.setValue("RSA");
+        listAlgo.getAlgos().add(rsa);
+
+        cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
+
+        XmlCC result = new XmlCC();
+        SignatureAlgorithmReliableCheck darc = new SignatureAlgorithmReliableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, result,
+                ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
+        darc.execute();
+
+        List<XmlConstraint> constraints = result.getConstraint();
+        assertEquals(1, constraints.size());
+        assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
+    }
+
+    @Test
+    void noEncryptionAlgoTest() {
+        CryptographicConstraint cryptographicConstraint = new CryptographicConstraint();
+        cryptographicConstraint.setLevel(Level.FAIL);
+
+        ListAlgo listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
+        XmlCC result = new XmlCC();
+        SignatureAlgorithmReliableCheck darc = new SignatureAlgorithmReliableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, result,
+                ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
+        darc.execute();
+
+        List<XmlConstraint> constraints = result.getConstraint();
+        assertEquals(1, constraints.size());
+        assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
     }
 
 }

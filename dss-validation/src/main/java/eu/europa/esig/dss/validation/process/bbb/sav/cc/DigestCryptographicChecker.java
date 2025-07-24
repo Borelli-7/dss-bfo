@@ -21,6 +21,7 @@
 package eu.europa.esig.dss.validation.process.bbb.sav.cc;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlCryptographicAlgorithm;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
@@ -35,6 +36,9 @@ import java.util.Date;
  */
 public class DigestCryptographicChecker extends AbstractCryptographicChecker {
 
+	/** The Digest algorithm */
+	private final DigestAlgorithm digestAlgorithm;
+
 	/**
 	 * Default constructor
 	 *
@@ -46,31 +50,74 @@ public class DigestCryptographicChecker extends AbstractCryptographicChecker {
 	 */
 	public DigestCryptographicChecker(I18nProvider i18nProvider, DigestAlgorithm digestAlgorithm, Date validationDate,
 									  MessageTag position, CryptographicSuite constraint) {
-		super(i18nProvider, digestAlgorithm, validationDate, position, constraint);
+		super(i18nProvider, validationDate, position, constraint);
+
+		this.digestAlgorithm = digestAlgorithm;
 	}
 
 	@Override
 	protected void initChain() {
 		
 		ChainItem<XmlCC> item = firstItem = digestAlgorithmReliable();
+
+		item = item.setNextItem(digestAlgorithmOnValidationTime());
 		
-		if (isExpirationDateAvailable(digestAlgorithm)) {
-			item = item.setNextItem(digestAlgorithmOnValidationTime());
+	}
+
+	/**
+	 * Checks if the {@code digestAlgorithm} is acceptable
+	 *
+	 * @return TRUE if the {@code digestAlgorithm} is acceptable, FALSE otherwise
+	 */
+	protected ChainItem<XmlCC> digestAlgorithmReliable() {
+		return new DigestAlgorithmReliableCheck(i18nProvider, digestAlgorithm, result, position, cryptographicSuite);
+	}
+
+	/**
+	 * Checks if the {@code digestAlgorithm} is not expired in validation time
+	 *
+	 * @return TRUE if the {@code digestAlgorithm} is not expired in validation time, FALSE otherwise
+	 */
+	protected ChainItem<XmlCC> digestAlgorithmOnValidationTime() {
+		return new DigestAlgorithmAtValidationTimeCheck(i18nProvider, digestAlgorithm, validationDate, result, position, cryptographicSuite);
+	}
+
+	@Override
+	protected XmlCryptographicAlgorithm getAlgorithm() {
+		{
+			if (cryptographicAlgorithm == null) {
+				cryptographicAlgorithm = new XmlCryptographicAlgorithm();
+				if (digestAlgorithm != null) {
+					// if DigestAlgorithm is defined
+					cryptographicAlgorithm.setName(digestAlgorithm.getName());
+					cryptographicAlgorithm.setUri(getDigestAlgorithmUri(digestAlgorithm));
+
+				} else {
+					// if DigestAlgorithm is not found (unable to build either SignatureAlgorithm nor DigestAlgorithm)
+					cryptographicAlgorithm.setName(ALGORITHM_UNIDENTIFIED);
+					cryptographicAlgorithm.setUri(ALGORITHM_UNIDENTIFIED_URN);
+				}
+			}
+			return cryptographicAlgorithm;
 		}
-		
+	}
+
+	private String getDigestAlgorithmUri(DigestAlgorithm digestAlgorithm) {
+		if (digestAlgorithm != null) {
+			if (digestAlgorithm.getUri() != null) {
+				return digestAlgorithm.getUri();
+			}
+			if (digestAlgorithm.getOid() != null) {
+				return digestAlgorithm.getOid();
+			}
+		}
+		return ALGORITHM_UNIDENTIFIED_URN;
 	}
 
 	@Override
 	protected Date getNotAfter() {
-		if (CryptographicSuiteUtils.isDigestAlgorithmReliable(cryptographicSuite, digestAlgorithm) &&
-				(encryptionAlgorithm == null || (CryptographicSuiteUtils.isEncryptionAlgorithmReliable(cryptographicSuite, encryptionAlgorithm) &&
-						CryptographicSuiteUtils.isEncryptionAlgorithmWithKeySizeReliable(cryptographicSuite, encryptionAlgorithm, keyLengthUsedToSignThisToken)))) {
-			Date notAfter = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, digestAlgorithm);
-			Date expirationEncryption = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, encryptionAlgorithm, keyLengthUsedToSignThisToken);
-			if (notAfter == null || (expirationEncryption != null && expirationEncryption.before(notAfter))) {
-				notAfter = expirationEncryption;
-			}
-			return notAfter;
+		if (CryptographicSuiteUtils.isDigestAlgorithmReliable(cryptographicSuite, digestAlgorithm)) {
+			return CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, digestAlgorithm);
 		}
 		return null;
 	}

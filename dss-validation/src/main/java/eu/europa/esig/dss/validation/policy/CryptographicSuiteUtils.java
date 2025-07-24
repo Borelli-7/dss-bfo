@@ -21,9 +21,9 @@
 package eu.europa.esig.dss.validation.policy;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
-import eu.europa.esig.dss.model.policy.EncryptionAlgorithmWithMinKeySize;
+import eu.europa.esig.dss.model.policy.SignatureAlgorithmWithMinKeySize;
 import eu.europa.esig.dss.utils.Utils;
 
 import java.util.ArrayList;
@@ -49,17 +49,17 @@ public final class CryptographicSuiteUtils {
     }
 
     /**
-     * Checks if the given {@link EncryptionAlgorithm} is reliable (acceptable)
+     * Checks if the given {@link SignatureAlgorithm} is reliable (acceptable)
      *
      * @param cryptographicSuite {@link CryptographicSuite}
-     * @param encryptionAlgorithm {@link EncryptionAlgorithm} to check
+     * @param signatureAlgorithm {@link SignatureAlgorithm} to check
      * @return TRUE if the algorithm is reliable, FALSE otherwise
      */
-    public static boolean isEncryptionAlgorithmReliable(CryptographicSuite cryptographicSuite, EncryptionAlgorithm encryptionAlgorithm) {
+    public static boolean isSignatureAlgorithmReliable(CryptographicSuite cryptographicSuite, SignatureAlgorithm signatureAlgorithm) {
         if (cryptographicSuite == null) {
             return true;
         }
-        return encryptionAlgorithm != null && cryptographicSuite.getAcceptableEncryptionAlgorithms().contains(encryptionAlgorithm);
+        return signatureAlgorithm != null && cryptographicSuite.getAcceptableSignatureAlgorithms().contains(signatureAlgorithm);
     }
 
     /**
@@ -84,37 +84,37 @@ public final class CryptographicSuiteUtils {
     }
 
     /**
-     * Checks if the {code keyLength} for {@link EncryptionAlgorithm} is reliable (acceptable)
+     * Checks if the {code keyLength} for {@link SignatureAlgorithm} is reliable (acceptable)
      *
      * @param cryptographicSuite {@link CryptographicSuite}
-     * @param encryptionAlgorithm {@link EncryptionAlgorithm} to check key length for
+     * @param signatureAlgorithm {@link SignatureAlgorithm} to check key length for
      * @param keyLength {@link String} the key length to be checked
      * @return TRUE if the key length for the algorithm is reliable, FALSE otherwise
      */
-    public static boolean isEncryptionAlgorithmWithKeySizeReliable(CryptographicSuite cryptographicSuite,
-                                                                   EncryptionAlgorithm encryptionAlgorithm, String keyLength) {
+    public static boolean isSignatureAlgorithmWithKeySizeReliable(CryptographicSuite cryptographicSuite,
+                                                                  SignatureAlgorithm signatureAlgorithm, String keyLength) {
         int keySize = parseKeySize(keyLength);
-        return isEncryptionAlgorithmWithKeySizeReliable(cryptographicSuite, encryptionAlgorithm, keySize);
+        return isSignatureAlgorithmWithKeySizeReliable(cryptographicSuite, signatureAlgorithm, keySize);
     }
 
     /**
-     * Checks if the {code keyLength} for {@link EncryptionAlgorithm} is reliable (acceptable)
+     * Checks if the {code keyLength} for {@link SignatureAlgorithm} is reliable (acceptable)
      *
      * @param cryptographicSuite {@link CryptographicSuite}
-     * @param encryptionAlgorithm {@link EncryptionAlgorithm} to check key length for
+     * @param signatureAlgorithm {@link SignatureAlgorithm} to check key length for
      * @param keySize {@link Integer} the key length to be checked
      * @return TRUE if the key length for the algorithm is reliable, FALSE otherwise
      */
-    public static boolean isEncryptionAlgorithmWithKeySizeReliable(CryptographicSuite cryptographicSuite,
-                                                                   EncryptionAlgorithm encryptionAlgorithm, Integer keySize) {
+    public static boolean isSignatureAlgorithmWithKeySizeReliable(CryptographicSuite cryptographicSuite,
+                                                                  SignatureAlgorithm signatureAlgorithm, Integer keySize) {
         if (cryptographicSuite == null) {
             return true;
         }
         boolean foundAlgorithm = false;
-        if (encryptionAlgorithm != null && keySize != 0) {
-            for (EncryptionAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize : cryptographicSuite.getAcceptableEncryptionAlgorithmsWithMinKeySizes()) {
-                int minKeySize = encryptionAlgorithmWithMinKeySize.getMinKeySize();
-                if (encryptionAlgorithm == encryptionAlgorithmWithMinKeySize.getEncryptionAlgorithm()) {
+        if (signatureAlgorithm != null && keySize != 0) {
+            for (SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize : cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes()) {
+                int minKeySize = signatureAlgorithmWithMinKeySize.getMinKeySize();
+                if (signatureAlgorithm == signatureAlgorithmWithMinKeySize.getSignatureAlgorithm()) {
                     foundAlgorithm = true;
                     if (minKeySize <= keySize) {
                         return true;
@@ -130,49 +130,49 @@ public final class CryptographicSuiteUtils {
     }
 
     /**
-     * Gets an expiration date for the encryption algorithm with name {@code algoToSearch} and {@code keyLength}.
+     * Gets an expiration date for the encryption algorithm with name {@code signatureAlgorithm} and {@code keyLength}.
      * Returns null if the expiration date is not defined for the algorithm.
      *
      * @param cryptographicSuite {@link CryptographicSuite}
-     * @param encryptionAlgorithm {@link EncryptionAlgorithm} to get expiration date for
+     * @param signatureAlgorithm {@link SignatureAlgorithm} to get expiration date for
      * @param keyLength {@link String} key length used to sign the token
      * @return {@link Date}
      */
     public static Date getExpirationDate(CryptographicSuite cryptographicSuite,
-                                         EncryptionAlgorithm encryptionAlgorithm, String keyLength) {
+                                         SignatureAlgorithm signatureAlgorithm, String keyLength) {
         int keySize = parseKeySize(keyLength);
-        return getExpirationDate(cryptographicSuite, encryptionAlgorithm, keySize);
+        return getExpirationDate(cryptographicSuite, signatureAlgorithm, keySize);
     }
 
     /**
-     * Gets an expiration date for the encryption algorithm with name {@code algoToSearch} and {@code keyLength}.
+     * Gets an expiration date for the encryption algorithm with name {@code signatureAlgorithm} and {@code keyLength}.
      * Returns null if the expiration date is not defined for the algorithm.
      *
      * @param cryptographicSuite {@link CryptographicSuite}
-     * @param encryptionAlgorithm {@link EncryptionAlgorithm} to get expiration date for
+     * @param signatureAlgorithm {@link SignatureAlgorithm} to get expiration date for
      * @param keySize {@link Integer} key length used to sign the token
      * @return {@link Date}
      */
     public static Date getExpirationDate(CryptographicSuite cryptographicSuite,
-                                         EncryptionAlgorithm encryptionAlgorithm, Integer keySize) {
+                                         SignatureAlgorithm signatureAlgorithm, Integer keySize) {
         final TreeMap<Integer, Date> dates = new TreeMap<>();
 
-        Map<EncryptionAlgorithmWithMinKeySize, Date> encryptionAlgorithmsWithExpirationDates =
-                cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates();
-        for (Map.Entry<EncryptionAlgorithmWithMinKeySize, Date> entry : encryptionAlgorithmsWithExpirationDates.entrySet()) {
-            EncryptionAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize = entry.getKey();
-            if (encryptionAlgorithm == encryptionAlgorithmWithMinKeySize.getEncryptionAlgorithm()) {
-                dates.put(encryptionAlgorithmWithMinKeySize.getMinKeySize(), entry.getValue());
+        Map<SignatureAlgorithmWithMinKeySize, Date> signatureAlgorithmsWithExpirationDates =
+                cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates();
+        for (Map.Entry<SignatureAlgorithmWithMinKeySize, Date> entry : signatureAlgorithmsWithExpirationDates.entrySet()) {
+            SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize = entry.getKey();
+            if (signatureAlgorithm == signatureAlgorithmWithMinKeySize.getSignatureAlgorithm()) {
+                dates.put(signatureAlgorithmWithMinKeySize.getMinKeySize(), entry.getValue());
             }
         }
 
-        for (EncryptionAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize : cryptographicSuite.getAcceptableEncryptionAlgorithmsWithMinKeySizes()) {
-            if (encryptionAlgorithm == encryptionAlgorithmWithMinKeySize.getEncryptionAlgorithm()) {
-                Map.Entry<Integer, Date> floorEntry = dates.floorEntry(encryptionAlgorithmWithMinKeySize.getMinKeySize());
+        for (SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize : cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes()) {
+            if (signatureAlgorithm == signatureAlgorithmWithMinKeySize.getSignatureAlgorithm()) {
+                Map.Entry<Integer, Date> floorEntry = dates.floorEntry(signatureAlgorithmWithMinKeySize.getMinKeySize());
                 if (floorEntry == null) {
-                    Map.Entry<Integer, Date> ceilingEntry = dates.ceilingEntry(encryptionAlgorithmWithMinKeySize.getMinKeySize());
+                    Map.Entry<Integer, Date> ceilingEntry = dates.ceilingEntry(signatureAlgorithmWithMinKeySize.getMinKeySize());
                     if (ceilingEntry != null) {
-                        dates.put(encryptionAlgorithmWithMinKeySize.getMinKeySize(), ceilingEntry.getValue());
+                        dates.put(signatureAlgorithmWithMinKeySize.getMinKeySize(), ceilingEntry.getValue());
                     }
                 }
             }
@@ -239,61 +239,61 @@ public final class CryptographicSuiteUtils {
     }
 
     /**
-     * This method returns a map between reliable {@code EncryptionAlgorithm} according to the current validation policy
-     * and their minimal accepted key length at the given time.
+     * This method returns a list of reliable {@code SignatureAlgorithmWithMinKeySize} according to
+     * the current validation policy and at the given time.
      *
      * @param cryptographicSuite {@link CryptographicSuite}
      * @param validationTime {@link Date} to verify against
-     * @return a list of {@link EncryptionAlgorithmWithMinKeySize}s
+     * @return a list of {@link SignatureAlgorithmWithMinKeySize}s
      */
-    public static List<EncryptionAlgorithmWithMinKeySize> getReliableEncryptionAlgorithmsWithMinimalKeyLengthAtTime(
+    public static List<SignatureAlgorithmWithMinKeySize> getReliableSignatureAlgorithmsWithMinimalKeyLengthAtTime(
             CryptographicSuite cryptographicSuite, Date validationTime) {
-        final Map<EncryptionAlgorithm, Integer> reliableEncryptionAlgorithms = new EnumMap<>(EncryptionAlgorithm.class);
-        Set<EncryptionAlgorithm> processedEncryptionAlgorithms = new HashSet<>();
+        final Map<SignatureAlgorithm, Integer> reliableSignatureAlgorithms = new EnumMap<>(SignatureAlgorithm.class);
+        Set<SignatureAlgorithm> processedSignatureAlgorithms = new HashSet<>();
 
-        List<EncryptionAlgorithm> acceptableEncryptionAlgorithms = cryptographicSuite.getAcceptableEncryptionAlgorithms();
-        Map<EncryptionAlgorithmWithMinKeySize, Date> encryptionAlgorithmsWithExpirationDates = 
-                cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates();
-        for (Map.Entry<EncryptionAlgorithmWithMinKeySize, Date> entry : encryptionAlgorithmsWithExpirationDates.entrySet()) {
-            EncryptionAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize = entry.getKey();
-            EncryptionAlgorithm encryptionAlgorithm = encryptionAlgorithmWithMinKeySize.getEncryptionAlgorithm();
-            int keySize = encryptionAlgorithmWithMinKeySize.getMinKeySize();
-            if (acceptableEncryptionAlgorithms.contains(encryptionAlgorithm)) {
-                Integer minKeySize = reliableEncryptionAlgorithms.get(encryptionAlgorithm);
+        List<SignatureAlgorithm> acceptableSignatureAlgorithms = cryptographicSuite.getAcceptableSignatureAlgorithms();
+        Map<SignatureAlgorithmWithMinKeySize, Date> signatureAlgorithmsWithExpirationDates =
+                cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates();
+        for (Map.Entry<SignatureAlgorithmWithMinKeySize, Date> entry : signatureAlgorithmsWithExpirationDates.entrySet()) {
+            SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize = entry.getKey();
+            SignatureAlgorithm signatureAlgorithm = signatureAlgorithmWithMinKeySize.getSignatureAlgorithm();
+            int keySize = signatureAlgorithmWithMinKeySize.getMinKeySize();
+            if (acceptableSignatureAlgorithms.contains(signatureAlgorithm)) {
+                Integer minKeySize = reliableSignatureAlgorithms.get(signatureAlgorithm);
                 if (minKeySize == null || minKeySize > keySize) {
                     Date expirationDate = entry.getValue();
                     if (isReliableAtTime(expirationDate, validationTime)) {
-                        reliableEncryptionAlgorithms.put(encryptionAlgorithm, keySize);
+                        reliableSignatureAlgorithms.put(signatureAlgorithm, keySize);
                     }
                 }
             }
-            processedEncryptionAlgorithms.add(encryptionAlgorithm);
+            processedSignatureAlgorithms.add(signatureAlgorithm);
         }
 
-        for (EncryptionAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize : cryptographicSuite.getAcceptableEncryptionAlgorithmsWithMinKeySizes()) {
-            EncryptionAlgorithm encryptionAlgorithm = encryptionAlgorithmWithMinKeySize.getEncryptionAlgorithm();
-            int keySize = encryptionAlgorithmWithMinKeySize.getMinKeySize();
-            if (!processedEncryptionAlgorithms.contains(encryptionAlgorithm)) {
-                reliableEncryptionAlgorithms.put(encryptionAlgorithm, keySize);
+        for (SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize : cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes()) {
+            SignatureAlgorithm signatureAlgorithm = signatureAlgorithmWithMinKeySize.getSignatureAlgorithm();
+            int keySize = signatureAlgorithmWithMinKeySize.getMinKeySize();
+            if (!processedSignatureAlgorithms.contains(signatureAlgorithm)) {
+                reliableSignatureAlgorithms.put(signatureAlgorithm, keySize);
 
-            } else if (reliableEncryptionAlgorithms.containsKey(encryptionAlgorithm)) {
-                Integer minKeySize = reliableEncryptionAlgorithms.get(encryptionAlgorithm);
+            } else if (reliableSignatureAlgorithms.containsKey(signatureAlgorithm)) {
+                Integer minKeySize = reliableSignatureAlgorithms.get(signatureAlgorithm);
                 if (minKeySize == null || minKeySize < keySize) {
-                    reliableEncryptionAlgorithms.put(encryptionAlgorithm, keySize);
+                    reliableSignatureAlgorithms.put(signatureAlgorithm, keySize);
                 }
             }
-            processedEncryptionAlgorithms.add(encryptionAlgorithm);
+            processedSignatureAlgorithms.add(signatureAlgorithm);
         }
 
-        for (EncryptionAlgorithm encryptionAlgorithm : acceptableEncryptionAlgorithms) {
-            if (!processedEncryptionAlgorithms.contains(encryptionAlgorithm)) {
-                reliableEncryptionAlgorithms.put(encryptionAlgorithm, 0);
+        for (SignatureAlgorithm signatureAlgorithm : acceptableSignatureAlgorithms) {
+            if (!processedSignatureAlgorithms.contains(signatureAlgorithm)) {
+                reliableSignatureAlgorithms.put(signatureAlgorithm, 0);
             }
         }
 
-        final List<EncryptionAlgorithmWithMinKeySize> result = new ArrayList<>();
-        for (Map.Entry<EncryptionAlgorithm, Integer> entry : reliableEncryptionAlgorithms.entrySet()) {
-            result.add(new EncryptionAlgorithmWithMinKeySize(entry.getKey(), entry.getValue()));
+        final List<SignatureAlgorithmWithMinKeySize> result = new ArrayList<>();
+        for (Map.Entry<SignatureAlgorithm, Integer> entry : reliableSignatureAlgorithms.entrySet()) {
+            result.add(new SignatureAlgorithmWithMinKeySize(entry.getKey(), entry.getValue()));
         }
         return result;
     }

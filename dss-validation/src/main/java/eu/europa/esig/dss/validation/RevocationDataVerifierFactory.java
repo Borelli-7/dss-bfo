@@ -22,15 +22,15 @@ package eu.europa.esig.dss.validation;
 
 import eu.europa.esig.dss.enumerations.Context;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.enumerations.SubContext;
 import eu.europa.esig.dss.model.policy.CertificateApplicabilityRule;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.DurationRule;
-import eu.europa.esig.dss.model.policy.EncryptionAlgorithmWithMinKeySize;
 import eu.europa.esig.dss.model.policy.LevelRule;
 import eu.europa.esig.dss.model.policy.MultiValuesRule;
+import eu.europa.esig.dss.model.policy.SignatureAlgorithmWithMinKeySize;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.spi.validation.RevocationDataVerifier;
 import eu.europa.esig.dss.validation.policy.CryptographicSuiteUtils;
@@ -108,40 +108,40 @@ public class RevocationDataVerifierFactory {
 
     private void instantiateCryptographicSuite(final RevocationDataVerifier revocationDataVerifier) {
         List<DigestAlgorithm> acceptableDigestAlgorithms;
-        List<EncryptionAlgorithmWithMinKeySize> acceptableEncryptionAlgorithms;
+        List<SignatureAlgorithmWithMinKeySize> acceptableSignatureAlgorithms;
 
         final CryptographicSuite cryptographicSuite = getRevocationCryptographicSuite(validationPolicy);
         if (cryptographicSuite != null && Level.FAIL.equals(cryptographicSuite.getLevel())) {
             Date currentTime = getValidationTime();
             acceptableDigestAlgorithms = CryptographicSuiteUtils.getReliableDigestAlgorithmsAtTime(cryptographicSuite, currentTime);
-            acceptableEncryptionAlgorithms = CryptographicSuiteUtils.getReliableEncryptionAlgorithmsWithMinimalKeyLengthAtTime(cryptographicSuite, currentTime);
+            acceptableSignatureAlgorithms = CryptographicSuiteUtils.getReliableSignatureAlgorithmsWithMinimalKeyLengthAtTime(cryptographicSuite, currentTime);
         } else {
             LOG.info("No enforced cryptographic constraints have been found in the provided validation policy. Accept all cryptographic algorithms.");
             acceptableDigestAlgorithms = Arrays.asList(DigestAlgorithm.values());
-            acceptableEncryptionAlgorithms = new ArrayList<>();
-            for (EncryptionAlgorithm encryptionAlgorithm : EncryptionAlgorithm.values()) {
-                acceptableEncryptionAlgorithms.add(new EncryptionAlgorithmWithMinKeySize(encryptionAlgorithm, 0));
+            acceptableSignatureAlgorithms = new ArrayList<>();
+            for (SignatureAlgorithm signatureAlgorithm : SignatureAlgorithm.values()) {
+                acceptableSignatureAlgorithms.add(new SignatureAlgorithmWithMinKeySize(signatureAlgorithm, 0));
             }
         }
         revocationDataVerifier.setAcceptableDigestAlgorithms(acceptableDigestAlgorithms);
-        revocationDataVerifier.setAcceptableEncryptionAlgorithmKeyLength(toEncryptionAlgorithmWithKeySizesMap(acceptableEncryptionAlgorithms));
+        revocationDataVerifier.setAcceptableSignatureAlgorithmKeyLength(toSignatureAlgorithmWithKeySizesMap(acceptableSignatureAlgorithms));
     }
 
     private CryptographicSuite getRevocationCryptographicSuite(ValidationPolicy validationPolicy) {
         return validationPolicy.getSignatureCryptographicConstraint(Context.REVOCATION);
     }
 
-    private Map<EncryptionAlgorithm, Integer> toEncryptionAlgorithmWithKeySizesMap(List<EncryptionAlgorithmWithMinKeySize> encryptionAlgorithms) {
-        final Map<EncryptionAlgorithm, Integer> encryptionAlgorithmsMap = new EnumMap<>(EncryptionAlgorithm.class);
-        for (EncryptionAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize : encryptionAlgorithms) {
-            EncryptionAlgorithm encryptionAlgorithm = encryptionAlgorithmWithMinKeySize.getEncryptionAlgorithm();
-            Integer minKeySize = encryptionAlgorithmsMap.get(encryptionAlgorithm);
+    private Map<SignatureAlgorithm, Integer> toSignatureAlgorithmWithKeySizesMap(List<SignatureAlgorithmWithMinKeySize> signatureAlgorithms) {
+        final Map<SignatureAlgorithm, Integer> signatureAlgorithmsMap = new EnumMap<>(SignatureAlgorithm.class);
+        for (SignatureAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize : signatureAlgorithms) {
+            SignatureAlgorithm signatureAlgorithm = encryptionAlgorithmWithMinKeySize.getSignatureAlgorithm();
+            Integer minKeySize = signatureAlgorithmsMap.get(signatureAlgorithm);
             int keySize = encryptionAlgorithmWithMinKeySize.getMinKeySize();
             if (minKeySize == null || minKeySize > keySize) {
-                encryptionAlgorithmsMap.put(encryptionAlgorithm, keySize);
+                signatureAlgorithmsMap.put(signatureAlgorithm, keySize);
             }
         }
-        return encryptionAlgorithmsMap;
+        return signatureAlgorithmsMap;
     }
 
     private void instantiateRevocationSkipConstraints(final RevocationDataVerifier revocationDataVerifier) {

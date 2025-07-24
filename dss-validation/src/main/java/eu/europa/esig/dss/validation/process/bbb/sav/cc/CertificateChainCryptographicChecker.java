@@ -99,7 +99,8 @@ public class CertificateChainCryptographicChecker extends Chain<XmlCC> {
 
             CryptographicSuite constraint = validationPolicy.getCertificateCryptographicConstraint(context, subContext);
 
-            CryptographicChecker cc = new CryptographicChecker(i18nProvider, certificate, validationTime, position, constraint);
+            CryptographicChecker cc = new CryptographicChecker(i18nProvider, certificate.getSignatureAlgorithm(),
+                    certificate.getKeyLengthUsedToSignThisToken(), validationTime, position, constraint);
             XmlCC xmlCC = cc.execute();
 
             ChainItem<XmlCC> certCryptoValidation = tokenUsedAlgorithmsAreSecureAtTime(validationTime, position, xmlCC, constraint);

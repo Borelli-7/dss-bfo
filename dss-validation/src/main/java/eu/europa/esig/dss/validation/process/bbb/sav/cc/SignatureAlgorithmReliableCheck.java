@@ -22,29 +22,20 @@ package eu.europa.esig.dss.validation.process.bbb.sav.cc;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlMessage;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
-import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.validation.policy.CryptographicSuiteUtils;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
 
-import java.util.Date;
-
 /**
- * Check EncryptionAlgorithm at validation time
+ * Check if SignatureAlgorithm is acceptable
  */
-public class EncryptionAlgorithmAtValidationTimeCheck extends AbstractCryptographicCheck {
+public class SignatureAlgorithmReliableCheck extends AbstractCryptographicCheck {
 
 	/** The algorithm to check */
-	private final EncryptionAlgorithm encryptionAlgo;
-
-	/** The used key size */
-	private final String keyLength;
-
-	/** Validation time */
-	private final Date validationDate;
+	private final SignatureAlgorithm signatureAlgorithm;
 
 	/** The cryptographic rules */
 	private final CryptographicSuite cryptographicSuite;
@@ -53,47 +44,32 @@ public class EncryptionAlgorithmAtValidationTimeCheck extends AbstractCryptograp
 	 * Default constructor
 	 *
 	 * @param i18nProvider {@link I18nProvider}
-	 * @param encryptionAlgo {@link EncryptionAlgorithm}
-	 * @param keyLength {@link String}
-	 * @param validationDate {@link Date}
+	 * @param signatureAlgorithm {@link SignatureAlgorithm}
 	 * @param result {@link XmlCC}
 	 * @param position {@link MessageTag}
 	 * @param cryptographicSuite {@link CryptographicSuite}
 	 */
-	protected EncryptionAlgorithmAtValidationTimeCheck(I18nProvider i18nProvider, EncryptionAlgorithm encryptionAlgo,
-													   String keyLength, Date validationDate, XmlCC result,
-													   MessageTag position, CryptographicSuite cryptographicSuite) {
-		super(i18nProvider, result, position, ValidationProcessUtils.getLevelRule(cryptographicSuite.getAlgorithmsExpirationDateLevel()));
-		this.encryptionAlgo = encryptionAlgo;
-		this.keyLength = keyLength;
-		this.validationDate = validationDate;
+	protected SignatureAlgorithmReliableCheck(I18nProvider i18nProvider, SignatureAlgorithm signatureAlgorithm,
+											  XmlCC result, MessageTag position,
+											  CryptographicSuite cryptographicSuite) {
+		super(i18nProvider, result, position, ValidationProcessUtils.getLevelRule(cryptographicSuite.getAcceptableSignatureAlgorithmsLevel()));
+		this.signatureAlgorithm = signatureAlgorithm;
 		this.cryptographicSuite = cryptographicSuite;
 	}
 
 	@Override
 	protected boolean process() {
-		Date expirationDate = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, encryptionAlgo, keyLength);
-		return expirationDate == null || !expirationDate.before(validationDate);
-	}
-
-	@Override
-	protected Level getLevel() {
-		Date algoExpirationDate = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, encryptionAlgo, keyLength);
-		Date cryptographicSuiteUpdateDate = cryptographicSuite.getCryptographicSuiteUpdateDate();
-		if (algoExpirationDate != null && cryptographicSuiteUpdateDate != null && cryptographicSuiteUpdateDate.before(algoExpirationDate)) {
-			return cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel();
-		}
-		return super.getLevel();
+		return CryptographicSuiteUtils.isSignatureAlgorithmReliable(cryptographicSuite, signatureAlgorithm);
 	}
 	
 	@Override
 	protected XmlMessage buildConstraintMessage() {
-		return buildXmlMessage(MessageTag.ASCCM_AR, getName(encryptionAlgo));
+		return buildXmlMessage(MessageTag.ASCCM_CAA, getName(signatureAlgorithm));
 	}
 	
 	@Override
 	protected XmlMessage buildErrorMessage() {
-		return buildXmlMessage(MessageTag.ASCCM_AR_ANS_AKSNR, getName(encryptionAlgo), keyLength, position);
+		return buildXmlMessage(MessageTag.ASCCM_CAA_ANS, getName(signatureAlgorithm), position);
 	}
 
 }

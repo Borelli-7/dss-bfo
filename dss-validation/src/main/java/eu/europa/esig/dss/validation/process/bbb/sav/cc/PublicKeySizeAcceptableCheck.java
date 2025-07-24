@@ -22,7 +22,7 @@ package eu.europa.esig.dss.validation.process.bbb.sav.cc;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlMessage;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
@@ -35,7 +35,7 @@ import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
 public class PublicKeySizeAcceptableCheck extends AbstractCryptographicCheck {
 
 	/** The algorithm to check */
-	private final EncryptionAlgorithm encryptionAlgo;
+	private final SignatureAlgorithm signatureAlgorithm;
 
 	/** Used public key length */
 	private final String keyLength;
@@ -47,33 +47,33 @@ public class PublicKeySizeAcceptableCheck extends AbstractCryptographicCheck {
 	 * Default constructor
 	 *
 	 * @param i18nProvider {@link I18nProvider}
-	 * @param encryptionAlgo {@link EncryptionAlgorithm}
+	 * @param signatureAlgorithm {@link SignatureAlgorithm}
 	 * @param keyLength {@link String}
 	 * @param result {@link XmlCC}
 	 * @param position {@link MessageTag}
 	 * @param cryptographicSuite {@link CryptographicSuite}
 	 */
-	protected PublicKeySizeAcceptableCheck(I18nProvider i18nProvider, EncryptionAlgorithm encryptionAlgo, String keyLength,
+	protected PublicKeySizeAcceptableCheck(I18nProvider i18nProvider, SignatureAlgorithm signatureAlgorithm, String keyLength,
 			XmlCC result, MessageTag position, CryptographicSuite cryptographicSuite) {
-		super(i18nProvider, result, position, ValidationProcessUtils.getLevelRule(cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel()));
-		this.encryptionAlgo = encryptionAlgo;
+		super(i18nProvider, result, position, ValidationProcessUtils.getLevelRule(cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel()));
+		this.signatureAlgorithm = signatureAlgorithm;
 		this.keyLength = keyLength;
 		this.cryptographicSuite = cryptographicSuite;
 	}
 
 	@Override
 	protected boolean process() {
-		return CryptographicSuiteUtils.isEncryptionAlgorithmWithKeySizeReliable(cryptographicSuite, encryptionAlgo, keyLength);
+		return CryptographicSuiteUtils.isSignatureAlgorithmWithKeySizeReliable(cryptographicSuite, signatureAlgorithm, keyLength);
 	}
 	
 	@Override
 	protected XmlMessage buildConstraintMessage() {
-		return buildXmlMessage(MessageTag.ASCCM_APKSA, getName(encryptionAlgo), keyLength);
+		return buildXmlMessage(MessageTag.ASCCM_APKSA, getName(signatureAlgorithm), keyLength);
 	}
 	
 	@Override
 	protected XmlMessage buildErrorMessage() {
-		return buildXmlMessage(MessageTag.ASCCM_APKSA_ANS, getName(encryptionAlgo), keyLength, position);
+		return buildXmlMessage(MessageTag.ASCCM_APKSA_ANS, getName(signatureAlgorithm), keyLength, position);
 	}
 
 }

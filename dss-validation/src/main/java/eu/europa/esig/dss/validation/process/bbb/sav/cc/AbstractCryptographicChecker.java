@@ -22,15 +22,10 @@ package eu.europa.esig.dss.validation.process.bbb.sav.cc;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCryptographicAlgorithm;
-import eu.europa.esig.dss.enumerations.DigestAlgorithm;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
-import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
-import eu.europa.esig.dss.validation.policy.CryptographicSuiteUtils;
 import eu.europa.esig.dss.validation.process.Chain;
-import eu.europa.esig.dss.validation.process.ChainItem;
 
 import java.util.Date;
 
@@ -40,19 +35,10 @@ import java.util.Date;
 public abstract class AbstractCryptographicChecker extends Chain<XmlCC> {
 
 	/** The name string for a unidentified (unsupported) algorithm */
-	private static final String ALGORITHM_UNIDENTIFIED = "UNIDENTIFIED";
+	protected static final String ALGORITHM_UNIDENTIFIED = "UNIDENTIFIED";
 
 	/** The urn for a not identified (unsupported) algorithm */
-	private static final String ALGORITHM_UNIDENTIFIED_URN = "urn:etsi:019102:algorithm:unidentified";
-
-	/** The Encryption algorithm */
-	protected final EncryptionAlgorithm encryptionAlgorithm;
-
-	/** The Digest algorithm */
-	protected final DigestAlgorithm digestAlgorithm;
-
-	/** Used Key length */
-	protected final String keyLengthUsedToSignThisToken;
+	protected static final String ALGORITHM_UNIDENTIFIED_URN = "urn:etsi:019102:algorithm:unidentified";
 
 	/** The validation time */
 	protected final Date validationDate;
@@ -64,43 +50,20 @@ public abstract class AbstractCryptographicChecker extends Chain<XmlCC> {
 	protected final MessageTag position;
 
 	/** The verified cryptographic algorithm */
-	private XmlCryptographicAlgorithm cryptographicAlgorithm;
+	protected XmlCryptographicAlgorithm cryptographicAlgorithm;
 
 	/**
 	 * Default constructor
 	 *
 	 * @param i18nProvider {@link I18nProvider}
-	 * @param digestAlgorithm {@link DigestAlgorithm}
-	 * @param validationDate {@link Date}
-	 * @param position {@link MessageTag}
-	 * @param constraint {@link CryptographicSuite}
-	 */
-	protected AbstractCryptographicChecker(I18nProvider i18nProvider, DigestAlgorithm digestAlgorithm,
-										   Date validationDate, MessageTag position,
-										   CryptographicSuite constraint) {
-		this(i18nProvider, null, digestAlgorithm, null,
-				validationDate, position, constraint);
-	}
-
-	/**
-	 * Complete constructor
-	 *
-	 * @param i18nProvider {@link I18nProvider}
-	 * @param encryptionAlgorithm {@link EncryptionAlgorithm}
-	 * @param digestAlgorithm {@link DigestAlgorithm}
-	 * @param keyLengthUsedToSignThisToken {@link String}
 	 * @param validationDate {@link Date}
 	 * @param position {@link MessageTag}
 	 * @param cryptographicSuite {@link CryptographicSuite}
 	 */
-	protected AbstractCryptographicChecker(I18nProvider i18nProvider, EncryptionAlgorithm encryptionAlgorithm,
-										   DigestAlgorithm digestAlgorithm, String keyLengthUsedToSignThisToken,
-										   Date validationDate, MessageTag position, CryptographicSuite cryptographicSuite) {
+	protected AbstractCryptographicChecker(I18nProvider i18nProvider, Date validationDate, MessageTag position,
+										   CryptographicSuite cryptographicSuite) {
 		super(i18nProvider, new XmlCC());
-		
-		this.encryptionAlgorithm = encryptionAlgorithm;
-		this.digestAlgorithm = digestAlgorithm;
-		this.keyLengthUsedToSignThisToken = keyLengthUsedToSignThisToken;
+
 		this.validationDate = validationDate;
 		this.cryptographicSuite = cryptographicSuite;
 		this.position = position;
@@ -109,82 +72,6 @@ public abstract class AbstractCryptographicChecker extends Chain<XmlCC> {
 	@Override
 	protected MessageTag getTitle() {
 		return MessageTag.CC;
-	}
-
-	/**
-	 * Gets if the expiration date if defined for the given {@code digestAlgorithm}
-	 *
-	 * @param digestAlgorithm {@link DigestAlgorithm} to check expiration date for
-	 * @return TRUE if expiration constrains are defines, FALSE otherwise
-	 */
-	protected boolean isExpirationDateAvailable(DigestAlgorithm digestAlgorithm) {
-		return CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, digestAlgorithm) != null;
-	}
-
-	/**
-	 * Gets if the expiration date if defined for the given {@code encryptionAlgorithm} and {@code keyLength}
-	 *
-	 * @param encryptionAlgorithm {@link EncryptionAlgorithm} to check expiration date for
-	 * @param keyLength {@link String} used to sign the token
-	 * @return TRUE if expiration constrains are defines, FALSE otherwise
-	 */
-	protected boolean isExpirationDateAvailable(EncryptionAlgorithm encryptionAlgorithm, String keyLength) {
-		return CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, encryptionAlgorithm, keyLength) != null;
-	}
-
-	/**
-	 * Checks if the {@code encryptionAlgorithm} is acceptable
-	 *
-	 * @return TRUE if the {@code encryptionAlgorithm} is acceptable, FALSE otherwise
-	 */
-	protected ChainItem<XmlCC> encryptionAlgorithmReliable() {
-		return new EncryptionAlgorithmReliableCheck(i18nProvider, encryptionAlgorithm, result, position, cryptographicSuite);
-	}
-
-	/**
-	 * Checks if the {@code digestAlgorithm} is acceptable
-	 *
-	 * @return TRUE if the {@code digestAlgorithm} is acceptable, FALSE otherwise
-	 */
-	protected ChainItem<XmlCC> digestAlgorithmReliable() {
-		return new DigestAlgorithmReliableCheck(i18nProvider, digestAlgorithm, result, position, cryptographicSuite);
-	}
-
-	/**
-	 * Checks if the {@code encryptionAlgorithm} is not expired in validation time
-	 *
-	 * @return TRUE if the {@code encryptionAlgorithm} is not expired in validation time, FALSE otherwise
-	 */
-	protected ChainItem<XmlCC> encryptionAlgorithmOnValidationTime() {
-		return new EncryptionAlgorithmAtValidationTimeCheck(i18nProvider, encryptionAlgorithm, keyLengthUsedToSignThisToken, validationDate, result,
-				position, cryptographicSuite);
-	}
-
-	/**
-	 * Checks if the {@code digestAlgorithm} is not expired in validation time
-	 *
-	 * @return TRUE if the {@code digestAlgorithm} is not expired in validation time, FALSE otherwise
-	 */
-	protected ChainItem<XmlCC> digestAlgorithmOnValidationTime() {
-		return new DigestAlgorithmAtValidationTimeCheck(i18nProvider, digestAlgorithm, validationDate, result, position, cryptographicSuite);
-	}
-
-	/**
-	 * Checks if the {@code keyLengthUsedToSignThisToken} is known
-	 *
-	 * @return TRUE if the {@code keyLengthUsedToSignThisToken} is known, FALSE otherwise
-	 */
-	protected ChainItem<XmlCC> publicKeySizeKnown() {
-		return new PublicKeySizeKnownCheck(i18nProvider, keyLengthUsedToSignThisToken, result, position, cryptographicSuite);
-	}
-
-	/**
-	 * Checks if the {@code keyLengthUsedToSignThisToken} is acceptable
-	 *
-	 * @return TRUE if the {@code keyLengthUsedToSignThisToken} is acceptable, FALSE otherwise
-	 */
-	protected ChainItem<XmlCC> publicKeySizeAcceptable() {
-		return new PublicKeySizeAcceptableCheck(i18nProvider, encryptionAlgorithm, keyLengthUsedToSignThisToken, result, position, cryptographicSuite);
 	}
 
 	@Override
@@ -199,76 +86,13 @@ public abstract class AbstractCryptographicChecker extends Chain<XmlCC> {
 	 *
 	 * @return {@link XmlCryptographicAlgorithm}
 	 */
-	private XmlCryptographicAlgorithm getAlgorithm() {
-		if (cryptographicAlgorithm == null) {
-			cryptographicAlgorithm = new XmlCryptographicAlgorithm();
-			if (digestAlgorithm == null) {
-				// if DigestAlgorithm is not found (unable to build either SignatureAlgorithm nor DigestAlgorithm)
-				cryptographicAlgorithm.setName(ALGORITHM_UNIDENTIFIED);
-				cryptographicAlgorithm.setUri(ALGORITHM_UNIDENTIFIED_URN);
-
-			} else if (encryptionAlgorithm != null) {
-				// if EncryptionAlgorithm and DigestAlgorithm are defined
-				SignatureAlgorithm signatureAlgorithm = getSignatureAlgorithm(digestAlgorithm, encryptionAlgorithm);
-				cryptographicAlgorithm.setName(signatureAlgorithm.getName());
-				cryptographicAlgorithm.setUri(getSignatureAlgorithmUri(signatureAlgorithm));
-				cryptographicAlgorithm.setKeyLength(keyLengthUsedToSignThisToken);
-
-			} else {
-				// if only DigestAlgorithm is defined
-				cryptographicAlgorithm.setName(digestAlgorithm.getName());
-				cryptographicAlgorithm.setUri(getDigestAlgorithmUri(digestAlgorithm));
-			}
-		}
-		return cryptographicAlgorithm;
-	}
-
-	private SignatureAlgorithm getSignatureAlgorithm(DigestAlgorithm digestAlgorithm,
-											EncryptionAlgorithm encryptionAlgorithm) {
-		return SignatureAlgorithm.getAlgorithm(encryptionAlgorithm, digestAlgorithm);
-	}
-
-	private String getSignatureAlgorithmUri(SignatureAlgorithm signatureAlgorithm) {
-		if (signatureAlgorithm != null) {
-			if (signatureAlgorithm.getUri() != null) {
-				return signatureAlgorithm.getUri();
-			}
-			if (signatureAlgorithm.getOid() != null) {
-				return signatureAlgorithm.getURIBasedOnOID();
-			}
-		}
-		return ALGORITHM_UNIDENTIFIED_URN;
-	}
-
-	private String getDigestAlgorithmUri(DigestAlgorithm digestAlgorithm) {
-		if (digestAlgorithm != null) {
-			if (digestAlgorithm.getUri() != null) {
-				return digestAlgorithm.getUri();
-			}
-			if (digestAlgorithm.getOid() != null) {
-				return digestAlgorithm.getOid();
-			}
-		}
-		return ALGORITHM_UNIDENTIFIED_URN;
-	}
+	protected abstract XmlCryptographicAlgorithm getAlgorithm();
 
 	/**
 	 * Returns time after which the used cryptographic algorithm(s) is no longer considered secure
 	 *
 	 * @return {@link Date}
 	 */
-	protected Date getNotAfter() {
-		if (CryptographicSuiteUtils.isDigestAlgorithmReliable(cryptographicSuite, digestAlgorithm) &&
-				CryptographicSuiteUtils.isEncryptionAlgorithmReliable(cryptographicSuite, encryptionAlgorithm) &&
-				CryptographicSuiteUtils.isEncryptionAlgorithmWithKeySizeReliable(cryptographicSuite, encryptionAlgorithm, keyLengthUsedToSignThisToken)) {
-			Date notAfter = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, digestAlgorithm);
-			Date expirationEncryption = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, encryptionAlgorithm, keyLengthUsedToSignThisToken);
-			if (notAfter == null || (expirationEncryption != null && expirationEncryption.before(notAfter))) {
-				notAfter = expirationEncryption;
-			}
-			return notAfter;
-		}
-		return null;
-	}
+	protected abstract Date getNotAfter();
 
 }

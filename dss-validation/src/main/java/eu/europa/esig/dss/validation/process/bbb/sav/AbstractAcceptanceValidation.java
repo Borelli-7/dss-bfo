@@ -140,8 +140,9 @@ public abstract class AbstractAcceptanceValidation<T extends AbstractTokenProxy>
 		// The basic signature constraints validation
 		CryptographicSuite constraint = validationPolicy.getSignatureCryptographicConstraint(context);
 		MessageTag position = ValidationProcessUtils.getCryptoPosition(context);
-		
-		CryptographicChecker cc = new CryptographicChecker(i18nProvider, token, currentTime, position, constraint);
+
+		CryptographicChecker cc = new CryptographicChecker(i18nProvider,
+				token.getSignatureAlgorithm(), token.getKeyLengthUsedToSignThisToken(), currentTime, position, constraint);
 		XmlCC ccResult = cc.execute();
 
 		if (item == null) {

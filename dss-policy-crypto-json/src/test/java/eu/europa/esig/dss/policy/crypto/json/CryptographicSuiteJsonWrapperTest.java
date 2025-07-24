@@ -29,7 +29,7 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.Level;
 import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
-import eu.europa.esig.dss.model.policy.EncryptionAlgorithmWithMinKeySize;
+import eu.europa.esig.dss.model.policy.SignatureAlgorithmWithMinKeySize;
 import eu.europa.esig.json.JsonObjectWrapper;
 import org.junit.jupiter.api.Test;
 
@@ -269,7 +269,7 @@ class CryptographicSuiteJsonWrapperTest {
     }
 
     @Test
-    void getAcceptableEncryptionAlgorithmsEmptyList() {
+    void getAcceptableSignatureAlgorithmsEmptyList() {
         Map<JsonString, JsonValue> securitySuitabilityPolicyMap = new HashMap<>();
         securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Collections.emptyList()));
 
@@ -277,12 +277,12 @@ class CryptographicSuiteJsonWrapperTest {
                 new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap))
         );
 
-        List<EncryptionAlgorithm> algorithms = cryptographicSuite.getAcceptableEncryptionAlgorithms();
+        List<SignatureAlgorithm> algorithms = cryptographicSuite.getAcceptableSignatureAlgorithms();
         assertTrue(algorithms.isEmpty(), "Expected no encryption algorithms for empty list.");
     }
 
     @Test
-    void getAcceptableEncryptionAlgorithmsUnknownAlgorithmIgnored() {
+    void getAcceptableSignatureAlgorithmsUnknownAlgorithmIgnored() {
         List<JsonValue> algorithmsList = new ArrayList<>();
         HashMap<JsonString, JsonValue> algoMap = new HashMap<>();
         algoMap.put(new JsonString("Algorithm"), new JsonString("UNKNOWN_ALGO"));
@@ -297,12 +297,12 @@ class CryptographicSuiteJsonWrapperTest {
                 new JsonObjectWrapper(new JsonObject(policyMap))
         );
 
-        List<EncryptionAlgorithm> algorithms = cryptographicSuite.getAcceptableEncryptionAlgorithms();
+        List<SignatureAlgorithm> algorithms = cryptographicSuite.getAcceptableSignatureAlgorithms();
         assertTrue(algorithms.isEmpty(), "Unknown algorithm should be ignored or not parsed.");
     }
 
     @Test
-    void getAcceptableEncryptionAlgorithmsTest() {
+    void getAcceptableSignatureAlgorithmsTest() {
         Map<JsonString, JsonValue> securitySuitabilityPolicyMap = new HashMap<>();
 
         List<JsonValue> algorithmsList = new ArrayList<>();
@@ -343,17 +343,23 @@ class CryptographicSuiteJsonWrapperTest {
         JsonObject jsonObject = new JsonObject(securitySuitabilityPolicyMap);
 
         CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(jsonObject));
-        List<EncryptionAlgorithm> encryptionAlgorithms = cryptographicSuite.getAcceptableEncryptionAlgorithms();
 
-        Set<EncryptionAlgorithm> expectedSet = new HashSet<>(Arrays.asList(
-                EncryptionAlgorithm.DSA, EncryptionAlgorithm.RSA, EncryptionAlgorithm.RSASSA_PSS,
-                EncryptionAlgorithm.ECDSA));
+        Set<SignatureAlgorithm> expected = new HashSet<>(Arrays.asList(SignatureAlgorithm.ECDSA_SHA224,
+                SignatureAlgorithm.ECDSA_SHA256, SignatureAlgorithm.RSA_SHA224));
+        assertEquals(expected, new HashSet<>(cryptographicSuite.getAcceptableSignatureAlgorithms()));
 
-        assertEquals(expectedSet, new HashSet<>(encryptionAlgorithms));
+        // Add DigestAlgorithm definition
+        algorithmsList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA512, "2029-01-01"));
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(jsonObject));
+
+        expected = new HashSet<>(Arrays.asList(SignatureAlgorithm.ECDSA_SHA224, SignatureAlgorithm.ECDSA_SHA256,
+                SignatureAlgorithm.RSA_SHA224, SignatureAlgorithm.DSA_SHA512, SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1));
+        assertEquals(expected, new HashSet<>(cryptographicSuite.getAcceptableSignatureAlgorithms()));
     }
 
     @Test
-    void getAcceptableEncryptionAlgorithmsWithMinKeySizesDuplicatesHandledCorrectly() {
+    void getAcceptableSignatureAlgorithmsWithMinKeySizesDuplicatesHandledCorrectly() {
         List<JsonValue> algorithmsList = new ArrayList<>();
 
         // Duplicate entries for same algorithm
@@ -372,42 +378,61 @@ class CryptographicSuiteJsonWrapperTest {
                 new JsonObjectWrapper(new JsonObject(policyMap))
         );
 
-        List<EncryptionAlgorithmWithMinKeySize> actual = cryptographicSuite.getAcceptableEncryptionAlgorithmsWithMinKeySizes();
+        Set<SignatureAlgorithmWithMinKeySize> expected = Collections.emptySet();
+        assertEquals(expected, new HashSet<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes()));
 
-        Set<EncryptionAlgorithmWithMinKeySize> expected = new HashSet<>(Collections.singletonList(
-                new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.DSA, 1024)));
+        // Add DigestAlgorithm definition
+        algorithmsList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, "2029-01-01"));
+        algorithmsList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA512, "2029-01-01"));
 
-        assertEquals(expected, new HashSet<>(actual));
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(
+                new JsonObjectWrapper(new JsonObject(policyMap))
+        );
+
+        expected = new HashSet<>(Arrays.asList(
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA256, 1024),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA512, 1024)
+        ));
+        assertEquals(expected, new HashSet<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes()));
     }
 
     @Test
-    void getAcceptableEncryptionAlgorithmsWithMinKeySizesMissingParameter() {
+    void getAcceptableSignatureAlgorithmsWithMinKeySizesMissingParameter() {
+        List<JsonValue> algorithmsList = new ArrayList<>();
+        algorithmsList.add(new JsonString("DSA"));
+
+        JsonArray algorithmsArray = new JsonArray(algorithmsList);
+
+        algorithmsList.add(createEncryptionAlgorithmDefinition(EncryptionAlgorithm.DSA, Collections.emptyList()));
+
         HashMap<JsonString, JsonValue> paramMap = new HashMap<>();
         paramMap.put(new JsonString("Type"), new JsonString("pLength"));
         // Missing actual value
         JsonObject badParam = new JsonObject(paramMap);
 
         HashMap<JsonString, JsonValue> algoMap = new HashMap<>();
-        algoMap.put(new JsonString("Algorithm"), new JsonString("DSA"));
+        algoMap.put(new JsonString("Algorithm"), algorithmsArray);
 
         HashMap<JsonString, JsonValue> evaluationMap = new HashMap<>();
         evaluationMap.put(new JsonString("ExpirationDate"), new JsonString("2029-01-01"));
         evaluationMap.put(new JsonString("Parameters"), new JsonArray(Collections.singletonList(badParam)));
         algoMap.put(new JsonString("Evaluations"), new JsonArray(Collections.singletonList(new JsonObject(evaluationMap))));
 
-
         Map<JsonString, JsonValue> policyMap = new HashMap<>();
         policyMap.put(new JsonString("Algorithm"), new JsonArray(Collections.singletonList(new JsonObject(algoMap))));
+
+        // Add DigestAlgorithm definition
+        algorithmsList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, "2029-01-01"));
 
         CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(
                 new JsonObjectWrapper(new JsonObject(policyMap)));
 
-        List<EncryptionAlgorithmWithMinKeySize> result = cryptographicSuite.getAcceptableEncryptionAlgorithmsWithMinKeySizes();
+        List<SignatureAlgorithmWithMinKeySize> result = cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes();
         assertTrue(result.isEmpty(), "Malformed parameter should result in exclusion.");
     }
 
     @Test
-    void getAcceptableEncryptionAlgorithmsWithMinKeySizesTest() {
+    void getAcceptableSignatureAlgorithmsWithMinKeySizesTest() {
         Map<JsonString, JsonValue> securitySuitabilityPolicyMap = new HashMap<>();
 
         List<JsonValue> algorithmsList = new ArrayList<>();
@@ -448,19 +473,32 @@ class CryptographicSuiteJsonWrapperTest {
         JsonObject jsonObject = new JsonObject(securitySuitabilityPolicyMap);
 
         CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(jsonObject));
-        List<EncryptionAlgorithmWithMinKeySize> encryptionAlgorithms = cryptographicSuite.getAcceptableEncryptionAlgorithmsWithMinKeySizes();
 
-        Set<EncryptionAlgorithmWithMinKeySize> expectedSet = new HashSet<>(Arrays.asList(
-                new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.DSA, 1900),
-                new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1900),
-                new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSASSA_PSS, 1900),
-                new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 0)));
+        Set<SignatureAlgorithmWithMinKeySize> expected = new HashSet<>(Arrays.asList(
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 0),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 0),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1900)
+        ));
+        assertEquals(expected, new HashSet<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes()));
 
-        assertEquals(expectedSet, new HashSet<>(encryptionAlgorithms));
+        // Add DigestAlgorithm definition
+        algorithmsList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA512, "2029-01-01"));
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(jsonObject));
+
+        expected = new HashSet<>(Arrays.asList(
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA512, 1900),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 0),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 0),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1900),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, 1900)
+        ));
+
+        assertEquals(expected, new HashSet<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes()));
     }
 
     @Test
-    void getAcceptableEncryptionAlgorithmsWithExpirationDatesInvalidAndValidDateMixed() {
+    void getAcceptableSignatureAlgorithmsWithExpirationDatesInvalidAndValidDateMixed() {
         List<JsonValue> algorithmsList = new ArrayList<>();
 
         algorithmsList.add(createEncryptionAlgorithmDefinition(EncryptionAlgorithm.DSA, Arrays.asList(
@@ -476,7 +514,7 @@ class CryptographicSuiteJsonWrapperTest {
                 new JsonObjectWrapper(new JsonObject(policyMap))
         );
 
-        Map<EncryptionAlgorithmWithMinKeySize, Date> result = cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates();
+        Map<SignatureAlgorithmWithMinKeySize, Date> result = cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates();
 
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.clear();
@@ -486,7 +524,7 @@ class CryptographicSuiteJsonWrapperTest {
     }
 
     @Test
-    void getAcceptableEncryptionAlgorithmsWithExpirationDatesTest() {
+    void getAcceptableSignatureAlgorithmsWithExpirationDatesTest() {
         Map<JsonString, JsonValue> securitySuitabilityPolicyMap = new HashMap<>();
 
         List<JsonValue> algorithmsList = new ArrayList<>();
@@ -528,33 +566,48 @@ class CryptographicSuiteJsonWrapperTest {
 
         CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(jsonObject));
 
-        Map<EncryptionAlgorithmWithMinKeySize, Date> encryptionAlgorithmsWithExpirationDates = cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates();
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+        cal.clear();
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.clear();
+        Map<SignatureAlgorithmWithMinKeySize, Date> expected = new HashMap<>();
 
-        Map<EncryptionAlgorithmWithMinKeySize, Date> expectedMap = new HashMap<>();
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1900), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 3000), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 0), cal.getTime());
 
-        calendar.set(2029, Calendar.JANUARY, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.DSA, 1900), calendar.getTime());
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 0), null);
 
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.DSA, 3000), null);
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
 
-        calendar.set(2029, Calendar.JANUARY, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1900), calendar.getTime());
+        // Add DigestAlgorithm definition
+        algorithmsList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA512, "2029-01-01"));
 
-        calendar.set(2029, Calendar.JANUARY, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 3000), calendar.getTime());
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(jsonObject));
 
-        calendar.set(2029, Calendar.JANUARY, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSASSA_PSS, 1900), calendar.getTime());
+        expected = new HashMap<>();
 
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSASSA_PSS, 3000), calendar.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1900), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 3000), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 0), cal.getTime());
 
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 0), null);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 0), null);
 
-        assertEquals(expectedMap, new HashMap<>(encryptionAlgorithmsWithExpirationDates));
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA512, 1900), cal.getTime());
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA512, 3000), cal.getTime());
+
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, 1900), cal.getTime());
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, 3000), cal.getTime());
+
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
     }
 
     @Test
@@ -578,25 +631,24 @@ class CryptographicSuiteJsonWrapperTest {
                 )))
         ));
 
+        CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
         cal.clear();
-        Map<EncryptionAlgorithmWithMinKeySize, Date> expected = new HashMap<>();
+        Map<SignatureAlgorithmWithMinKeySize, Date> expected = new HashMap<>();
 
         cal.set(2010, Calendar.AUGUST, 1);
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 786), cal.getTime());
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 786), cal.getTime());
         cal.set(2019, Calendar.OCTOBER, 1);
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1024), cal.getTime());
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1024), cal.getTime());
         cal.set(2019, Calendar.OCTOBER, 1);
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1536), cal.getTime());
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1536), cal.getTime());
         cal.set(2029, Calendar.JANUARY, 1);
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1900), cal.getTime());
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1900), cal.getTime());
         cal.set(2029, Calendar.JANUARY, 1);
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 3000), cal.getTime());
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 3000), cal.getTime());
 
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 4096), null);
-
-        CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
-        assertEquals(expected, cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates());
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
 
         // Opposite order test
 
@@ -620,7 +672,229 @@ class CryptographicSuiteJsonWrapperTest {
         ));
 
         cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
-        assertEquals(expected, cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates());
+        assertEquals(expected, cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates());
+
+        // add Digest Algo test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.RSA_SHA224, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(1900, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.RSA, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2025-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH))),
+                        new EvaluationType(null, Arrays.asList(new ParameterType(4096, MODULES_LENGTH)))
+                )),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, null)
+        )));
+
+        expected = new HashMap<>();
+
+        cal.set(2010, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 786), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1024), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1536), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1900), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 3000), cal.getTime());
+
+        cal.set(2010, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 786), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 1024), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 1536), cal.getTime());
+        cal.set(2025, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 3000), cal.getTime());
+
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 4096), null);
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
+
+        // opposite test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, null),
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.RSA_SHA224, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(1900, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.RSA, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2025-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH))),
+                        new EvaluationType(null, Arrays.asList(new ParameterType(4096, MODULES_LENGTH)))
+                ))
+        )));
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
+
+        // DigestAlgo expiration after test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.RSA_SHA224, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(1900, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.RSA, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2025-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH))),
+                        new EvaluationType(null, Arrays.asList(new ParameterType(4096, MODULES_LENGTH)))
+                )),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, "2029-01-01+00:00")
+        )));
+
+        expected = new HashMap<>();
+
+        cal.set(2010, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 786), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1024), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1536), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1900), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 3000), cal.getTime());
+
+        cal.set(2010, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 786), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 1024), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 1536), cal.getTime());
+        cal.set(2025, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 3000), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 4096), cal.getTime());
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
+
+        // opposite test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, "2029-01-01+00:00"),
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.RSA_SHA224, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(1900, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.RSA, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2025-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH))),
+                        new EvaluationType(null, Arrays.asList(new ParameterType(4096, MODULES_LENGTH)))
+                ))
+        )));
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
+
+        // DigestAlgo expiration before
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.RSA_SHA224, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(1900, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.RSA, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2025-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH))),
+                        new EvaluationType(null, Arrays.asList(new ParameterType(4096, MODULES_LENGTH)))
+                )),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, "2019-01-01+00:00")
+        )));
+
+        expected = new HashMap<>();
+
+        cal.set(2010, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 786), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1024), cal.getTime());
+        cal.set(2019, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1536), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1900), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 3000), cal.getTime());
+
+        cal.set(2010, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 786), cal.getTime());
+        cal.set(2019, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 1024), cal.getTime());
+        cal.set(2019, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 1536), cal.getTime());
+        cal.set(2019, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 3000), cal.getTime());
+        cal.set(2019, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 4096), cal.getTime());
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
+
+        // opposite test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, "2019-01-01+00:00"),
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.RSA_SHA224, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(1900, MODULES_LENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.RSA, Arrays.asList(
+                        new EvaluationType("2010-08-01", Arrays.asList(new ParameterType(786, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1024, MODULES_LENGTH))),
+                        new EvaluationType("2019-10-01", Arrays.asList(new ParameterType(1536, MODULES_LENGTH))),
+                        new EvaluationType("2025-01-01", Arrays.asList(new ParameterType(3000, MODULES_LENGTH))),
+                        new EvaluationType(null, Arrays.asList(new ParameterType(4096, MODULES_LENGTH)))
+                ))
+        )));
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
     }
 
     @Test
@@ -646,7 +920,7 @@ class CryptographicSuiteJsonWrapperTest {
                         new EvaluationType("2012-08-01", Arrays.asList(
                                 new ParameterType(163, PLENGTH),
                                 new ParameterType(163, QLENGTH))),
-                        new EvaluationType("2021-01-01", Arrays.asList(
+                        new EvaluationType("2021-10-01", Arrays.asList(
                                 new ParameterType(256, PLENGTH),
                                 new ParameterType(256, QLENGTH))),
                         new EvaluationType(null, Arrays.asList(
@@ -657,21 +931,17 @@ class CryptographicSuiteJsonWrapperTest {
 
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
         cal.clear();
-        Map<EncryptionAlgorithmWithMinKeySize, Date> expected = new HashMap<>();
+        Map<SignatureAlgorithmWithMinKeySize, Date> expected = new HashMap<>();
 
         cal.set(2012, Calendar.AUGUST, 1);
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 160), cal.getTime());
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 160), cal.getTime());
         cal.set(2012, Calendar.AUGUST, 1);
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 163), cal.getTime());
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 163), cal.getTime());
         cal.set(2029, Calendar.JANUARY, 1);
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 224), cal.getTime());
-        cal.set(2029, Calendar.JANUARY, 1);
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 256), cal.getTime());
-
-        expected.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 384), null);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 224), cal.getTime());
 
         CryptographicSuiteJsonWrapper cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
-        assertEquals(expected, cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates());
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
 
         // Opposite order test
 
@@ -685,7 +955,7 @@ class CryptographicSuiteJsonWrapperTest {
                         new EvaluationType("2012-08-01", Arrays.asList(
                                 new ParameterType(163, PLENGTH),
                                 new ParameterType(163, QLENGTH))),
-                        new EvaluationType("2021-01-01", Arrays.asList(
+                        new EvaluationType("2021-10-01", Arrays.asList(
                                 new ParameterType(256, PLENGTH),
                                 new ParameterType(256, QLENGTH))),
                         new EvaluationType(null, Arrays.asList(
@@ -706,7 +976,143 @@ class CryptographicSuiteJsonWrapperTest {
         ));
 
         cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
-        assertEquals(expected, cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates());
+        assertEquals(expected, cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates());
+
+        // add DigestAlgo
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.ECDSA_SHA224, Arrays.asList(
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(160, PLENGTH),
+                                new ParameterType(160, QLENGTH))),
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(163, PLENGTH),
+                                new ParameterType(163, QLENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(
+                                new ParameterType(224, PLENGTH),
+                                new ParameterType(224, QLENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.ECDSA, Arrays.asList(
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(160, PLENGTH),
+                                new ParameterType(160, QLENGTH))),
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(163, PLENGTH),
+                                new ParameterType(163, QLENGTH))),
+                        new EvaluationType("2021-10-01", Arrays.asList(
+                                new ParameterType(256, PLENGTH),
+                                new ParameterType(256, QLENGTH))),
+                        new EvaluationType(null, Arrays.asList(
+                                new ParameterType(384, PLENGTH),
+                                new ParameterType(384, QLENGTH)))
+                )),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, null)
+        )));
+
+        expected = new HashMap<>();
+
+        cal.set(2012, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 160), cal.getTime());
+        cal.set(2012, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 163), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 224), cal.getTime());
+
+        cal.set(2012, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 160), cal.getTime());
+        cal.set(2012, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 163), cal.getTime());
+        cal.set(2021, Calendar.OCTOBER, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 256), cal.getTime());
+
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 384), null);
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
+
+        // opposite test
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, null),
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.ECDSA_SHA224, Arrays.asList(
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(160, PLENGTH),
+                                new ParameterType(160, QLENGTH))),
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(163, PLENGTH),
+                                new ParameterType(163, QLENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(
+                                new ParameterType(224, PLENGTH),
+                                new ParameterType(224, QLENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.ECDSA, Arrays.asList(
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(160, PLENGTH),
+                                new ParameterType(160, QLENGTH))),
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(163, PLENGTH),
+                                new ParameterType(163, QLENGTH))),
+                        new EvaluationType("2021-10-01", Arrays.asList(
+                                new ParameterType(256, PLENGTH),
+                                new ParameterType(256, QLENGTH))),
+                        new EvaluationType(null, Arrays.asList(
+                                new ParameterType(384, PLENGTH),
+                                new ParameterType(384, QLENGTH)))
+                ))
+        )));
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
+
+        // same DigestAlgo
+
+        securitySuitabilityPolicyMap = new HashMap<>();
+
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Arrays.asList(
+                createSignatureAlgorithmDefinition(SignatureAlgorithm.ECDSA_SHA224, Arrays.asList(
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(160, PLENGTH),
+                                new ParameterType(160, QLENGTH))),
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(163, PLENGTH),
+                                new ParameterType(163, QLENGTH))),
+                        new EvaluationType("2029-01-01", Arrays.asList(
+                                new ParameterType(224, PLENGTH),
+                                new ParameterType(224, QLENGTH)))
+                )),
+                createEncryptionAlgorithmDefinition(EncryptionAlgorithm.ECDSA, Arrays.asList(
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(160, PLENGTH),
+                                new ParameterType(160, QLENGTH))),
+                        new EvaluationType("2012-08-01", Arrays.asList(
+                                new ParameterType(163, PLENGTH),
+                                new ParameterType(163, QLENGTH))),
+                        new EvaluationType("2021-10-01", Arrays.asList(
+                                new ParameterType(256, PLENGTH),
+                                new ParameterType(256, QLENGTH))),
+                        new EvaluationType(null, Arrays.asList(
+                                new ParameterType(384, PLENGTH),
+                                new ParameterType(384, QLENGTH)))
+                )),
+                createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, null)
+        )));
+
+        expected = new HashMap<>();
+
+        // SignatureAlgorithm takes precedence
+        cal.set(2012, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 160), cal.getTime());
+        cal.set(2012, Calendar.AUGUST, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 163), cal.getTime());
+        cal.set(2029, Calendar.JANUARY, 1);
+        expected.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 224), cal.getTime());
+
+        cryptographicSuite = new CryptographicSuiteJsonWrapper(new JsonObjectWrapper(new JsonObject(securitySuitabilityPolicyMap)));
+        assertEquals(expected, new HashMap<>(cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates()));
     }
 
     @Test
@@ -840,56 +1246,56 @@ class CryptographicSuiteJsonWrapperTest {
         assertEquals(Level.FAIL, cryptographicSuite.getLevel()); // default
         // inherited from default
         assertEquals(Level.FAIL, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel()); // default
 
         cryptographicSuite.setLevel(Level.IGNORE);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
         cryptographicSuite.setAlgorithmsExpirationTimeAfterPolicyUpdateLevel(Level.INFORM);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
         cryptographicSuite.setAcceptableDigestAlgorithmsLevel(Level.INFORM);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
-        cryptographicSuite.setAcceptableEncryptionAlgorithmsLevel(Level.INFORM);
+        cryptographicSuite.setAcceptableSignatureAlgorithmsLevel(Level.INFORM);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
-        cryptographicSuite.setAcceptableEncryptionAlgorithmsMiniKeySizeLevel(Level.INFORM);
+        cryptographicSuite.setAcceptableSignatureAlgorithmsMiniKeySizeLevel(Level.INFORM);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
         cryptographicSuite.setAlgorithmsExpirationDateLevel(Level.INFORM);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
     }

@@ -23,8 +23,10 @@ package eu.europa.esig.dss.policy;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.EncryptionAlgorithmWithMinKeySize;
+import eu.europa.esig.dss.model.policy.SignatureAlgorithmWithMinKeySize;
 import eu.europa.esig.dss.policy.jaxb.Algo;
 import eu.europa.esig.dss.policy.jaxb.AlgoExpirationDate;
 import eu.europa.esig.dss.policy.jaxb.CryptographicConstraint;
@@ -37,9 +39,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 /**
@@ -60,17 +64,17 @@ public class CryptographicConstraintWrapper extends LevelConstraintWrapper imple
     /** Cached list of acceptable digest algorithms */
     private List<DigestAlgorithm> acceptableDigestAlgorithms;
 
-    /** Cached list of acceptable encryption algorithms */
-    private List<EncryptionAlgorithm> acceptableEncryptionAlgorithms;
-
-    /** Cached list of acceptable encryption algorithms with corresponding minimum key sizes */
-    private List<EncryptionAlgorithmWithMinKeySize> acceptableEncryptionAlgorithmsWithMinKeySizes;
-
     /** Cached list of acceptable digest algorithms with their expiration dates */
     private Map<DigestAlgorithm, Date> acceptableDigestAlgorithmsWithExpirationDates;
 
-    /** Cached list of acceptable encryption algorithms with their expiration dates */
-    private Map<EncryptionAlgorithmWithMinKeySize, Date> acceptableEncryptionAlgorithmsWithExpirationDates;
+    /** Cached list of acceptable signature algorithms */
+    private List<SignatureAlgorithm> acceptableSignatureAlgorithms;
+
+    /** Cached list of acceptable signature algorithms with corresponding minimum key sizes */
+    private List<SignatureAlgorithmWithMinKeySize> acceptableSignatureAlgorithmsWithMinKeySizes;
+
+    /** Cached list of acceptable signature algorithms with their expiration dates */
+    private Map<SignatureAlgorithmWithMinKeySize, Date> acceptableSignatureAlgorithmsWithExpirationDates;
 
     /**
      * Constructor to create an empty instance of Cryptographic constraints
@@ -113,17 +117,38 @@ public class CryptographicConstraintWrapper extends LevelConstraintWrapper imple
     }
 
     @Override
-    public List<EncryptionAlgorithm> getAcceptableEncryptionAlgorithms() {
-        if (acceptableEncryptionAlgorithms == null) {
-            acceptableEncryptionAlgorithms = new ArrayList<>();
-            if (constraint != null) {
-                ListAlgo acceptableEncryptionAlgos = ((CryptographicConstraint) constraint).getAcceptableEncryptionAlgo();
-                if (acceptableEncryptionAlgos != null) {
-                    for (Algo algo : acceptableEncryptionAlgos.getAlgos()) {
-                        EncryptionAlgorithm encryptionAlgorithm = toEncryptionAlgorithm(algo.getValue());
-                        if (encryptionAlgorithm != null) {
-                            acceptableEncryptionAlgorithms.add(encryptionAlgorithm);
-                        }
+    public List<SignatureAlgorithm> getAcceptableSignatureAlgorithms() {
+        if (acceptableSignatureAlgorithms == null) {
+            acceptableSignatureAlgorithms = new ArrayList<>();
+
+            List<DigestAlgorithm> digestAlgorithms = getAcceptableDigestAlgorithms();
+            List<EncryptionAlgorithm> encryptionAlgorithms = getAcceptableEncryptionAlgorithms();
+            for (EncryptionAlgorithm encryptionAlgorithm : encryptionAlgorithms) {
+                for (DigestAlgorithm digestAlgorithm : digestAlgorithms) {
+                    SignatureAlgorithm signatureAlgorithm = findSignatureAlgorithm(encryptionAlgorithm, digestAlgorithm);
+                    if (signatureAlgorithm != null) {
+                        acceptableSignatureAlgorithms.add(signatureAlgorithm);
+                    }
+                }
+            }
+        }
+        return acceptableSignatureAlgorithms;
+    }
+
+    /**
+     * Gets a list of Encryption algorithms accepted by the current policy
+     *
+     * @return a list of {@link EncryptionAlgorithm}
+     */
+    protected List<EncryptionAlgorithm> getAcceptableEncryptionAlgorithms() {
+        List<EncryptionAlgorithm> acceptableEncryptionAlgorithms = new ArrayList<>();
+        if (constraint != null) {
+            ListAlgo acceptableEncryptionAlgos = ((CryptographicConstraint) constraint).getAcceptableEncryptionAlgo();
+            if (acceptableEncryptionAlgos != null) {
+                for (Algo algo : acceptableEncryptionAlgos.getAlgos()) {
+                    EncryptionAlgorithm encryptionAlgorithm = toEncryptionAlgorithm(algo.getValue());
+                    if (encryptionAlgorithm != null) {
+                        acceptableEncryptionAlgorithms.add(encryptionAlgorithm);
                     }
                 }
             }
@@ -132,17 +157,39 @@ public class CryptographicConstraintWrapper extends LevelConstraintWrapper imple
     }
 
     @Override
-    public List<EncryptionAlgorithmWithMinKeySize> getAcceptableEncryptionAlgorithmsWithMinKeySizes() {
-        if (acceptableEncryptionAlgorithmsWithMinKeySizes == null) {
-            acceptableEncryptionAlgorithmsWithMinKeySizes = new ArrayList<>();
-            if (constraint != null) {
-                ListAlgo miniPublicKeySizes = ((CryptographicConstraint) constraint).getMiniPublicKeySize();
-                if (miniPublicKeySizes != null) {
-                    for (Algo algo : miniPublicKeySizes.getAlgos()) {
-                        EncryptionAlgorithm encryptionAlgorithm = toEncryptionAlgorithm(algo.getValue());
-                        if (encryptionAlgorithm != null) {
-                            acceptableEncryptionAlgorithmsWithMinKeySizes.add(new EncryptionAlgorithmWithMinKeySize(encryptionAlgorithm, algo.getSize()));
-                        }
+    public List<SignatureAlgorithmWithMinKeySize> getAcceptableSignatureAlgorithmsWithMinKeySizes() {
+        if (acceptableSignatureAlgorithmsWithMinKeySizes == null) {
+            acceptableSignatureAlgorithmsWithMinKeySizes = new ArrayList<>();
+
+            List<DigestAlgorithm> digestAlgorithms = getAcceptableDigestAlgorithms();
+            List<EncryptionAlgorithmWithMinKeySize> encryptionAlgorithmsWithMinKeySizes = getAcceptableEncryptionAlgorithmsWithMinKeySizes();
+            for (EncryptionAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize : encryptionAlgorithmsWithMinKeySizes) {
+                EncryptionAlgorithm encryptionAlgorithm = encryptionAlgorithmWithMinKeySize.getEncryptionAlgorithm();
+                for (DigestAlgorithm digestAlgorithm : digestAlgorithms) {
+                    SignatureAlgorithm signatureAlgorithm = findSignatureAlgorithm(encryptionAlgorithm, digestAlgorithm);
+                    if (signatureAlgorithm != null) {
+                        acceptableSignatureAlgorithmsWithMinKeySizes.add(new SignatureAlgorithmWithMinKeySize(signatureAlgorithm, encryptionAlgorithmWithMinKeySize.getMinKeySize()));
+                    }
+                }
+            }
+        }
+        return acceptableSignatureAlgorithmsWithMinKeySizes;
+    }
+
+    /**
+     * Gets a list of acceptable encryption algorithms with the corresponding minimum key sizes
+     *
+     * @return a list of {@link EncryptionAlgorithmWithMinKeySize}
+     */
+    protected List<EncryptionAlgorithmWithMinKeySize> getAcceptableEncryptionAlgorithmsWithMinKeySizes() {
+        List<EncryptionAlgorithmWithMinKeySize> acceptableEncryptionAlgorithmsWithMinKeySizes = new ArrayList<>();
+        if (constraint != null) {
+            ListAlgo miniPublicKeySizes = ((CryptographicConstraint) constraint).getMiniPublicKeySize();
+            if (miniPublicKeySizes != null) {
+                for (Algo algo : miniPublicKeySizes.getAlgos()) {
+                    EncryptionAlgorithm encryptionAlgorithm = toEncryptionAlgorithm(algo.getValue());
+                    if (encryptionAlgorithm != null) {
+                        acceptableEncryptionAlgorithmsWithMinKeySizes.add(new EncryptionAlgorithmWithMinKeySize(encryptionAlgorithm, algo.getSize()));
                     }
                 }
             }
@@ -163,6 +210,16 @@ public class CryptographicConstraintWrapper extends LevelConstraintWrapper imple
                         if (digestAlgorithm != null) {
                             Date expirationDate = getDate(algo, dateFormat);
                             acceptableDigestAlgorithmsWithExpirationDates.put(digestAlgorithm, expirationDate);
+                        }
+                    }
+                }
+                // For all accepted Digest Algos without expiration dates
+                ListAlgo acceptableDigestAlgo = ((CryptographicConstraint) constraint).getAcceptableDigestAlgo();
+                if (acceptableDigestAlgo != null) {
+                    for (Algo algo: acceptableDigestAlgo.getAlgos()) {
+                        final DigestAlgorithm digestAlgorithm = toDigestAlgorithm(algo.getValue());
+                        if (digestAlgorithm != null && !acceptableDigestAlgorithmsWithExpirationDates.containsKey(digestAlgorithm)) {
+                            acceptableDigestAlgorithmsWithExpirationDates.put(digestAlgorithm, null);
                         }
                     }
                 }
@@ -205,18 +262,79 @@ public class CryptographicConstraintWrapper extends LevelConstraintWrapper imple
     }
 
     @Override
-    public Map<EncryptionAlgorithmWithMinKeySize, Date> getAcceptableEncryptionAlgorithmsWithExpirationDates() {
-        if (acceptableEncryptionAlgorithmsWithExpirationDates == null) {
-            acceptableEncryptionAlgorithmsWithExpirationDates = new LinkedHashMap<>();
-            if (constraint != null) {
-                AlgoExpirationDate algoExpirationDates = ((CryptographicConstraint) constraint).getAlgoExpirationDate();
-                if (algoExpirationDates != null) {
-                    SimpleDateFormat dateFormat = getUsedDateFormat(algoExpirationDates);
-                    for (Algo algo: algoExpirationDates.getAlgos()) {
+    public Map<SignatureAlgorithmWithMinKeySize, Date> getAcceptableSignatureAlgorithmsWithExpirationDates() {
+        if (acceptableSignatureAlgorithmsWithExpirationDates == null) {
+            acceptableSignatureAlgorithmsWithExpirationDates = new LinkedHashMap<>();
+
+            Map<DigestAlgorithm, Date> digestAlgorithmsWithExpirationDates = getAcceptableDigestAlgorithmsWithExpirationDates();
+            Map<EncryptionAlgorithmWithMinKeySize, Date> encryptionAlgorithmsExpirationMap = getAcceptableEncryptionAlgorithmsWithExpirationDates();
+            for (Map.Entry<EncryptionAlgorithmWithMinKeySize, Date> entry : encryptionAlgorithmsExpirationMap.entrySet()) {
+                EncryptionAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize = entry.getKey();
+                EncryptionAlgorithm encryptionAlgorithm = encryptionAlgorithmWithMinKeySize.getEncryptionAlgorithm();
+                for (Map.Entry<DigestAlgorithm, Date> digestAlgorithmWithExpirationDate : digestAlgorithmsWithExpirationDates.entrySet()) {
+                    SignatureAlgorithm signatureAlgorithm = findSignatureAlgorithm(encryptionAlgorithm, digestAlgorithmWithExpirationDate.getKey());
+                    if (signatureAlgorithm != null) {
+                        // take the earliest expiration time
+                        Date expirationDate = digestAlgorithmWithExpirationDate.getValue();
+                        Date encryptionAlgoExpiration = entry.getValue();
+                        if (expirationDate == null || (encryptionAlgoExpiration != null && encryptionAlgoExpiration.before(expirationDate))) {
+                            expirationDate = encryptionAlgoExpiration;
+                        }
+                        acceptableSignatureAlgorithmsWithExpirationDates.put(
+                                new SignatureAlgorithmWithMinKeySize(signatureAlgorithm, encryptionAlgorithmWithMinKeySize.getMinKeySize()), expirationDate);
+                    }
+                }
+            }
+        }
+        return acceptableSignatureAlgorithmsWithExpirationDates;
+    }
+
+    private SignatureAlgorithm findSignatureAlgorithm(EncryptionAlgorithm encryptionAlgorithm, DigestAlgorithm digestAlgorithm) {
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.getAlgorithm(encryptionAlgorithm, digestAlgorithm);
+        if (signatureAlgorithm == null) {
+            LOG.trace("Cannot find a SignatureAlgorithm for combination of {} with {}.", encryptionAlgorithm.getName(), digestAlgorithm.getName());
+        }
+        return signatureAlgorithm;
+    }
+
+    /**
+     * Gets a map between {@code EncryptionAlgorithmWithMinKeySize} and their corresponding expiration dates
+     *
+     * @return a map between {@code EncryptionAlgorithmWithMinKeySize} and {@code Date}
+     */
+    protected Map<EncryptionAlgorithmWithMinKeySize, Date> getAcceptableEncryptionAlgorithmsWithExpirationDates() {
+        Set<EncryptionAlgorithm> addedEncryptionAlgos = new HashSet<>();
+        Map<EncryptionAlgorithmWithMinKeySize, Date> acceptableEncryptionAlgorithmsWithExpirationDates = new LinkedHashMap<>();
+        if (constraint != null) {
+            AlgoExpirationDate algoExpirationDates = ((CryptographicConstraint) constraint).getAlgoExpirationDate();
+            if (algoExpirationDates != null) {
+                SimpleDateFormat dateFormat = getUsedDateFormat(algoExpirationDates);
+                for (Algo algo: algoExpirationDates.getAlgos()) {
+                    final EncryptionAlgorithm encryptionAlgorithm = toEncryptionAlgorithm(algo.getValue());
+                    if (encryptionAlgorithm != null) {
+                        Date expirationDate = getDate(algo, dateFormat);
+                        acceptableEncryptionAlgorithmsWithExpirationDates.put(new EncryptionAlgorithmWithMinKeySize(encryptionAlgorithm, algo.getSize()), expirationDate);
+                        addedEncryptionAlgos.add(encryptionAlgorithm);
+                    }
+                }
+                // For all accepted Encryption Algos without expiration dates
+                ListAlgo miniPublicKeySize = ((CryptographicConstraint) constraint).getMiniPublicKeySize();
+                if (miniPublicKeySize != null) {
+                    for (Algo algo: miniPublicKeySize.getAlgos()) {
                         final EncryptionAlgorithm encryptionAlgorithm = toEncryptionAlgorithm(algo.getValue());
-                        if (encryptionAlgorithm != null) {
-                            Date expirationDate = getDate(algo, dateFormat);
-                            acceptableEncryptionAlgorithmsWithExpirationDates.put(new EncryptionAlgorithmWithMinKeySize(encryptionAlgorithm, algo.getSize()), expirationDate);
+                        if (encryptionAlgorithm != null && !addedEncryptionAlgos.contains(encryptionAlgorithm)) {
+                            acceptableEncryptionAlgorithmsWithExpirationDates.put(new EncryptionAlgorithmWithMinKeySize(encryptionAlgorithm, algo.getSize()), null);
+                            addedEncryptionAlgos.add(encryptionAlgorithm);
+                        }
+                    }
+                }
+                ListAlgo acceptableEncryptionAlgos = ((CryptographicConstraint) constraint).getAcceptableEncryptionAlgo();
+                if (acceptableEncryptionAlgos != null) {
+                    for (Algo algo: acceptableEncryptionAlgos.getAlgos()) {
+                        final EncryptionAlgorithm encryptionAlgorithm = toEncryptionAlgorithm(algo.getValue());
+                        if (encryptionAlgorithm != null && !addedEncryptionAlgos.contains(encryptionAlgorithm)) {
+                            acceptableEncryptionAlgorithmsWithExpirationDates.put(new EncryptionAlgorithmWithMinKeySize(encryptionAlgorithm, 0), null);
+                            addedEncryptionAlgos.add(encryptionAlgorithm);
                         }
                     }
                 }
@@ -242,7 +360,7 @@ public class CryptographicConstraintWrapper extends LevelConstraintWrapper imple
     }
 
     @Override
-    public Level getAcceptableEncryptionAlgorithmsLevel() {
+    public Level getAcceptableSignatureAlgorithmsLevel() {
         if (constraint != null) {
             return getCryptographicLevel(((CryptographicConstraint) constraint).getAcceptableEncryptionAlgo());
         }
@@ -250,7 +368,7 @@ public class CryptographicConstraintWrapper extends LevelConstraintWrapper imple
     }
 
     @Override
-    public void setAcceptableEncryptionAlgorithmsLevel(Level acceptableEncryptionAlgorithmsLevel) {
+    public void setAcceptableSignatureAlgorithmsLevel(Level acceptableEncryptionAlgorithmsLevel) {
         if (constraint != null) {
             ListAlgo acceptableEncryptionAlgo = ((CryptographicConstraint) constraint).getAcceptableEncryptionAlgo();
             if (acceptableEncryptionAlgo != null) {
@@ -260,7 +378,7 @@ public class CryptographicConstraintWrapper extends LevelConstraintWrapper imple
     }
 
     @Override
-    public Level getAcceptableEncryptionAlgorithmsMiniKeySizeLevel() {
+    public Level getAcceptableSignatureAlgorithmsMiniKeySizeLevel() {
         if (constraint != null) {
             return getCryptographicLevel(((CryptographicConstraint) constraint).getMiniPublicKeySize());
         }
@@ -268,7 +386,7 @@ public class CryptographicConstraintWrapper extends LevelConstraintWrapper imple
     }
 
     @Override
-    public void setAcceptableEncryptionAlgorithmsMiniKeySizeLevel(Level acceptableEncryptionAlgorithmsMiniKeySizeLevel) {
+    public void setAcceptableSignatureAlgorithmsMiniKeySizeLevel(Level acceptableEncryptionAlgorithmsMiniKeySizeLevel) {
         if (constraint != null) {
             ListAlgo miniPublicKeySize = ((CryptographicConstraint) constraint).getMiniPublicKeySize();
             if (miniPublicKeySize != null) {

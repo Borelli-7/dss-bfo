@@ -299,7 +299,7 @@ include::{samplesdir}/constraint.xml[]
 [[CryptographicSuite]]
 ==== Cryptographic Suite
 
-Since the version `6.3`, DSS implements a support of the ETSI TS 119 322 (cf. <<R21>>), providing a specification for machine-readable cryptographic suites catalogues, in both XML and JSON formats. The cryptographic suite allows definition of supported cryptographic algorithms by the current application, as well definition of supported parameters (such as minimum key sizes for encryption algorithms) and expiration times of the algorithms.
+Since the version `6.3`, DSS implements a support of the ETSI TS 119 322 (cf. <<R21>>), providing a specification for machine-readable cryptographic suites catalogues, available in both XML and JSON formats. The cryptographic suite allows definition of supported cryptographic algorithms by the current application, as well definition of supported parameters (such as minimum key sizes for encryption algorithms) and expiration times of the algorithms.
 
 DSS supplies the following modules providing an implementation for the cryptographic suite, namely:
 
@@ -337,15 +337,35 @@ When loaded from a file explicitly in the `DocumentValidator`, the cryptographic
 
 WARNING: The 4.2.9.2 "Algorithm-usage" element as defined in ETSI TS 119 322 (cf. <<R21>>) currently is not supported. For the applicability rules of the cryptographic suite based on the validation context, please refer to the information above.
 
-In DSS version `6.3` or earlier, signature algorithm validation is not performed holistically. Instead, DSS validates the digest algorithm and the encryption algorithm with the given key size independently. Because of this, when processing a cryptographic suite file, the following rules apply:
+The validation of cryptographic algorithms is performed according to the section "6. Processing" of the RFC 5698 "Data Structure for the Security Suitability of Cryptographic Algorithms (DSSC)". The full validation algorithm is described below.
 
- * *Digest Algorithms*: Only constraints that explicitly reference the digest algorithm are considered and extracted.
- * *Encryption Algorithms*: Both, constraints explicitly referencing the encryption algorithm, and signature algorithm constraints that embed the encryption algorithm in question
-are extracted. If multiple expiration dates are defined across these constraints, the latest expiration date is used during validation.
+Starting from DSS version 6.4, the following processing algorithm is applied when validating cryptographic algorithms against a defined cryptographic suite:
 
-The validation of cryptographic algorithms is performed according to the section "6. Processing" of the RFC 5698 "Data Structure for the Security Suitability of Cryptographic Algorithms (DSSC)".
+. All constraint entries in the cryptographic suite that match the cryptographic algorithm under validation (either by OID or URI) are extracted for further processing. If the obtained list is not empty, continue to the next step.
+If no matching entries are found and the algorithm under validation is a signature algorithm, continue to step 5.
+If none of the following applies, validation terminates with a failed status.
 
-WARNING: Please note that the `Start` time and `Max` elements are not supported by the implementation. Please use the `End` time and `Min` elements for the constraints definition.
+. All `Evaluation` entries from the extracted constraints are collected.
+If the algorithm under validation is a digest algorithm, proceed to step 4.
+Otherwise, proceed to the next step.
+
+. If the cryptographic algorithm does not impose any parameters (e.g. SHA-1, SHA-256, etc. digest algorithms), continue to the next step.
+If the cryptographic algorithm imposes verification of any parameters (such as key length, etc.), then from the collected `Evaluation` entries, retain only those containing a `Parameter` element with values matching the corresponding values of the cryptographic algorithm under validation. If no such entries remain, validation returns a failed status.
+Otherwise, continue to the next step.
+
+. The process verifies whether at least one of the filtered `Evaluation` entries either lacks an `End` element or has an `End` element (from its internal `Validity` element) with its datetime value after than the control time.
+If such an entry exists, validation returns a successful status.
+Otherwise, validation returns a failed status.
+
+. For the digest algorithm used within the signature algorithm under validation, the processing algorithm is run from step 1.
+If that validation returns a successful status, proceed to the next step.
+Otherwise, validation returns a failed status.
+
+. For the encryption algorithm used within the signature algorithm under validation, the process algorithm is run from step 1.
+If that validation returns a successful status, the overall validation concludes with a successful status.
+Otherwise, validation returns a failed status.
+
+WARNING: The `Start` and `Max` elements are not supported by the implementation. Please use the `End` and `Min` elements for the constraints definition.
 
 [[ValidationPolicyLoader]]
 ==== Validation Policy Loader

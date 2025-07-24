@@ -663,9 +663,21 @@ public class ValidationPolicyLoader {
          *
          * @param level {@link Level}
          * @return this
+         * @deprecated since DSS 6.4. Please use {@code #andAcceptableSignatureAlgorithmsLevel} method instead.
          */
+        @Deprecated
         public ValidationPolicyLoaderWithCryptoSuite andAcceptableEncryptionAlgorithmsLevel(Level level) {
-            cryptographicSuite.setAcceptableEncryptionAlgorithmsLevel(level);
+            return andAcceptableSignatureAlgorithmsLevel(level);
+        }
+
+        /**
+         * Sets the execution level for acceptable signature algorithms check of the last provided cryptographic suite
+         *
+         * @param level {@link Level}
+         * @return this
+         */
+        public ValidationPolicyLoaderWithCryptoSuite andAcceptableSignatureAlgorithmsLevel(Level level) {
+            cryptographicSuite.setAcceptableSignatureAlgorithmsLevel(level);
             return this;
         }
 
@@ -675,9 +687,22 @@ public class ValidationPolicyLoader {
          *
          * @param level {@link Level}
          * @return this
+         * @deprecated since DSS 6.4. Please use {@code #andAcceptableSignatureAlgorithmsMiniKeySizeLevel} method instead.
          */
+        @Deprecated
         public ValidationPolicyLoaderWithCryptoSuite andAcceptableEncryptionAlgorithmsMiniKeySizeLevel(Level level) {
-            cryptographicSuite.setAcceptableEncryptionAlgorithmsMiniKeySizeLevel(level);
+            return andAcceptableSignatureAlgorithmsMiniKeySizeLevel(level);
+        }
+
+        /**
+         * Sets the execution level for acceptable minimum key sizes of encryption algorithms check of
+         * the last provided cryptographic suite
+         *
+         * @param level {@link Level}
+         * @return this
+         */
+        public ValidationPolicyLoaderWithCryptoSuite andAcceptableSignatureAlgorithmsMiniKeySizeLevel(Level level) {
+            cryptographicSuite.setAcceptableSignatureAlgorithmsMiniKeySizeLevel(level);
             return this;
         }
 

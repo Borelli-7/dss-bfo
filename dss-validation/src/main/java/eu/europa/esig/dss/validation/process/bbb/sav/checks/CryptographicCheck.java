@@ -71,7 +71,8 @@ public class CryptographicCheck<T extends XmlConstraintsConclusion> extends Cryp
 	
 	private static XmlCC execute(I18nProvider i18nProvider, TokenProxy token, Date validationDate,
 			MessageTag position, CryptographicSuite constraint) {
-		CryptographicChecker cc = new CryptographicChecker(i18nProvider, token, validationDate, position, constraint);
+		CryptographicChecker cc = new CryptographicChecker(i18nProvider,
+				token.getSignatureAlgorithm(), token.getKeyLengthUsedToSignThisToken(), validationDate, position, constraint);
 		return cc.execute();
 	}
 

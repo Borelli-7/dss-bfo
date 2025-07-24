@@ -22,8 +22,8 @@ package eu.europa.esig.dss.validation.process.bbb.sav.cc;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.Indication;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
@@ -73,13 +73,13 @@ public abstract class AbstractCryptographicCheck extends ChainItem<XmlCC> {
 	}
 
 	/**
-	 * Returns name for an EncryptionAlgorithm safely
+	 * Returns name for an SignatureAlgorithm safely
 	 *
-	 * @param encryptionAlgorithm {@link EncryptionAlgorithm}
+	 * @param signatureAlgorithm {@link SignatureAlgorithm}
 	 * @return {@link String} name
 	 */
-	protected String getName(EncryptionAlgorithm encryptionAlgorithm) {
-		return encryptionAlgorithm != null ? encryptionAlgorithm.getName() : "?";
+	protected String getName(SignatureAlgorithm signatureAlgorithm) {
+		return signatureAlgorithm != null ? signatureAlgorithm.getName() : "?";
 	}
 
 }

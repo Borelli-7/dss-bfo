@@ -21,10 +21,12 @@
 package eu.europa.esig.dss.validation.process.bbb.sav.cc;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
-import eu.europa.esig.dss.diagnostic.TokenProxy;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlCryptographicAlgorithm;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
+import eu.europa.esig.dss.validation.policy.CryptographicSuiteUtils;
 import eu.europa.esig.dss.validation.process.ChainItem;
 
 import java.util.Date;
@@ -34,40 +36,120 @@ import java.util.Date;
  */
 public class CryptographicChecker extends AbstractCryptographicChecker {
 
+	/** The Signature algorithm */
+	private final SignatureAlgorithm signatureAlgorithm;
+
+	/** Used Key length */
+	private final String keyLengthUsedToSignThisToken;
+
 	/**
 	 * Default constructor
 	 *
 	 * @param i18nProvider {@link I18nProvider}
-	 * @param token {@link TokenProxy} to validate
+	 * @param signatureAlgorithm {@link SignatureAlgorithm} to validate
+	 * @param keyLengthUsedToSignThisToken {@link String}
 	 * @param validationDate {@link Date}
 	 * @param position {@link MessageTag}
 	 * @param cryptographicSuite {@link CryptographicSuite}
 	 */
-	public CryptographicChecker(I18nProvider i18nProvider, TokenProxy token, Date validationDate, MessageTag position,
-								CryptographicSuite cryptographicSuite) {
-		super(i18nProvider, token.getEncryptionAlgorithm(), token.getDigestAlgorithm(),
-				token.getKeyLengthUsedToSignThisToken(), validationDate, position, cryptographicSuite);
+	public CryptographicChecker(I18nProvider i18nProvider, SignatureAlgorithm signatureAlgorithm, String keyLengthUsedToSignThisToken,
+								Date validationDate, MessageTag position, CryptographicSuite cryptographicSuite) {
+		super(i18nProvider, validationDate, position, cryptographicSuite);
+
+		this.signatureAlgorithm = signatureAlgorithm;
+		this.keyLengthUsedToSignThisToken = keyLengthUsedToSignThisToken;
 	}
 
 	@Override
 	protected void initChain() {
 		
-		ChainItem<XmlCC> item = firstItem = encryptionAlgorithmReliable();
-		
-		item = item.setNextItem(digestAlgorithmReliable());
-		
-		if (isExpirationDateAvailable(digestAlgorithm)) {
-			item = item.setNextItem(digestAlgorithmOnValidationTime());
-		}
+		ChainItem<XmlCC> item = firstItem = signatureAlgorithmReliable();
 		
 		item = item.setNextItem(publicKeySizeKnown());
 		
 		item = item.setNextItem(publicKeySizeAcceptable());
+
+		item = item.setNextItem(signatureAlgorithmOnValidationTime());
 		
-		if (isExpirationDateAvailable(encryptionAlgorithm, keyLengthUsedToSignThisToken)) {
-			item = item.setNextItem(encryptionAlgorithmOnValidationTime());
+	}
+
+	/**
+	 * Checks if the {@code signatureAlgorithm} is acceptable
+	 *
+	 * @return TRUE if the {@code signatureAlgorithm} is acceptable, FALSE otherwise
+	 */
+	protected ChainItem<XmlCC> signatureAlgorithmReliable() {
+		return new SignatureAlgorithmReliableCheck(i18nProvider, signatureAlgorithm, result, position, cryptographicSuite);
+	}
+
+	/**
+	 * Checks if the {@code keyLengthUsedToSignThisToken} is known
+	 *
+	 * @return TRUE if the {@code keyLengthUsedToSignThisToken} is known, FALSE otherwise
+	 */
+	protected ChainItem<XmlCC> publicKeySizeKnown() {
+		return new PublicKeySizeKnownCheck(i18nProvider, keyLengthUsedToSignThisToken, result, position, cryptographicSuite);
+	}
+
+	/**
+	 * Checks if the {@code keyLengthUsedToSignThisToken} is acceptable
+	 *
+	 * @return TRUE if the {@code keyLengthUsedToSignThisToken} is acceptable, FALSE otherwise
+	 */
+	protected ChainItem<XmlCC> publicKeySizeAcceptable() {
+		return new PublicKeySizeAcceptableCheck(i18nProvider, signatureAlgorithm, keyLengthUsedToSignThisToken, result, position, cryptographicSuite);
+	}
+
+	/**
+	 * Checks if the {@code signatureAlgorithm} is not expired in validation time
+	 *
+	 * @return TRUE if the {@code signatureAlgorithm} is not expired in validation time, FALSE otherwise
+	 */
+	protected ChainItem<XmlCC> signatureAlgorithmOnValidationTime() {
+		return new SignatureAlgorithmAtValidationTimeCheck(i18nProvider, signatureAlgorithm, keyLengthUsedToSignThisToken, validationDate, result,
+				position, cryptographicSuite);
+	}
+
+	@Override
+	protected XmlCryptographicAlgorithm getAlgorithm() {
+		{
+			if (cryptographicAlgorithm == null) {
+				cryptographicAlgorithm = new XmlCryptographicAlgorithm();
+				if (signatureAlgorithm != null) {
+					// if SignatureAlgorithm is defined
+					cryptographicAlgorithm.setName(signatureAlgorithm.getName());
+					cryptographicAlgorithm.setUri(getSignatureAlgorithmUri(signatureAlgorithm));
+					cryptographicAlgorithm.setKeyLength(keyLengthUsedToSignThisToken);
+
+				} else {
+					// if SignatureAlgorithm is not found
+					cryptographicAlgorithm.setName(ALGORITHM_UNIDENTIFIED);
+					cryptographicAlgorithm.setUri(ALGORITHM_UNIDENTIFIED_URN);
+				}
+			}
+			return cryptographicAlgorithm;
 		}
-		
+	}
+
+	private String getSignatureAlgorithmUri(SignatureAlgorithm signatureAlgorithm) {
+		if (signatureAlgorithm != null) {
+			if (signatureAlgorithm.getUri() != null) {
+				return signatureAlgorithm.getUri();
+			}
+			if (signatureAlgorithm.getOid() != null) {
+				return signatureAlgorithm.getURIBasedOnOID();
+			}
+		}
+		return ALGORITHM_UNIDENTIFIED_URN;
+	}
+
+	@Override
+	protected Date getNotAfter() {
+		if (CryptographicSuiteUtils.isSignatureAlgorithmReliable(cryptographicSuite, signatureAlgorithm) &&
+				CryptographicSuiteUtils.isSignatureAlgorithmWithKeySizeReliable(cryptographicSuite, signatureAlgorithm, keyLengthUsedToSignThisToken)) {
+			return CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, signatureAlgorithm, keyLengthUsedToSignThisToken);
+		}
+		return null;
 	}
 
 }

@@ -14,6 +14,52 @@ For changes within Diagnostic Data XSD please refer <<DiagnosticDataChanges>>.
 For changes within XML Signature Policy please refer <<ValidationPolicyChanges>>.
 
 [cols="2,5,5"]
+.Code changes from version 6.3 to 6.4
+|===
+|Title                               |v6.3                            |v6.4
+a|Cryptographic suite's validation level definition          a|
+[source,java]
+----
+import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.model.policy.ValidationPolicy;
+import eu.europa.esig.dss.validation.policy.ValidationPolicyLoader;
+import java.io.File;
+
+ValidationPolicy validationPolicy = ValidationPolicyLoader
+    .fromValidationPolicy(new File("/path/to/validation/policy"))
+    // provide a cryptographic suite to be configured
+    .withCryptographicSuite(new File("/path/to/cryptographic/suite"))
+    // and/or level for validation of encryption algorithms acceptance
+    .andAcceptableEncryptionAlgorithmsLevel(Level.WARN)
+    // and/or level for validation of key sizes of encryption algorithms acceptance
+    .andAcceptableEncryptionAlgorithmsMiniKeySizeLevel(Level.WARN)
+    // create final validation policy
+    .create();
+----
+                                                                     a|
+
+[source,java]
+----
+import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.model.policy.ValidationPolicy;
+import eu.europa.esig.dss.validation.policy.ValidationPolicyLoader;
+import java.io.File;
+
+ValidationPolicy validationPolicy = ValidationPolicyLoader
+    .fromValidationPolicy(new File("/path/to/validation/policy"))
+    // provide a cryptographic suite to be configured
+    .withCryptographicSuite(new File("/path/to/cryptographic/suite"))
+    // and/or level for validation of signature algorithms acceptance
+    .andAcceptableSignatureAlgorithmsLevel(Level.WARN)
+    // and/or level for validation of key sizes of signature algorithms acceptance
+    .andAcceptableSignatureAlgorithmsMiniKeySizeLevel(Level.WARN)
+    // create final validation policy
+    .create();
+----
+
+|===
+
+[cols="2,5,5"]
 .Code changes from version 6.2 to 6.3
 |===
 |Title                               |v6.2                            |v6.3

@@ -22,10 +22,10 @@ package eu.europa.esig.dss.validation.policy;
 
 import eu.europa.esig.dss.enumerations.Context;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.CryptographicSuiteFactory;
-import eu.europa.esig.dss.model.policy.EncryptionAlgorithmWithMinKeySize;
+import eu.europa.esig.dss.model.policy.SignatureAlgorithmWithMinKeySize;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.model.policy.ValidationPolicyFactory;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -130,102 +130,361 @@ public class DefaultCryptographicSuiteTest {
 
     @ParameterizedTest(name = "Policy {index} : {0}")
     @MethodSource("data")
-    void getAcceptableEncryptionAlgorithmsTest(CryptographicSuite cryptographicSuite) {
-        List<EncryptionAlgorithm> encryptionAlgorithms = cryptographicSuite.getAcceptableEncryptionAlgorithms();
+    void getAcceptableSignatureAlgorithmsTest(CryptographicSuite cryptographicSuite) {
+        List<SignatureAlgorithm> signatureAlgorithms = cryptographicSuite.getAcceptableSignatureAlgorithms();
 
-        Set<EncryptionAlgorithm> expectedSet = new HashSet<>(Arrays.asList(
-                EncryptionAlgorithm.DSA, EncryptionAlgorithm.RSA, EncryptionAlgorithm.RSASSA_PSS,
-                EncryptionAlgorithm.ECDSA, EncryptionAlgorithm.PLAIN_ECDSA));
+        Set<SignatureAlgorithm> expectedSet = new HashSet<>(Arrays.asList(
+                SignatureAlgorithm.RSA_MD5, SignatureAlgorithm.RSA_SHA1, SignatureAlgorithm.RSA_SHA224, SignatureAlgorithm.RSA_SHA256, 
+                SignatureAlgorithm.RSA_SHA384, SignatureAlgorithm.RSA_SHA512, SignatureAlgorithm.RSA_SHA3_256,
+                SignatureAlgorithm.RSA_SHA3_384, SignatureAlgorithm.RSA_SHA3_512, SignatureAlgorithm.RSA_RIPEMD160,
+                
+                SignatureAlgorithm.RSA_SSA_PSS_SHA1_MGF1, SignatureAlgorithm.RSA_SSA_PSS_SHA224_MGF1, SignatureAlgorithm.RSA_SSA_PSS_SHA256_MGF1,
+                SignatureAlgorithm.RSA_SSA_PSS_SHA384_MGF1, SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, SignatureAlgorithm.RSA_SSA_PSS_SHA3_256_MGF1,
+                SignatureAlgorithm.RSA_SSA_PSS_SHA3_384_MGF1, SignatureAlgorithm.RSA_SSA_PSS_SHA3_512_MGF1,
 
-        assertEquals(expectedSet, new HashSet<>(encryptionAlgorithms));
+                SignatureAlgorithm.DSA_SHA1, SignatureAlgorithm.DSA_SHA224, SignatureAlgorithm.DSA_SHA256,
+                SignatureAlgorithm.DSA_SHA384, SignatureAlgorithm.DSA_SHA512, SignatureAlgorithm.DSA_SHA3_256,
+                SignatureAlgorithm.DSA_SHA3_384, SignatureAlgorithm.DSA_SHA3_512,
+                
+                SignatureAlgorithm.ECDSA_SHA1, SignatureAlgorithm.ECDSA_SHA224, SignatureAlgorithm.ECDSA_SHA256,
+                SignatureAlgorithm.ECDSA_SHA384, SignatureAlgorithm.ECDSA_SHA512, SignatureAlgorithm.ECDSA_SHA3_256,
+                SignatureAlgorithm.ECDSA_SHA3_384, SignatureAlgorithm.ECDSA_SHA3_512, SignatureAlgorithm.ECDSA_RIPEMD160,
+
+                SignatureAlgorithm.PLAIN_ECDSA_SHA1, SignatureAlgorithm.PLAIN_ECDSA_SHA224, SignatureAlgorithm.PLAIN_ECDSA_SHA256,
+                SignatureAlgorithm.PLAIN_ECDSA_SHA384, SignatureAlgorithm.PLAIN_ECDSA_SHA512, SignatureAlgorithm.PLAIN_ECDSA_SHA3_256,
+                SignatureAlgorithm.PLAIN_ECDSA_SHA3_384, SignatureAlgorithm.PLAIN_ECDSA_SHA3_512, SignatureAlgorithm.PLAIN_ECDSA_RIPEMD160
+        ));
+
+        assertEquals(expectedSet, new HashSet<>(signatureAlgorithms));
     }
 
     @ParameterizedTest(name = "Policy {index} : {0}")
     @MethodSource("data")
-    void getAcceptableEncryptionAlgorithmsWithMinKeySizesTest(CryptographicSuite cryptographicSuite) {
-        List<EncryptionAlgorithmWithMinKeySize> encryptionAlgorithms = cryptographicSuite.getAcceptableEncryptionAlgorithmsWithMinKeySizes();
+    void getAcceptableSignatureAlgorithmsWithMinKeySizesTest(CryptographicSuite cryptographicSuite) {
+        List<SignatureAlgorithmWithMinKeySize> signatureAlgorithms = cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes();
 
-        Set<EncryptionAlgorithmWithMinKeySize> expectedSet = new HashSet<>(Arrays.asList(
-                new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.DSA, 1024),
-                new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 786),
-                new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSASSA_PSS, 786),
-                new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 160),
-                new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.PLAIN_ECDSA, 160)));
+        Set<SignatureAlgorithmWithMinKeySize> expectedSet = new HashSet<>(Arrays.asList(
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_MD5, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA1, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA384, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA512, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_256,786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_384, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_512, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_RIPEMD160, 786),
 
-        assertEquals(expectedSet, new HashSet<>(encryptionAlgorithms));
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA1_MGF1, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA224_MGF1, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA256_MGF1,786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA384_MGF1, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_256_MGF1,786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_384_MGF1, 786),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_512_MGF1, 786),
+                
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA1, 1024), 
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA224, 1024), 
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA256, 1024), 
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA384, 1024), 
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA512, 1024), 
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_256, 1024), 
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_384, 1024), 
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_512, 1024),
+
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA1, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA384, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA512, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_256, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_384, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_512, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_RIPEMD160, 160),
+
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA1, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA224, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA256, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA384, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA512, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_256, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_384, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_512, 160),
+                new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_RIPEMD160, 160)
+        ));
+
+        assertEquals(expectedSet, new HashSet<>(signatureAlgorithms));
     }
 
     @ParameterizedTest(name = "Policy {index} : {0}")
     @MethodSource("data")
-    void getAcceptableEncryptionAlgorithmsWithExpirationDatesTest(CryptographicSuite cryptographicSuite) {
-        Map<EncryptionAlgorithmWithMinKeySize, Date> encryptionAlgorithmsWithExpirationDates = cryptographicSuite.getAcceptableEncryptionAlgorithmsWithExpirationDates();
+    void getAcceptableSignatureAlgorithmsWithExpirationDatesTest(CryptographicSuite cryptographicSuite) {
+        Map<SignatureAlgorithmWithMinKeySize, Date> signatureAlgorithmsWithExpirationDates = cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates();
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.clear();
 
-        Map<EncryptionAlgorithmWithMinKeySize, Date> expectedMap = new HashMap<>();
+        Map<SignatureAlgorithmWithMinKeySize, Date> expectedMap = new HashMap<>();
 
+        calendar.set(2004, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_MD5, 786), calendar.getTime());
+        calendar.set(2010, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA1, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA384, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA512, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_256, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_384, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_512, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_RIPEMD160, 786), calendar.getTime());
+
+        calendar.set(2004, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_MD5, 1024), calendar.getTime());
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA1, 1024), calendar.getTime());
+        calendar.set(2019, Calendar.OCTOBER, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA384, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA512, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_256, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_384, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_512, 1024), calendar.getTime());
+        calendar.set(2014, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_RIPEMD160, 1024), calendar.getTime());
+
+        calendar.set(2004, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_MD5, 1536), calendar.getTime());
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA1, 1536), calendar.getTime());
+        calendar.set(2019, Calendar.OCTOBER, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA384, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA512, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_256, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_384, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_512, 1536), calendar.getTime());
+        calendar.set(2014, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_RIPEMD160, 1536), calendar.getTime());
+
+        calendar.set(2004, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_MD5, 1900), calendar.getTime());
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA1, 1900), calendar.getTime());
+        calendar.set(2029, Calendar.JANUARY, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA384, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA512, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_256, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_384, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_512, 1900), calendar.getTime());
+        calendar.set(2014, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_RIPEMD160, 1900), calendar.getTime());
+
+        calendar.set(2004, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_MD5, 3000), calendar.getTime());
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA1, 3000), calendar.getTime());
+        calendar.set(2029, Calendar.JANUARY, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA224, 3000), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA256, 3000), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA384, 3000), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA512, 3000), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_256, 3000), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_384, 3000), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SHA3_512, 3000), calendar.getTime());
+        calendar.set(2014, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_RIPEMD160, 3000), calendar.getTime());
+
+        calendar.set(2010, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA1_MGF1, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA224_MGF1, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA256_MGF1, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA384_MGF1, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_256_MGF1, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_384_MGF1, 786), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_512_MGF1, 786), calendar.getTime());
+
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA1_MGF1, 1024), calendar.getTime());
+        calendar.set(2019, Calendar.OCTOBER, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA224_MGF1, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA256_MGF1, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA384_MGF1, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_256_MGF1, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_384_MGF1, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_512_MGF1, 1024), calendar.getTime());
+
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA1_MGF1, 1536), calendar.getTime());
+        calendar.set(2019, Calendar.OCTOBER, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA224_MGF1, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA256_MGF1, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA384_MGF1, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_256_MGF1, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_384_MGF1, 1536), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_512_MGF1, 1536), calendar.getTime());
+
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA1_MGF1, 1900), calendar.getTime());
+        calendar.set(2029, Calendar.JANUARY, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA224_MGF1, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA256_MGF1, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA384_MGF1, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_256_MGF1, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_384_MGF1, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_512_MGF1, 1900), calendar.getTime());
+
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA1_MGF1, 3000), calendar.getTime());
+        calendar.set(2029, Calendar.JANUARY, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA224_MGF1, 3000), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA256_MGF1, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA384_MGF1, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_256_MGF1, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_384_MGF1, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.RSA_SSA_PSS_SHA3_512_MGF1, 3000), null);
+
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA1, 1024), calendar.getTime());
         calendar.set(2015, Calendar.DECEMBER, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.DSA, 1024), calendar.getTime());
-
-        calendar.set(2029, Calendar.JANUARY, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.DSA, 1900), calendar.getTime());
-
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.DSA, 3000), null);
-
-        calendar.set(2010, Calendar.AUGUST, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 786), calendar.getTime());
-
-        calendar.set(2019, Calendar.OCTOBER, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1024), calendar.getTime());
-
-        calendar.set(2019, Calendar.OCTOBER, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1536), calendar.getTime());
-
-        calendar.set(2029, Calendar.JANUARY, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 1900), calendar.getTime());
-
-        calendar.set(2029, Calendar.JANUARY, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSA, 3000), calendar.getTime());
-
-        calendar.set(2010, Calendar.AUGUST, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSASSA_PSS, 786), calendar.getTime());
-
-        calendar.set(2019, Calendar.OCTOBER, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSASSA_PSS, 1024), calendar.getTime());
-
-        calendar.set(2019, Calendar.OCTOBER, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSASSA_PSS, 1536), calendar.getTime());
-
-        calendar.set(2029, Calendar.JANUARY, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSASSA_PSS, 1900), calendar.getTime());
-
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.RSASSA_PSS, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA224, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA256, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA384, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA512, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_256, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_384, 1024), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_512, 1024), calendar.getTime());
 
         calendar.set(2012, Calendar.AUGUST, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA1, 1900), calendar.getTime());
+        calendar.set(2029, Calendar.JANUARY, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA224, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA256, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA384, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA512, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_256, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_384, 1900), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_512, 1900), calendar.getTime());
 
         calendar.set(2012, Calendar.AUGUST, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA1, 3000), calendar.getTime());
+        calendar.set(2029, Calendar.JANUARY, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA224, 3000), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA256, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA384, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA512, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_256, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_384, 3000), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.DSA_SHA3_512, 3000), null);
 
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA1, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA384, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA512, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_256, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_384, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_512, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_RIPEMD160, 160), calendar.getTime());
+
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA1, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA384, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA512, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_256, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_384, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_512, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_RIPEMD160, 163), calendar.getTime());
+
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA1, 224), calendar.getTime());
         calendar.set(2021, Calendar.OCTOBER, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 224), calendar.getTime());
-
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.ECDSA, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA384, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA512, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_256, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_384, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_512, 224), calendar.getTime());
+        calendar.set(2014, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_RIPEMD160, 224), calendar.getTime());
 
         calendar.set(2012, Calendar.AUGUST, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.PLAIN_ECDSA, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA1, 256), calendar.getTime());
+        calendar.set(2029, Calendar.JANUARY, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA224, 256), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA256, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA384, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA512, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_256, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_384, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_SHA3_512, 256), null);
+        calendar.set(2014, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.ECDSA_RIPEMD160, 256), calendar.getTime());
 
         calendar.set(2012, Calendar.AUGUST, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.PLAIN_ECDSA, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA1, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA224, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA256, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA384, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA512, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_256, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_384, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_512, 160), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_RIPEMD160, 160), calendar.getTime());
 
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA1, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA224, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA256, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA384, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA512, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_256, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_384, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_512, 163), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_RIPEMD160, 163), calendar.getTime());
+
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA1, 224), calendar.getTime());
         calendar.set(2021, Calendar.OCTOBER, 1);
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.PLAIN_ECDSA, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA224, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA256, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA384, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA512, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_256, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_384, 224), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_512, 224), calendar.getTime());
+        calendar.set(2014, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_RIPEMD160, 224), calendar.getTime());
 
-        expectedMap.put(new EncryptionAlgorithmWithMinKeySize(EncryptionAlgorithm.PLAIN_ECDSA, 256), null);
+        calendar.set(2012, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA1, 256), calendar.getTime());
+        calendar.set(2029, Calendar.JANUARY, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA224, 256), calendar.getTime());
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA256, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA384, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA512, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_256, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_384, 256), null);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_SHA3_512, 256), null);
+        calendar.set(2014, Calendar.AUGUST, 1);
+        expectedMap.put(new SignatureAlgorithmWithMinKeySize(SignatureAlgorithm.PLAIN_ECDSA_RIPEMD160, 256), calendar.getTime());
 
-        assertEquals(expectedMap, new HashMap<>(encryptionAlgorithmsWithExpirationDates));
+        assertEquals(expectedMap, new HashMap<>(signatureAlgorithmsWithExpirationDates));
     }
 
     @ParameterizedTest(name = "Policy {index} : {0}")

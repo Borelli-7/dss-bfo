@@ -24,8 +24,8 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraint;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlStatus;
 import eu.europa.esig.dss.enumerations.Context;
-import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.policy.CryptographicConstraintWrapper;
 import eu.europa.esig.dss.policy.jaxb.Algo;
 import eu.europa.esig.dss.policy.jaxb.CryptographicConstraint;
@@ -54,8 +54,16 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, EncryptionAlgorithm.RSA, "2048", result,
+        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "2048", result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         pkskc.execute();
 
@@ -78,14 +86,69 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, EncryptionAlgorithm.RSA, "32", result,
+        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "32", result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         pkskc.execute();
 
         List<XmlConstraint> constraints = result.getConstraint();
         assertEquals(1, constraints.size());
         assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
+    }
+
+    @Test
+    void notDefinedDigestAlgo() {
+        CryptographicConstraint cryptographicConstraint = new CryptographicConstraint();
+        cryptographicConstraint.setLevel(Level.FAIL);
+
+        ListAlgo listAlgo = new ListAlgo();
+
+        Algo rsa1000 = new Algo();
+        rsa1000.setValue("RSA");
+        rsa1000.setSize(1000);
+        listAlgo.getAlgos().add(rsa1000);
+
+        cryptographicConstraint.setMiniPublicKeySize(listAlgo);
+
+        XmlCC result = new XmlCC();
+        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "2048", result,
+                ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
+        pkskc.execute();
+
+        List<XmlConstraint> constraints = result.getConstraint();
+        assertEquals(1, constraints.size());
+        assertEquals(XmlStatus.OK, constraints.get(0).getStatus());
+    }
+
+    @Test
+    void notDefinedEncryptionAlgo() {
+        CryptographicConstraint cryptographicConstraint = new CryptographicConstraint();
+        cryptographicConstraint.setLevel(Level.FAIL);
+
+        ListAlgo listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
+        XmlCC result = new XmlCC();
+        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "2048", result,
+                ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
+        pkskc.execute();
+
+        List<XmlConstraint> constraints = result.getConstraint();
+        assertEquals(1, constraints.size());
+        assertEquals(XmlStatus.OK, constraints.get(0).getStatus());
     }
 
     @Test
@@ -102,8 +165,16 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, EncryptionAlgorithm.DSA, "1024", result,
+        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "1024", result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         pkskc.execute();
 
@@ -127,8 +198,16 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, EncryptionAlgorithm.RSA, "32", result,
+        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "32", result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         pkskc.execute();
 
@@ -151,8 +230,16 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, EncryptionAlgorithm.RSA, "32", result,
+        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "32", result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         pkskc.execute();
 
@@ -174,8 +261,16 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
 
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
         XmlCC result = new XmlCC();
-        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, EncryptionAlgorithm.RSA, "32", result,
+        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "32", result,
                 ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
         pkskc.execute();
 

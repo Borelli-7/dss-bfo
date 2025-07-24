@@ -24,7 +24,7 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.model.policy.Abstract19322CryptographicSuite;
-import eu.europa.esig.dss.model.policy.EncryptionAlgorithmWithMinKeySize;
+import eu.europa.esig.dss.model.policy.SignatureAlgorithmWithMinKeySize;
 import eu.europa.esig.dss.policy.crypto.xml.jaxb.AlgorithmIdentifierType;
 import eu.europa.esig.dss.policy.crypto.xml.jaxb.AlgorithmType;
 import eu.europa.esig.dss.policy.crypto.xml.jaxb.EvaluationType;
@@ -38,10 +38,12 @@ import org.slf4j.LoggerFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -163,8 +165,30 @@ public class CryptographicSuiteXmlWrapper extends Abstract19322CryptographicSuit
     }
 
     @Override
-    protected Map<EncryptionAlgorithmWithMinKeySize, Date> buildAcceptableEncryptionAlgorithmsWithExpirationDates() {
-        final Map<EncryptionAlgorithm, TreeMap<Integer, Date>> encryptionAlgorithmWithKeySizesMap = new LinkedHashMap<>();
+    protected Map<SignatureAlgorithmWithMinKeySize, Date> buildAcceptableSignatureAlgorithmsWithExpirationDates() {
+        final Map<SignatureAlgorithm, TreeMap<Integer, Date>> signatureAlgorithmWithKeySizesMap = new LinkedHashMap<>();
+        final Set<SignatureAlgorithm> explicitlyDefinedSignatureAlgorithms = new HashSet<>();
+
+        // Step 1. Find all entries matching the SignatureAlgorithm definition
+        for (AlgorithmType algorithmType : securitySuitabilityPolicy.getAlgorithm()) {
+            AlgorithmIdentifierType algorithmIdentifier = algorithmType.getAlgorithmIdentifier();
+            SignatureAlgorithm signatureAlgorithm = getSignatureAlgorithm(algorithmIdentifier);
+            if (signatureAlgorithm == null) {
+                continue;
+            }
+
+            TreeMap<Integer, Date> keySizeMap = signatureAlgorithmWithKeySizesMap.getOrDefault(signatureAlgorithm, new TreeMap<>());
+            Map<Integer, Date> endDatesMap = getSignatureAlgorithmKeySizeEndDates(signatureAlgorithm, algorithmType.getEvaluation());
+            populateKeySizeMap(keySizeMap, endDatesMap);
+
+            explicitlyDefinedSignatureAlgorithms.add(signatureAlgorithm);
+            signatureAlgorithmWithKeySizesMap.put(signatureAlgorithm, keySizeMap);
+        }
+
+        // Step 2a. Extract supported digest algorithms for mapping
+        Map<DigestAlgorithm, Date> digestAlgorithmsWithExpirationDates = getAcceptableDigestAlgorithmsWithExpirationDates();
+
+        // Step 2b. Process encryption algorithms defined independently
         for (AlgorithmType algorithmType : securitySuitabilityPolicy.getAlgorithm()) {
             AlgorithmIdentifierType algorithmIdentifier = algorithmType.getAlgorithmIdentifier();
             EncryptionAlgorithm encryptionAlgorithm = getEncryptionAlgorithm(algorithmIdentifier);
@@ -172,66 +196,55 @@ public class CryptographicSuiteXmlWrapper extends Abstract19322CryptographicSuit
                 continue;
             }
 
-            TreeMap<Integer, Date> keySizeMap = encryptionAlgorithmWithKeySizesMap.getOrDefault(encryptionAlgorithm, new TreeMap<>());
+            for (Map.Entry<DigestAlgorithm, Date> digestAlgorithmWithDateEntry : digestAlgorithmsWithExpirationDates.entrySet()) {
+                SignatureAlgorithm signatureAlgorithm = findSignatureAlgorithm(encryptionAlgorithm, digestAlgorithmWithDateEntry.getKey());
+                // process SignatureAlgorithm, only if not defined explicitly
+                if (signatureAlgorithm != null && !explicitlyDefinedSignatureAlgorithms.contains(signatureAlgorithm)) {
+                    Date digestAlgoExpirationDate = digestAlgorithmWithDateEntry.getValue();
 
-            Map<Integer, Date> endDatesMap = getEncryptionAlgorithmKeySizeEndDates(encryptionAlgorithm, algorithmType.getEvaluation());
-            for (Map.Entry<Integer, Date> entry : endDatesMap.entrySet()) {
-                Integer keySize = entry.getKey();
-                Date keySizeEndDate = entry.getValue();
+                    // NOTE: It may be that the same EncryptionAlgo is encountered, therefore the keySizeMap may already exist
+                    TreeMap<Integer, Date> keySizeMap = signatureAlgorithmWithKeySizesMap.getOrDefault(signatureAlgorithm, new TreeMap<>());
+                    Map<Integer, Date> endDatesMap = getEncryptionAlgorithmKeySizeEndDates(encryptionAlgorithm, algorithmType.getEvaluation());
+                    populateKeySizeMap(keySizeMap, endDatesMap);
 
-                // if there is an entry with a longer deprecation date, we need to re-use the existing entry. See RFC 5698
-                Map.Entry<Integer, Date> floorEntry = keySizeMap.floorEntry(keySize);
-                if (floorEntry != null) {
-                    Date currentEndDate = floorEntry.getValue();
-                    if (currentEndDate == null || (keySizeEndDate != null && currentEndDate.after(keySizeEndDate))) {
-                        keySizeEndDate = currentEndDate;
-                    }
+                    // Ensure that SignatureAlgorithm expires at least as early as DigestAlgorithm, if applicable
+                    keySizeMap = getTreeMapWithBottomDates(keySizeMap, digestAlgoExpirationDate);
+                    signatureAlgorithmWithKeySizesMap.put(signatureAlgorithm, keySizeMap);
                 }
-
-                // evaluate existing keySize entries, and "extend" with a longer expiration date, if applicable
-                Map.Entry<Integer, Date> higherEntry = keySizeMap.higherEntry(keySize);
-                if (higherEntry != null) {
-                    Date currentEndDate = higherEntry.getValue();
-                    if (currentEndDate != null && (keySizeEndDate == null || currentEndDate.before(keySizeEndDate))) {
-                        keySizeMap.put(higherEntry.getKey(), keySizeEndDate);
-                    }
-                }
-
-                keySizeMap.put(keySize, keySizeEndDate);
-
             }
-
-            encryptionAlgorithmWithKeySizesMap.put(encryptionAlgorithm, keySizeMap);
         }
 
-
-        final Map<EncryptionAlgorithmWithMinKeySize, Date> encryptionAlgorithmsMap = new LinkedHashMap<>();
-        for (Map.Entry<EncryptionAlgorithm, TreeMap<Integer, Date>> entry : encryptionAlgorithmWithKeySizesMap.entrySet()) {
-            EncryptionAlgorithm encryptionAlgorithm = entry.getKey();
+        // Step 3. Build final map between SignatureAlgorithmWithMinKeySize and expiration Date
+        final Map<SignatureAlgorithmWithMinKeySize, Date> signatureAlgorithmsMap = new LinkedHashMap<>();
+        for (Map.Entry<SignatureAlgorithm, TreeMap<Integer, Date>> entry : signatureAlgorithmWithKeySizesMap.entrySet()) {
+            SignatureAlgorithm signatureAlgorithm = entry.getKey();
             for (Map.Entry<Integer, Date> keySizeEntry : entry.getValue().entrySet()) {
-                encryptionAlgorithmsMap.put(new EncryptionAlgorithmWithMinKeySize(encryptionAlgorithm, keySizeEntry.getKey()), keySizeEntry.getValue());
+                signatureAlgorithmsMap.put(new SignatureAlgorithmWithMinKeySize(signatureAlgorithm, keySizeEntry.getKey()), keySizeEntry.getValue());
             }
         }
-        return encryptionAlgorithmsMap;
+        return signatureAlgorithmsMap;
     }
 
-    private EncryptionAlgorithm getEncryptionAlgorithm(AlgorithmIdentifierType algorithmIdentifier) {
+    private SignatureAlgorithm getSignatureAlgorithm(AlgorithmIdentifierType algorithmIdentifier) {
         if (algorithmIdentifier == null) {
             return null;
         }
         List<String> objectIdentifiers = algorithmIdentifier.getObjectIdentifier();
         if (objectIdentifiers != null && !objectIdentifiers.isEmpty()) {
             for (String oid : objectIdentifiers) {
-                // Can be defined as EncryptionAlgorithm or SignatureAlgorithm
-                try {
-                    // first come, first served policy
-                    return EncryptionAlgorithm.forOID(oid);
-                } catch (IllegalArgumentException e) {
-                    // continue silently
-                }
                 try {
                     SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.forOID(oid);
-                    return signatureAlgorithm.getEncryptionAlgorithm();
+                    if (signatureAlgorithm != null) {
+                        /*
+                         * Here we check for a potential conflict with the EncryptionAlgorithm definition.
+                         * If matching EncryptionAlgorithm is found as well, then we continue with the URIs check.
+                         * Example: RSASSA-PSS using the same OID ("1.2.840.113549.1.1.10") as the RSA_SSA_PSS_SHA1_MGF1 Signature Algorithm
+                         */
+                        EncryptionAlgorithm encryptionAlgorithm = getEncryptionAlgorithm(algorithmIdentifier);
+                        if (encryptionAlgorithm == null) {
+                            return signatureAlgorithm;
+                        }
+                    }
                 } catch (IllegalArgumentException e) {
                     // continue silently
                 }
@@ -243,13 +256,38 @@ public class CryptographicSuiteXmlWrapper extends Abstract19322CryptographicSuit
             for (String uri : uris) {
                 try {
                     SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.forXML(uri);
-                    return signatureAlgorithm.getEncryptionAlgorithm();
+                    if (signatureAlgorithm != null) {
+                        return signatureAlgorithm;
+                    }
                 } catch (IllegalArgumentException e) {
                     // continue silently
                 }
             }
         }
         return null;
+    }
+
+    private EncryptionAlgorithm getEncryptionAlgorithm(AlgorithmIdentifierType algorithmIdentifier) {
+        if (algorithmIdentifier == null) {
+            return null;
+        }
+        List<String> objectIdentifiers = algorithmIdentifier.getObjectIdentifier();
+        if (objectIdentifiers != null && !objectIdentifiers.isEmpty()) {
+            for (String oid : objectIdentifiers) {
+                try {
+                    // first come, first served policy
+                    return EncryptionAlgorithm.forOID(oid);
+                } catch (IllegalArgumentException e) {
+                    // continue silently
+                }
+            }
+        }
+        return null;
+    }
+
+    private Map<Integer, Date> getSignatureAlgorithmKeySizeEndDates(SignatureAlgorithm signatureAlgorithm, List<EvaluationType> evaluations) {
+        // Encryption algorithm is used for parameters determination
+        return getEncryptionAlgorithmKeySizeEndDates(signatureAlgorithm.getEncryptionAlgorithm(), evaluations);
     }
 
     private Map<Integer, Date> getEncryptionAlgorithmKeySizeEndDates(EncryptionAlgorithm encryptionAlgorithm, List<EvaluationType> evaluations) {

@@ -293,7 +293,15 @@ public final class DSSUtils {
 	 * @return the certificate token
 	 */
 	public static CertificateToken loadCertificate(final InputStream inputStream) {
-		List<CertificateToken> certificates = loadCertificates(inputStream);
+		List<CertificateToken> certificates = loadCertificates(inputStream, DSSSecurityProvider.getSecurityProviderName());
+		if (certificates.size() == 1) {
+			return certificates.get(0);
+		}
+		throw new DSSException("Could not parse certificate");
+	}
+
+	public static CertificateToken loadCertificate(final InputStream inputStream, final String providerName) {
+		List<CertificateToken> certificates = loadCertificates(inputStream, providerName);
 		if (certificates.size() == 1) {
 			return certificates.get(0);
 		}
@@ -307,15 +315,15 @@ public final class DSSUtils {
 	 * @return a list of {@link CertificateToken}s
 	 */
 	public static List<CertificateToken> loadCertificateFromP7c(InputStream inputStream) {
-		return loadCertificates(inputStream);
+		return loadCertificates(inputStream, DSSSecurityProvider.getSecurityProviderName());
 	}
 
-	private static List<CertificateToken> loadCertificates(InputStream inputStream) {
+	private static List<CertificateToken> loadCertificates(InputStream inputStream, String providerName) {
 		final List<CertificateToken> certificates = new ArrayList<>();
 		try (InputStream is = inputStream) {
 			@SuppressWarnings("unchecked")
 			final Collection<X509Certificate> certificatesCollection = (Collection<X509Certificate>) CertificateFactory
-					.getInstance("X.509", DSSSecurityProvider.getSecurityProviderName()).generateCertificates(is);
+					.getInstance("X.509", providerName).generateCertificates(is);
 			if (certificatesCollection != null) {
 				for (X509Certificate cert : certificatesCollection) {
 					certificates.add(new CertificateToken(cert));
@@ -347,8 +355,21 @@ public final class DSSUtils {
 	 */
 	public static CertificateToken loadCertificate(final byte[] input) {
 		Objects.requireNonNull(input, "Input binary cannot be null");
-		final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
-		return loadCertificate(inputStream);
+		try {
+			final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
+			return loadCertificate(inputStream);
+		} catch (Exception e) {
+			LOG.warn("Unable to load certificate with default security provider.");
+		}
+		for (Provider provider : DSSSecurityProvider.getAlternativeSecurityProviders()) {
+			try {
+				final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
+				return loadCertificate(inputStream, provider.getName());
+			} catch (Exception e) {
+				LOG.warn("Unable to load certificate with alternative security provider with name '{}'.", provider.getName());
+			}
+		}
+		throw new DSSException(String.format("Unable to load certificate : %s", Utils.toBase64(input)));
 	}
 
 	/**

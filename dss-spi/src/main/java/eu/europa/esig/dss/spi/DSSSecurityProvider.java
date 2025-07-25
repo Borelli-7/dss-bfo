@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.Provider;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The default security provider
@@ -39,6 +41,8 @@ public final class DSSSecurityProvider {
 
 	/** Provider */
 	private static Provider securityProvider;
+
+	private static List<Provider> alternativeSecurityProviders;
 
 	/**
 	 * Gets the provider
@@ -70,6 +74,17 @@ public final class DSSSecurityProvider {
 	public static void setSecurityProvider(Provider provider) {
 		LOG.debug("DSSSecurityProvider initialized with {}", provider.getClass());
 		DSSSecurityProvider.securityProvider = provider;
+	}
+
+	public static List<Provider> getAlternativeSecurityProviders() {
+		if (alternativeSecurityProviders == null) {
+			alternativeSecurityProviders = Collections.emptyList();
+		}
+		return alternativeSecurityProviders;
+	}
+
+	public static void setAlternativeSecurityProviders(List<Provider> alternativeSecurityProviders) {
+		DSSSecurityProvider.alternativeSecurityProviders = alternativeSecurityProviders;
 	}
 
 }

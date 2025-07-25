@@ -58,6 +58,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -665,6 +666,15 @@ class DSSUtilsTest {
 		assertFalse(DSSUtils.isEmpty(new InMemoryDocument(new byte[] { 'a' })));
 		assertFalse(DSSUtils.isEmpty(new InMemoryDocument(getClass().getResourceAsStream("/good-user.crt"))));
 		assertFalse(DSSUtils.isEmpty(new FileDocument("src/test/resources/good-user.crt")));
+	}
+
+	@Test
+	void loadATTLTest() {
+		DSSSecurityProvider.setAlternativeSecurityProviders(Collections.singletonList(Security.getProvider("SUN")));
+
+		byte[] certificate = Utils.fromBase64("MIIDDjCCAnegAwIBAgIBATANBgkqhkiG9w0BAQUFADCBmjELMAkGA1UEBhMCQVQxSDBGBgNVBAoTP0EtVHJ1c3QgR2VzLiBmLiBTaWNoZXJoZWl0c3N5c3RlbWUgaW0gZWxla3RyLiBEYXRlbnZlcmtlaHIgR21iSDEXMBUGA1UECxMOd3d3LmEtdHJ1c3QuYXQxEzARBgNVBAsTCmEtc2lnbiB1bmkxEzARBgNVBAMTCmEtc2lnbiB1bmkwHhcNMDIwOTEzMTgzMjM4WhcNMzIwOTEzMTgzMjM4WjCBmjELMAkGA1UEBhMCQVQxSDBGBgNVBAoTP0EtVHJ1c3QgR2VzLiBmLiBTaWNoZXJoZWl0c3N5c3RlbWUgaW0gZWxla3RyLiBEYXRlbnZlcmtlaHIgR21iSDEXMBUGA1UECxMOd3d3LmEtdHJ1c3QuYXQxEzARBgNVBAsTCmEtc2lnbiB1bmkxEzARBgNVBAMTCmEtc2lnbiB1bmkwgZ4wCwYJKoZIhvcNAQEBA4GOADCBigKBgQCvBqGXYw0rNZyQR8YG+EQ4GeoQgMRdsYPhnuvkl6aEMWdMvDuvAPlLi4rXNNq3mb4yKKCswSp5SPiRo43uwrpfCjLxu9RT+Fi3wDE1Z5tBr7iQOnOCx5IKs2X94hcdsJClWHYoxT4f5Jnq86kNVYys+T8TUJCrsHm/8TCr3x7vuwIEAAAAA6NjMGEwDgYDVR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFBXzfvl2WIKcUwhZzt+1wC1ShQPBMB8GA1UdIwQYMBaAFBXzfvl2WIKcUwhZzt+1wC1ShQPBMA0GCSqGSIb3DQEBBQUAA4GBAALtJ7UT/H4ZwUAeKV1X1Gz+pIqVtCsECNKWHiZeXx0ly/insjh+vbNVNy2RyOimKWtms0GZ0Kj/oDK81efRL9YvHKMlCLlz6FBKaUTUztO1FYa2othUGsu8LsBtPPU6u0wMPGhE3DEdo5/4lA6gMbsOvKQ6jQyeCjqOB22EjbJd");
+		CertificateToken certificateToken = DSSUtils.loadCertificate(certificate);
+		assertNotNull(certificateToken);
 	}
 
 }

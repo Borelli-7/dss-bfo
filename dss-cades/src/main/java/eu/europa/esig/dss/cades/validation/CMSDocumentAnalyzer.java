@@ -69,18 +69,6 @@ public class CMSDocumentAnalyzer extends DefaultDocumentAnalyzer {
 	}
 
 	/**
-	 * The default constructor for {@code CMSDocumentAnalyzer}.
-	 *
-	 * @param cmsSignedData
-	 *            pkcs7-signature(s)
-	 * @deprecated since DSS 6.3. Please use {@code new CMSDocumentAnalyzer(CMS cms)} constructor instead.
-	 */
-	@Deprecated
-	public CMSDocumentAnalyzer(final CMSSignedData cmsSignedData) {
-		this.cms = toCMS(new CMSSignedDocument(cmsSignedData));
-	}
-
-	/**
 	 * The constructor for {@code CMSDocumentAnalyzer} creation from a {@code CMS}.
 	 *
 	 * @param cms

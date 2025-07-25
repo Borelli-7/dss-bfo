@@ -34,20 +34,6 @@ import org.bouncycastle.cms.CMSSignedData;
 public class CAdESOCSPSource extends CMSOCSPSource {
 
 	/**
-	 * The default constructor
-	 *
-	 * @param cmsSignedData {@link CMSSignedData} of the CAdES signature
-	 * @param unsignedAttributes {@link AttributeTable} the corresponding unsigned properties if present
-	 * @deprecated since DSS 6.3. Please use {@code new CAdESOCSPSource(CMS cms, AttributeTable unsignedAttributes)}
-	 * 	 *             constructor instead.
-	 */
-	@Deprecated
-	public CAdESOCSPSource(CMSSignedData cmsSignedData, AttributeTable unsignedAttributes) {
-		super(cmsSignedData.getOtherRevocationInfo(CMSObjectIdentifiers.id_ri_ocsp_response),
-				cmsSignedData.getOtherRevocationInfo(OCSPObjectIdentifiers.id_pkix_ocsp_basic), unsignedAttributes);
-	}
-
-	/**
 	 * Creates a CAdES OCSP source from a {@code CMS} and the related {@code unsignedAttributes} of the signer
 	 *
 	 * @param cms {@link CMS}

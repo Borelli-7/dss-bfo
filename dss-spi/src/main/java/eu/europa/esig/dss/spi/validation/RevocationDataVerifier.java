@@ -43,7 +43,6 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -99,15 +98,6 @@ public class RevocationDataVerifier {
                 Extension.noRevAvail.getId()
         );
     }
-
-    /**
-     * A collection of revocation data to be processed. This is a local variable used to be defined
-     * by a SignatureValidationContext, calling the class
-     *
-     * @deprecated since DSS 6.3. Please provide revocation data within {@code validationContext}
-     */
-    @Deprecated
-    private Collection<RevocationToken<?>> processedRevocations;
 
     /**
      * A collection of Digest Algorithms to accept from CRL/OCSP responders.
@@ -240,33 +230,6 @@ public class RevocationDataVerifier {
             throw new DSSException(String.format(
                     "Unable to instantiate default RevocationDataVerifier. Reason : %s", e.getMessage()), e);
         }
-    }
-
-    /**
-     * Gets a collection of processed revocations, when present.
-     * This method is used internally during a {@code eu.europa.esig.dss.validation.SignatureValidationContext} execution,
-     * to verify presence of the collection of processed revocation data
-     *
-     * @return a collection of {@link RevocationToken}s
-     * @deprecated since DSS 6.3. Please use {@code validationContext} instead.
-     */
-    @Deprecated
-    protected Collection<RevocationToken<?>> getProcessedRevocations() {
-        return processedRevocations;
-    }
-
-    /**
-     * This method sets a collection of processed revocation tokens, for validation of timestamp's certificate chain.
-     * Note : This method is used internally during a {@code eu.europa.esig.dss.validation.SignatureValidationContext}
-     *        initialization, in order to provide the same revocation data as the one used within
-     *        the certificate validation process.
-     *
-     * @param processedRevocations a collection of {@link RevocationToken}s
-     * @deprecated since DSS 6.3. Please provide revocation data within {@code validationContext} instead.
-     */
-    @Deprecated
-    protected void setProcessedRevocations(Collection<RevocationToken<?>> processedRevocations) {
-        this.processedRevocations = processedRevocations;
     }
 
     /**
@@ -902,20 +865,6 @@ public class RevocationDataVerifier {
      * Verifies if the certificate is valid
      *
      * @param certificateToken {@link CertificateToken}
-     * @param controlTime {@link Date}
-     * @return TRUE if the certificate token is valid, FALSE otherwise
-     * @deprecated since DSS 6.3.
-     *             Please use {@code #isCertificateValid(certificateToken, certificateChain, controlTime)} instead.
-     */
-    @Deprecated
-    protected boolean isCertificateValid(CertificateToken certificateToken, Date controlTime) {
-        return isCertificateValid(certificateToken, Collections.emptyList(), controlTime);
-    }
-
-    /**
-     * Verifies if the certificate is valid
-     *
-     * @param certificateToken {@link CertificateToken}
      * @param certificateChain collection of {@link CertificateToken}s
      * @param controlTime {@link Date}
      * @return TRUE if the certificate token is valid, FALSE otherwise
@@ -940,20 +889,6 @@ public class RevocationDataVerifier {
     private boolean hasRevocationAccessPoints(final CertificateToken certificateToken) {
         return Utils.isCollectionNotEmpty(CertificateExtensionsUtils.getCRLAccessUrls(certificateToken)) ||
                 Utils.isCollectionNotEmpty(CertificateExtensionsUtils.getOCSPAccessUrls(certificateToken));
-    }
-
-    /**
-     * This method verifies whether a certificate token is not revoked at control time
-     *
-     * @param certificateToken {@link CertificateToken} to validated
-     * @param controlTime {@link Date} validation time
-     * @return TRUE if the certificate token is valid at control time, FALSE otherwise
-     * @deprecated since DSS 6.3.
-     *             Please use {@code #isCertificateNotRevoked(certificateToken, certificateChain, controlTime)} instead.
-     */
-    @Deprecated
-    protected boolean isCertificateNotRevoked(CertificateToken certificateToken, Date controlTime) {
-        return isCertificateNotRevoked(certificateToken, Collections.emptyList(), controlTime);
     }
 
     /**
@@ -1016,30 +951,18 @@ public class RevocationDataVerifier {
     }
 
     private List<RevocationToken<?>> getRelatedRevocationTokens(CertificateToken certificateToken) {
-        // TODO : temporary support of processedRevocations. Remove in DSS 6.3
-        if (validationContext == null && Utils.isCollectionEmpty(processedRevocations)) {
+        if (validationContext == null) {
             LOG.warn("ValidationContext is not defined! Unable to retrieve revocation data for certificate.");
             return Collections.emptyList();
         }
 
-        List<RevocationToken<?>> revocationData = new ArrayList<>();
-        if (validationContext != null) {
-            revocationData.addAll(validationContext.getRevocationData(certificateToken));
-        }
-        // TODO : temporary processing. Remove in DSS 6.3
-        if (Utils.isCollectionNotEmpty(processedRevocations)) {
-            revocationData.addAll(processedRevocations);
-        }
+        List<RevocationToken<?>> revocationData = validationContext.getRevocationData(certificateToken);
         if (Utils.isCollectionEmpty(revocationData)) {
             return Collections.emptyList();
         }
-        List<RevocationToken<?>> result = new ArrayList<>();
-        for (RevocationToken<?> revocationToken : revocationData) {
-            if (Utils.areStringsEqual(certificateToken.getDSSIdAsString(), revocationToken.getRelatedCertificateId())) {
-                result.add(revocationToken);
-            }
-        }
-        return result;
+        return revocationData.stream()
+                .filter(r -> Utils.areStringsEqual(certificateToken.getDSSIdAsString(), r.getRelatedCertificateId()))
+                .collect(Collectors.toList());
     }
 
 }

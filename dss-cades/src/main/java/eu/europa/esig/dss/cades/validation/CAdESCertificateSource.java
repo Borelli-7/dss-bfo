@@ -32,20 +32,6 @@ import org.bouncycastle.cms.SignerInformation;
 public class CAdESCertificateSource extends CMSCertificateSource {
 
 	/**
-	 * The constructor with additional signer id parameter. All certificates are
-	 * extracted during instantiation.
-	 *
-	 * @param cmsSignedData {@link CMSSignedData} of the signature
-	 * @param signerInformation {@link SignerInformation} extracted from cmsSignedData
-	 * @deprecated since DSS 6.3. Please use {@code new CAdESCertificateSource(CMS cms, SignerInformation signerInformation)}
-	 *             constructor instead.
-	 */
-	@Deprecated
-	public CAdESCertificateSource(final CMSSignedData cmsSignedData, final SignerInformation signerInformation) {
-		super(cmsSignedData, signerInformation);
-	}
-
-	/**
 	 * The constructor to create a CAdES certificate source from a {@code CMS} with an additional signer id parameter.
 	 * All certificates are extracted during instantiation.
 	 *

@@ -153,19 +153,6 @@ public class DSSMessageDigestCalculator {
     }
 
     /**
-     * Returns the {@code DSSMessageDigest} accordingly to the current state.
-     * This method resets the state of message-digest.
-     *
-     * @return {@link DSSMessageDigest}
-     * @deprecated since DSS 6.3. Please use {@code #getMessageDigest(DigestAlgorithm)} method instead.
-     */
-    @Deprecated
-    public DSSMessageDigest getMessageDigest() {
-        LOG.warn("Use of deprecated method #getMessageDigest()! Please use #getMessageDigest(DigestAlgorithm) method instead!");
-        return getMessageDigest(messageDigestMap.keySet().iterator().next());
-    }
-
-    /**
      * Returns the {@code DSSMessageDigest} accordingly to the given {@code digestAlgorithm}
      * This method resets the state of message-digest.
      *

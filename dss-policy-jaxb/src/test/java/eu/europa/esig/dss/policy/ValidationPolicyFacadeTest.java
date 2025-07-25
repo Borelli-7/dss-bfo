@@ -22,7 +22,6 @@ package eu.europa.esig.dss.policy;
 
 import eu.europa.esig.dss.enumerations.Level;
 import eu.europa.esig.dss.enumerations.ValidationModel;
-import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.policy.jaxb.Algo;
 import eu.europa.esig.dss.policy.jaxb.CertificateConstraints;
 import eu.europa.esig.dss.policy.jaxb.ConstraintsParameters;
@@ -30,14 +29,10 @@ import eu.europa.esig.dss.policy.jaxb.ModelConstraint;
 import eu.europa.esig.dss.policy.jaxb.RevocationConstraints;
 import eu.europa.esig.dss.policy.jaxb.TimeConstraint;
 import eu.europa.esig.dss.policy.jaxb.TimeUnit;
-import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.UnmarshalException;
 import org.junit.jupiter.api.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,26 +82,6 @@ class ValidationPolicyFacadeTest {
 		ConstraintsParameters constraintsParameters = ValidationPolicyFacade.newFacade()
 				.unmarshall(new File("src/test/resources/constraint-core-validation.xml"));
 		assertNotNull(constraintsParameters);
-	}
-
-	// TODO : test cases to be removed after DSS 6.3
-	@Test
-	void getDefaultValidationPolicy() throws JAXBException, XMLStreamException, IOException, SAXException {
-		assertNotNull(ValidationPolicyFacade.newFacade().getDefaultValidationPolicy());
-	}
-
-	@Test
-	void getCertificateValidationPolicy() throws JAXBException, XMLStreamException, IOException, SAXException {
-		ValidationPolicy certificateValidationPolicy = ValidationPolicyFacade.newFacade().getCertificateValidationPolicy();
-		assertNotNull(certificateValidationPolicy);
-		assertEquals("Certificate policy TL based", certificateValidationPolicy.getPolicyName());
-	}
-
-	@Test
-	void getTrustedListValidationPolicy() throws JAXBException, XMLStreamException, IOException, SAXException {
-		ValidationPolicy trustedListValidationPolicy = ValidationPolicyFacade.newFacade().getTrustedListValidationPolicy();
-		assertNotNull(trustedListValidationPolicy);
-		assertEquals("Policy to validate Trusted Lists", trustedListValidationPolicy.getPolicyDescription());
 	}
 
 	@Test

@@ -21,7 +21,6 @@
 package eu.europa.esig.dss.policy;
 
 import eu.europa.esig.dss.enumerations.Context;
-import eu.europa.esig.dss.enumerations.Level;
 import eu.europa.esig.dss.enumerations.SubContext;
 import eu.europa.esig.dss.enumerations.ValidationModel;
 import eu.europa.esig.dss.model.policy.CertificateApplicabilityRule;
@@ -810,15 +809,7 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 	public LevelRule getThisUpdatePresentConstraint() {
 		RevocationConstraints revocationConstraints = getRevocationConstraints();
 		if (revocationConstraints != null) {
-			LevelConstraint constraint = revocationConstraints.getThisUpdatePresent();
-			if (constraint == null) {
-				// TODO : temporary handling since 6.3 to ensure smooth migration to DSS 6.4. To be removed in 6.4.
-				constraint = new LevelConstraint();
-				constraint.setLevel(Level.FAIL);
-				LOG.warn("No ThisUpdatePresent constraint is defined in the validation policy for Revocation element! " +
-						"Default behavior with FAIL level is added to processing. Please set the constraint explicitly. To be required since DSS 6.4.");
-			}
-			return toLevelRule(constraint);
+			return toLevelRule(revocationConstraints.getThisUpdatePresent());
 		}
 		return null;
 	}
@@ -827,15 +818,7 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 	public LevelRule getRevocationIssuerKnownConstraint() {
 		RevocationConstraints revocationConstraints = getRevocationConstraints();
 		if (revocationConstraints != null) {
-			LevelConstraint constraint = revocationConstraints.getRevocationIssuerKnown();
-			if (constraint == null) {
-				// TODO : temporary handling since 6.3 to ensure smooth migration to DSS 6.4. To be removed in 6.4.
-				constraint = new LevelConstraint();
-				constraint.setLevel(Level.FAIL);
-				LOG.warn("No RevocationIssuerKnown constraint is defined in the validation policy for Revocation element! " +
-						"Default behavior with FAIL level is added to processing. Please set the constraint explicitly. To be required since DSS 6.4.");
-			}
-			return toLevelRule(constraint);
+			return toLevelRule(revocationConstraints.getRevocationIssuerKnown());
 		}
 		return null;
 	}
@@ -844,15 +827,7 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 	public LevelRule getRevocationIssuerValidAtProductionTimeConstraint() {
 		RevocationConstraints revocationConstraints = getRevocationConstraints();
 		if (revocationConstraints != null) {
-			LevelConstraint constraint = revocationConstraints.getRevocationIssuerValidAtProductionTime();
-			if (constraint == null) {
-				// TODO : temporary handling since 6.3 to ensure smooth migration to DSS 6.4. To be removed in 6.4.
-				constraint = new LevelConstraint();
-				constraint.setLevel(Level.FAIL);
-				LOG.warn("No RevocationIssuerValidAtProductionTime constraint is defined in the validation policy for Revocation element! " +
-						"Default behavior with FAIL level is added to processing. Please set the constraint explicitly. To be required since DSS 6.4.");
-			}
-			return toLevelRule(constraint);
+			return toLevelRule(revocationConstraints.getRevocationIssuerValidAtProductionTime());
 		}
 		return null;
 	}
@@ -861,15 +836,7 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 	public LevelRule getRevocationAfterCertificateIssuanceConstraint() {
 		RevocationConstraints revocationConstraints = getRevocationConstraints();
 		if (revocationConstraints != null) {
-			LevelConstraint constraint = revocationConstraints.getRevocationAfterCertificateIssuance();
-			if (constraint == null) {
-				// TODO : temporary handling since 6.3 to ensure smooth migration to DSS 6.4. To be removed in 6.4.
-				constraint = new LevelConstraint();
-				constraint.setLevel(Level.FAIL);
-				LOG.warn("No RevocationIssuerKnowsCertificate constraint is defined in the validation policy for Revocation element! " +
-						"Default behavior with FAIL level is added to processing. Please set the constraint explicitly. To be required since DSS 6.4.");
-			}
-			return toLevelRule(constraint);
+			return toLevelRule(revocationConstraints.getRevocationAfterCertificateIssuance());
 		}
 		return null;
 	}
@@ -878,15 +845,7 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 	public LevelRule getRevocationHasInformationAboutCertificateConstraint() {
 		RevocationConstraints revocationConstraints = getRevocationConstraints();
 		if (revocationConstraints != null) {
-			LevelConstraint constraint = revocationConstraints.getRevocationHasInformationAboutCertificate();
-			if (constraint == null) {
-				// TODO : temporary handling since 6.3 to ensure smooth migration to DSS 6.4. To be removed in 6.4.
-				constraint = new LevelConstraint();
-				constraint.setLevel(Level.FAIL);
-				LOG.warn("No RevocationIssuerHasInformationAboutCertificate constraint is defined in the validation policy for Revocation element! " +
-						"Default behavior with FAIL level is added to processing. Please set the constraint explicitly. To be required since DSS 6.4.");
-			}
-			return toLevelRule(constraint);
+			return toLevelRule(revocationConstraints.getRevocationHasInformationAboutCertificate());
 		}
 		return null;
 	}

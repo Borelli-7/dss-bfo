@@ -777,19 +777,6 @@ public final class DSSASN1Utils {
 	}
 
 	/**
-	 * Returns the first {@code SignerInformation} extracted from {@code CMSSignedData}.
-	 *
-	 * @param cms
-	 *            CMSSignedData
-	 * @return returns {@code SignerInformation}
-	 * @deprecated since DSS 6.3. Please use {@code #getFirstSignerInformation(cms.getSignerInfos())} method instead.
-	 */
-	@Deprecated
-	public static SignerInformation getFirstSignerInformation(final CMSSignedData cms) {
-		return getFirstSignerInformation(cms.getSignerInfos());
-	}
-
-	/**
 	 * Returns the first {@code SignerInformation} extracted from {@code SignerInformationStore}.
 	 *
 	 * @param signerInformationStore
@@ -827,23 +814,6 @@ public final class DSSASN1Utils {
 		} catch (Exception e) {
 			LOG.warn("Unable to retrieve the date {}", encodable, e);
 			return null;
-		}
-	}
-
-	/**
-	 * Extracts all extended key usages for the certificate token
-	 *
-	 * @param certToken {@link CertificateToken}
-	 * @return a list of {@link String}s
-	 * @deprecated since DSS 6.3. See {@code CertificateExtensionUtils#getExtendedKeyUsage(CertificateToken)}
-	 */
-	@Deprecated
-	public static List<String> getExtendedKeyUsage(CertificateToken certToken) {
-		try {
-			return certToken.getCertificate().getExtendedKeyUsage();
-		} catch (CertificateParsingException e) {
-			LOG.warn("Unable to retrieve ExtendedKeyUsage : {}", e.getMessage());
-			return Collections.emptyList();
 		}
 	}
 

@@ -32,19 +32,6 @@ import org.bouncycastle.cms.CMSSignedData;
 public class CAdESCRLSource extends CMSCRLSource {
 
 	/**
-	 * The default constructor
-	 *
-	 * @param cmsSignedData {@link CMSSignedData} of the CAdES signature
-	 * @param unsignedAttributes {@link AttributeTable} the corresponding unsigned properties if present
-	 * @deprecated since DSS 6.3. Please use {@code new CAdESCRLSource(CMS cms, AttributeTable unsignedAttributes)}
-	 *             constructor instead.
-	 */
-	@Deprecated
-	public CAdESCRLSource(CMSSignedData cmsSignedData, AttributeTable unsignedAttributes) {
-		super(cmsSignedData.getCRLs(), unsignedAttributes);
-	}
-
-	/**
 	 * Creates a CAdES CRL source from a {@code CMS} and the related {@code unsignedAttributes} of the signer
 	 *
 	 * @param cms {@link CMS}

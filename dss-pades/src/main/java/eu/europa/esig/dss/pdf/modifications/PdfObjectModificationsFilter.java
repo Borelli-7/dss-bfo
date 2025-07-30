@@ -453,6 +453,7 @@ public class PdfObjectModificationsFilter {
          */
         boolean isStructTreeRoot = false;
         List<String> keyChain = objectModification.getObjectTree().getKeyChain();
+        String lastKey = objectModification.getObjectTree().getLastKey();
         PdfObjectModificationType actionType = objectModification.getActionType();
         for (String key : keyChain) {
             if (PAdESConstants.STRUCT_TREE_ROOT_NAME.equals(key)) {
@@ -464,7 +465,7 @@ public class PdfObjectModificationsFilter {
                     PAdESConstants.STRUCT_TREE_ROOT_PARENT_TREE_NEXT_KEY_NAME)) {
                 return true;
 
-            } else if (isStructTreeRoot && PAdESConstants.STRUCT_TREE_ROOT_K_NAME.equals(key) &&
+            } else if (isStructTreeRoot && PAdESConstants.STRUCT_TREE_ROOT_K_NAME.equals(key) && PAdESConstants.STRUCT_TREE_ROOT_K_NAME.equals(lastKey) &&
                     (PdfObjectModificationType.CREATION == actionType || PdfObjectModificationType.DELETION == actionType)) {
                 return true;
 

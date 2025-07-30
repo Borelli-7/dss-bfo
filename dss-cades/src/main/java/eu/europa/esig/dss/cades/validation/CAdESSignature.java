@@ -836,7 +836,7 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 			ReferenceValidation entryValidation = new ReferenceValidation();
 			entryValidation.setType(DigestMatcherType.MANIFEST_ENTRY);
 			entryValidation.setUri(entry.getUri());
-			entryValidation.setDocumentName(entry.getDocumentName());
+			entryValidation.setDocument(entry.getDocument());
 			entryValidation.setDigest(entry.getDigest());
 			entryValidation.setFound(entry.isFound());
 			entryValidation.setIntact(entry.isIntact());
@@ -879,7 +879,7 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 		}
 
 		if (originalDocument != null) {
-			messageDigestValidation.setDocumentName(originalDocument.getName());
+			messageDigestValidation.setDocument(originalDocument);
 			messageDigestValidation.setFound(true);
 			messageDigestValidation.setIntact(verifyDigestAlgorithm(originalDocument, digestAlgorithmCandidates, messageDigest));
 

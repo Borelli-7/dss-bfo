@@ -32,15 +32,14 @@ import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.Digest;
 import eu.europa.esig.dss.model.DigestDocument;
-import eu.europa.esig.dss.spi.DSSUtils;
-import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.model.ReferenceValidation;
+import eu.europa.esig.dss.model.scope.SignatureScope;
 import eu.europa.esig.dss.spi.validation.scope.AbstractSignatureScopeFinder;
 import eu.europa.esig.dss.spi.validation.scope.CounterSignatureScope;
 import eu.europa.esig.dss.spi.validation.scope.DigestSignatureScope;
 import eu.europa.esig.dss.spi.validation.scope.FullSignatureScope;
-import eu.europa.esig.dss.model.scope.SignatureScope;
 import eu.europa.esig.dss.spi.validation.scope.SignatureScopeFinder;
+import eu.europa.esig.dss.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,8 +89,8 @@ public class JAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 					return getSignatureScopeFromOriginalDocuments(originalDocuments);
 					
 				} else if (referenceValidation.getUri() != null) {
-					DSSDocument documentByName = getDocumentByName(originalDocuments, referenceValidation.getUri());
-					result.add(getSignatureScopeFromOriginalDocument(documentByName));
+					DSSDocument document = referenceValidation.getDocument();
+					result.add(getSignatureScopeFromOriginalDocument(document));
 					
 				}
 			}
@@ -129,23 +128,6 @@ public class JAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 		} else {
 			return new FullSignatureScope(originalDocument.getName(), originalDocument);
 		}
-	}
-	
-	/**
-	 * Returns a DSSDocument with the given name from the available list of documents
-	 * 
-	 * @param documents a list of {@link DSSDocument}s
-	 * @param documentName {@link String} document name to extract
-	 * @return {@link DSSDocument}
-	 */
-	private DSSDocument getDocumentByName(List<DSSDocument> documents, String documentName) {
-		documentName = DSSUtils.decodeURI(documentName);
-		for (DSSDocument document : documents) {
-			if (documentName != null && documentName.equals(document.getName())) {
-				return document;
-			}
-		}
-		return null;
 	}
 
 	/**

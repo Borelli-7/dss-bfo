@@ -411,7 +411,7 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
                     referenceValidation.setType(DigestMatcherType.EVIDENCE_RECORD_ARCHIVE_OBJECT);
                     referenceValidation.setDigest(manifestEntry.getDigest());
                     referenceValidation.setUri(manifestEntry.getUri());
-                    referenceValidation.setDocumentName(matchingDocument != null ? matchingDocument.getName() : null);
+                    referenceValidation.setDocument(matchingDocument);
                     referenceValidation.setFound(matchingDocument != null);
                     referenceValidation.setIntact(false);
                     referenceValidations.add(referenceValidation);
@@ -480,10 +480,10 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
                     referenceValidation.setFound(matchingManifestEntry.isFound() || matchingDocument != null);
                     referenceValidation.setIntact(matchingManifestEntry.isIntact() && matchingDocument != null);
                     referenceValidation.setUri(matchingManifestEntry.getUri());
-                    referenceValidation.setDocumentName(matchingManifestEntry.getDocumentName());
+                    referenceValidation.setDocument(matchingManifestEntry.getDocument());
 
                 } else if (matchingDocument != null) {
-                    referenceValidation.setDocumentName(matchingDocument.getName());
+                    referenceValidation.setDocument(matchingDocument);
 
                 } else {
                     referenceValidation.setType(DigestMatcherType.EVIDENCE_RECORD_ORPHAN_REFERENCE);
@@ -494,13 +494,13 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
             } else if (matchingDocument != null) {
                 referenceValidation.setFound(true);
                 referenceValidation.setIntact(true);
-                referenceValidation.setDocumentName(matchingDocument.getName());
+                referenceValidation.setDocument(matchingDocument);
 
             } else if (Utils.collectionSize(digestValues) == 1 && Utils.collectionSize(detachedContents) == 1 && !evidenceRecord.isEmbedded()) {
                 // if one document is expected and provided -> assume it as a signed data
                 referenceValidation.setFound(true);
                 referenceValidation.setIntact(false);
-                referenceValidation.setDocumentName(detachedContents.get(0).getName());
+                referenceValidation.setDocument(detachedContents.get(0));
 
             } else {
                 referenceValidation.setType(DigestMatcherType.EVIDENCE_RECORD_ORPHAN_REFERENCE);

@@ -98,7 +98,7 @@ public class XAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 					String manifestEntryReferenceName = getReferenceName(manifestEntry);
 					if (manifestEntryReferenceName != null && manifestEntry.isFound()) {
 						// try to get document digest from list of detached contents
-						SignatureScope detachedSignatureScopeResult = getFromDetachedContent(xadesSignature, transformations, getReferencedDocumentName(manifestEntry));
+						SignatureScope detachedSignatureScopeResult = getFromDetachedContent(xadesSignature, transformations, manifestEntry);
 						if (detachedSignatureScopeResult != null) {
 							manifestSignatureScope.addChildSignatureScope(detachedSignatureScopeResult);
 						} else if (manifestEntry.getDigest() != null) {
@@ -137,8 +137,7 @@ public class XAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 				
 			} else if (xadesReferenceValidation.isIntact() && Utils.isCollectionNotEmpty(xadesSignature.getDetachedContents())) {
 				// detached file (the signature must intact in order to be sure in the correctness of the provided file)
-				final String referencedDocumentName = getReferencedDocumentName(xadesReferenceValidation);
-				SignatureScope signatureScope = getFromDetachedContent(xadesSignature, transformations, referencedDocumentName);
+				SignatureScope signatureScope = getFromDetachedContent(xadesSignature, transformations, xadesReferenceValidation);
 				if (signatureScope != null) {
 					result.add(signatureScope);
 				}
@@ -175,36 +174,30 @@ public class XAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 	}
 
 	private SignatureScope getFromDetachedContent(final XAdESSignature xadesSignature,
-												  final List<String> transformations, final String relatedDocumentName) {
-		List<DSSDocument> detachedContents = xadesSignature.getDetachedContents();
-		if (Utils.isCollectionNotEmpty(detachedContents)) {
-			for (DSSDocument detachedDocument : detachedContents) {
-
-				// check the original detached file by its name (or if no name if provided, see {@link DetachedSignatureResolver})
-				if (detachedDocument.getName() == null && (relatedDocumentName == null && Utils.collectionSize(detachedContents) == 1)
-						|| (relatedDocumentName != null && relatedDocumentName.equals(detachedDocument.getName())) ) {
-					String fileName = detachedDocument.getName() != null ? detachedDocument.getName() : relatedDocumentName;
-					if (detachedDocument instanceof DigestDocument) {
-						DigestDocument digestDocument = (DigestDocument) detachedDocument;
-						return new DigestSignatureScope(fileName, digestDocument);
-	
-					} else if (Utils.isCollectionNotEmpty(transformations)) {
-						return new XmlFullSignatureScope(fileName, detachedDocument, transformations);
-	
-					} else if (isASiCSArchive(xadesSignature)) {
-						ContainerSignatureScope containerSignatureScope = new ContainerSignatureScope(relatedDocumentName, detachedDocument);
-						for (DSSDocument archivedDocument : xadesSignature.getContainerContents()) {
-							containerSignatureScope.addChildSignatureScope(new ContainerContentSignatureScope(archivedDocument));
-						}
-						return containerSignatureScope;
-	
-					} else {
-						return new FullSignatureScope(fileName, detachedDocument);
-					}
-				}
-			}
+												  final List<String> transformations, final ReferenceValidation xadesReferenceValidation) {
+		DSSDocument detachedDocument = xadesReferenceValidation.getDocument();
+		if (detachedDocument == null) {
+			return null;
 		}
-		return null;
+
+		String fileName = detachedDocument.getName() != null ? detachedDocument.getName() : getReferencedDocumentName(xadesReferenceValidation);
+		if (detachedDocument instanceof DigestDocument) {
+			DigestDocument digestDocument = (DigestDocument) detachedDocument;
+			return new DigestSignatureScope(fileName, digestDocument);
+
+		} else if (Utils.isCollectionNotEmpty(transformations)) {
+			return new XmlFullSignatureScope(fileName, detachedDocument, transformations);
+
+		} else if (isASiCSArchive(xadesSignature)) {
+			ContainerSignatureScope containerSignatureScope = new ContainerSignatureScope(fileName, detachedDocument);
+			for (DSSDocument archivedDocument : xadesSignature.getContainerContents()) {
+				containerSignatureScope.addChildSignatureScope(new ContainerContentSignatureScope(archivedDocument));
+			}
+			return containerSignatureScope;
+
+		} else {
+			return new FullSignatureScope(fileName, detachedDocument);
+		}
 	}
 
 	private boolean isEverythingCovered(XAdESSignature signature, String coveredObjectId) {

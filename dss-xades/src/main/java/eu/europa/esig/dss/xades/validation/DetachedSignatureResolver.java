@@ -78,7 +78,7 @@ public class DetachedSignatureResolver extends ResourceResolverSpi {
 	}
 
 	private DSSDocument getBestCandidate(ResourceResolverContext context) throws ResourceResolverException {
-		if (definedFilename(context) && isDocumentNamesDefined()) {
+		if (definedFilename(context)) {
 			Attr uriAttr = context.attr;
 			String uriValue = DSSUtils.decodeURI(uriAttr.getNodeValue());
 			Digest referenceDigest = DSSXMLUtils.getDigestAndValue(uriAttr.getOwnerElement());
@@ -192,17 +192,6 @@ public class DetachedSignatureResolver extends ResourceResolverSpi {
 	private boolean definedFilename(ResourceResolverContext context) {
 		Attr uriAttr = context.attr;
 		return uriAttr != null && Utils.isStringNotBlank(uriAttr.getNodeValue()) && !DomUtils.startsFromHash(uriAttr.getNodeValue());
-	}
-
-	private boolean isDocumentNamesDefined() {
-		if (Utils.isCollectionNotEmpty(documents)) {
-			for (final DSSDocument dssDocument : documents) {
-				if (dssDocument.getName() != null) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 }

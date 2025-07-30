@@ -21,6 +21,8 @@
 package eu.europa.esig.dss.model;
 
 import eu.europa.esig.dss.enumerations.DigestMatcherType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,15 +30,17 @@ import java.util.List;
 
 /**
  * This class is used to store individual reference validations.
- * 
+ * <p>
  * For XAdES, that means reference tag(s) validation
- * 
+ * <p>
  * For CAdES, that means message-digest validation
  *
  */
 public class ReferenceValidation implements Serializable {
 
 	private static final long serialVersionUID = 1303869856995695436L;
+
+	private static final Logger LOG = LoggerFactory.getLogger(ReferenceValidation.class);
 
 	/** The type of the Reference */
 	private DigestMatcherType type;
@@ -56,8 +60,8 @@ public class ReferenceValidation implements Serializable {
 	/** The reference to the original document. (E.g. for XAdES : reference URI attribute value) */
 	private String uri;
 
-	/** Name of the matching document (when applicable) */
-	private String documentName;
+	/** The matching document (when applicable) */
+	private DSSDocument document;
 
 	/** List of used transforms to compute digest of the reference */
 	protected List<String> transforms;
@@ -190,18 +194,40 @@ public class ReferenceValidation implements Serializable {
 	 * Gets matching document name
 	 *
 	 * @return {@link String}
+	 * @deprecated since DSS 6.4. Please use {@code getDocument().getName()} method instead
 	 */
+	@Deprecated
 	public String getDocumentName() {
-		return documentName;
+		return document != null ? document.getName() : null;
 	}
 
 	/**
 	 * Sets the matching document name
 	 *
 	 * @param documentName {@link String}
+	 * @deprecated since DSS 6.4. Please use {@code setDocument()} method instead
 	 */
+	@Deprecated
 	public void setDocumentName(String documentName) {
-		this.documentName = documentName;
+		LOG.warn("Use of deprecated method #setDocumentName. Please switch to #setDocument. Current method processing is skipped");
+	}
+
+	/**
+	 * Gets matching document
+	 *
+	 * @return {@link DSSDocument}
+	 */
+	public DSSDocument getDocument() {
+		return document;
+	}
+
+	/**
+	 * Sets the matching document
+	 *
+	 * @param document {@link DSSDocument}
+	 */
+	public void setDocument(DSSDocument document) {
+		this.document = document;
 	}
 
 	/**

@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 class CommonsDataLoaderTest {
 
 	private static final String URL_TO_LOAD = "http://certs.eid.belgium.be/belgiumrs2.crt";
-	private static final String TIMEOUT_URL = "https://httpstat.us/200?sleep=1";
+	private static final String TIMEOUT_URL = "https://dss.nowina.lu/pki-factory/crl/timeout/1/good-ca.crl";
 
 	private CommonsDataLoader dataLoader;
 
@@ -198,12 +198,12 @@ class CommonsDataLoaderTest {
 	void multipleDataLoaderExceptionTest() {
 		dataLoader.setTimeoutConnection(1);
 
-		List<String> urls = Arrays.asList("http://wrong.url", "does_not_exist", URL_TO_LOAD);
+		List<String> urls = Arrays.asList("http://wrong.url", "does_not_exist", TIMEOUT_URL);
 		DSSDataLoaderMultipleException exception = assertThrows(DSSDataLoaderMultipleException.class,
 				() -> dataLoader.get(urls));
 		assertTrue(exception.getMessage().contains("http://wrong.url"));
 		assertTrue(exception.getMessage().contains("does_not_exist"));
-		assertTrue(exception.getMessage().contains(URL_TO_LOAD));
+		assertTrue(exception.getMessage().contains(TIMEOUT_URL));
 	}
 
 	@Test

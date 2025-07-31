@@ -45,6 +45,22 @@ This chapter covers the most frequently asked questions and issues occurring in 
 
 For the description of the available implementations, please see the <<dssCms>> section.
 
+|v6.3                      a|Exception "java.lang.NoClassDefFoundError: org/apache/commons/lang3/Strings"
+
+a|The exception is caused by a dependency conflict, with DSS requiring `commons-lang3` version `3.18.0` or higher. Versions `3.17.0` and before contain the `CVE-2025-48924` vulnerability.
+
+Please enforce the higher version of the `commons-lang3` within `pom.xml` of you project, as shown below:
+
+[source,xml]
+.pom.xml
+----
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>3.18.0</version>
+</dependency>
+----
+
 |v6.2                      a|`SSLCertificateLoader` does not work with Spring-Boot `3.3.x` or before                a|Since version `6.2` DSS uses HttpClient5 of version `5.4.x` (or higher), bringing incompatible changes in the API used by the `SSLCertificateLoader` class. In case the support of the class is required, please upgrade to the latest version of Spring-Boot, starting from `3.4.0`.
 
 |v6.1 and after             |CMS validation fails because of "invalid OID contents"       a|Starting from version `1.78` cryptographic library BouncyCastle enforces a secure validation of `ASN1ObjectIdentifier` objects, which makes validation of invalid signatures (or other tokens, such as CRL/OCSP responses) to fail with the exception "java.lang.IllegalArgumentException: invalid OID contents". In order to get back to the original behavior (no validation is performed), the following system property should be added before signature validation:

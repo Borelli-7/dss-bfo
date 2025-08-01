@@ -16,7 +16,7 @@ The latest version of DSS framework has the following minimal requirements:
 * Memory and Disk: see minimal requirements for the used JVM. In general the higher available is better;
 * Operating system: no specific requirements (tested on Windows and Linux).
 
-Starting from version `6.0`, DSS uses `jakarta.\*` namespace naming of Specification API. If your application uses `javax.*` namespaces, please use version `5.13`.
+Starting from version `6.0`, DSS uses `jakarta.\*` namespace naming of Specification API. If your application uses `javax.*` namespaces, please use version `5.13.1`.
 
 # Maven repository
 
@@ -31,7 +31,7 @@ https://central.sonatype.com/search?q=eu.europa.ec.joinup.sd-dss
         &lt;dependency&gt;
             &lt;groupId&gt;eu.europa.ec.joinup.sd-dss&lt;/groupId&gt;
             &lt;artifactId&gt;dss-bom&lt;/artifactId&gt;
-            &lt;version&gt;6.3.RC1&lt;/version&gt;
+            &lt;version&gt;6.3&lt;/version&gt;
             &lt;type&gt;pom&lt;/type&gt;
             &lt;scope&gt;import&lt;/scope&gt;
         &lt;/dependency&gt;

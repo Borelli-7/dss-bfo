@@ -73,7 +73,7 @@ public class XMLEvidenceRecordAnalyzer extends DefaultEvidenceRecordAnalyzer {
     }
 
     private Element toEvidenceRecordElement(DSSDocument document) {
-        Element evidenceRecordElement;
+        Element erElement;
         try {
             Node documentNode;
             if (document instanceof DOMDocument) {
@@ -86,18 +86,18 @@ public class XMLEvidenceRecordAnalyzer extends DefaultEvidenceRecordAnalyzer {
             } else {
                 documentNode = DomUtils.buildDOM(document);
             }
-            evidenceRecordElement = DomUtils.getElement(documentNode, XMLERSPath.EVIDENCE_RECORD_PATH);
+            erElement = DomUtils.getElement(documentNode, XMLERSPath.EVIDENCE_RECORD_PATH);
 
         } catch (Exception e) {
             throw new IllegalInputException(String.format("An XML file is expected : %s", e.getMessage()), e);
         }
 
-        if (evidenceRecordElement == null) {
+        if (erElement == null) {
             throw new IllegalInputException(String.format(
                     "No Evidence Record found within the provided document with name '%s'! " +
                             "Please ensure the Evidence Record is present at the root level of the provided document.", document.getName()));
         }
-        return evidenceRecordElement;
+        return erElement;
     }
 
     @Override

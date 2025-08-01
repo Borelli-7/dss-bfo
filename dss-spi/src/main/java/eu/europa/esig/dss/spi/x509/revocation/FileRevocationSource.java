@@ -27,11 +27,14 @@ public abstract class FileRevocationSource<R extends Revocation> extends Reposit
 
 	private static final Logger LOG = LoggerFactory.getLogger(FileRevocationSource.class);
 
+	/** Subdirectory to be used by default for revocation data caching */
+	private static final String DEFAULT_REVOCATION_CACHE_SUBDIRECTORY = "/dss-cache-revocation";
+
 	/**
 	 * The directory where cached revocation files are stored
 	 * Default : Temporary directory with a "/dss-cache-revocation" subdirectory
 	 */
-	private File fileCacheDirectory = new File(System.getProperty("java.io.tmpdir"), "/dss-cache-revocation");
+	private File fileCacheDirectory = new File(System.getProperty("java.io.tmpdir"), DEFAULT_REVOCATION_CACHE_SUBDIRECTORY);
 
 	/**
 	 * Empty constructor.
@@ -60,7 +63,7 @@ public abstract class FileRevocationSource<R extends Revocation> extends Reposit
 	 */
 	public void setFileCacheDirectory(File fileCacheDirectory) {
 		Objects.requireNonNull(fileCacheDirectory, "File cache directory cannot be null!");
-		this.fileCacheDirectory = initializeCacheDirectory(fileCacheDirectory);;
+		this.fileCacheDirectory = initializeCacheDirectory(fileCacheDirectory);
 	}
 
 	/**

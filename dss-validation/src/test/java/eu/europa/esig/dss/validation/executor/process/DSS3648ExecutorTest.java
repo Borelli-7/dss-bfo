@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class DSS3648ExecutorTest extends AbstractProcessExecutorTest {
+class DSS3648ExecutorTest extends AbstractProcessExecutorTest {
 
     @Test
     void ltLevelTest() throws Exception {

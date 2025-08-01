@@ -94,6 +94,7 @@ public class EmbeddedEvidenceRecordBuilder extends ExtensionBuilder {
      *
      * @param signatureDocument {@link DSSDocument}
      * @param signatureId {@link String} identifier of a signature to return
+     * @param detachedContent a list of {@link DSSDocument}s
      * @return {@link XAdESSignature}
      */
     protected XAdESSignature getXAdESSignature(DSSDocument signatureDocument, String signatureId, List<DSSDocument> detachedContent) {

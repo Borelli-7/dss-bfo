@@ -354,6 +354,8 @@ public abstract class FileRevocationSource<R extends Revocation> extends Reposit
 
 		/**
 		 * Cleans all files within the file system associated with the current cache entry
+		 *
+		 * @return TRUE if the cache has been cleaned succesfully, FALSE otherwise
 		 */
 		public boolean clean() {
 			boolean cacheCleaned = removeFile(getCacheRevocationFile());

@@ -88,7 +88,6 @@ import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.ArrayList;

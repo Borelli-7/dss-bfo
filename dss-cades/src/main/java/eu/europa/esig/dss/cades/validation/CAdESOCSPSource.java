@@ -23,9 +23,6 @@ package eu.europa.esig.dss.cades.validation;
 import eu.europa.esig.dss.cms.CMS;
 import eu.europa.esig.dss.spi.x509.CMSOCSPSource;
 import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
-import org.bouncycastle.cms.CMSSignedData;
 
 /**
  * The OCSP source for a CAdES signature

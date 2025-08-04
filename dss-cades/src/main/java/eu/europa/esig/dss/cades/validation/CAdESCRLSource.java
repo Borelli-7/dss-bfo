@@ -23,7 +23,6 @@ package eu.europa.esig.dss.cades.validation;
 import eu.europa.esig.dss.cms.CMS;
 import eu.europa.esig.dss.spi.x509.CMSCRLSource;
 import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.cms.CMSSignedData;
 
 /**
  * The CRL source for a CAdES signature

@@ -22,7 +22,6 @@ package eu.europa.esig.dss.cades.validation;
 
 import eu.europa.esig.dss.cms.CMS;
 import eu.europa.esig.dss.spi.x509.CMSCertificateSource;
-import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 
 /**

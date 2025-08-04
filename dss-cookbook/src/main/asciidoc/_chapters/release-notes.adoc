@@ -18,7 +18,7 @@
                                             * WebApp uses server-signing from now on (NexU deprecated);
                                             * Added support of base64-encoded certificates on validation in dss-demonstrations;
                                             * Added a button to download current validation policy in DSS WebApp;
-                                            * Dependencies upgrade (commons-lang3, verapdf, etc.).
+                                            * Dependencies upgrade (commons-lang3, json-sKema, verapdf, etc.).
 
 Bug fixes :
 

@@ -20,32 +20,24 @@
  */
 package eu.europa.esig.dss.validation.process.bbb.sav;
 
-import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
-import eu.europa.esig.dss.detailedreport.jaxb.XmlCryptographicValidation;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlSAV;
 import eu.europa.esig.dss.diagnostic.AbstractTokenProxy;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestMatcher;
 import eu.europa.esig.dss.enumerations.Context;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.LevelRule;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
-import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.validation.process.Chain;
 import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
-import eu.europa.esig.dss.validation.process.bbb.sav.cc.CryptographicChecker;
-import eu.europa.esig.dss.validation.process.bbb.sav.cc.DigestMatcherListCryptographicChainBuilder;
-import eu.europa.esig.dss.validation.process.bbb.sav.cc.SigningCertificateRefDigestAlgorithmCheckChainBuilder;
+import eu.europa.esig.dss.validation.process.bbb.aov.checks.AlgorithmObsolescenceValidationCheck;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.AllCertificatesInPathReferencedCheck;
-import eu.europa.esig.dss.validation.process.bbb.sav.checks.CryptographicCheckerResultCheck;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.SigningCertificateAttributePresentCheck;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.SigningCertificateReferencesValidityCheck;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.UnicitySigningCertificateAttributeCheck;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * 5.2.8 Signature acceptance validation (SAV) This building block covers any
@@ -65,11 +57,11 @@ public abstract class AbstractAcceptanceValidation<T extends AbstractTokenProxy>
 	/** The validation context */
 	protected final Context context;
 
+	/** Result of Algorithm Obsolescence Validation block */
+	protected final XmlAOV aov;
+
 	/** The validation policy */
 	protected final ValidationPolicy validationPolicy;
-
-	/** The cryptographic information for the report */
-	private XmlCryptographicValidation cryptographicValidation;
 
 	/**
 	 * Default constructor
@@ -78,14 +70,16 @@ public abstract class AbstractAcceptanceValidation<T extends AbstractTokenProxy>
 	 * @param token to validate
 	 * @param currentTime {@link Date}
 	 * @param context {@link Context}
+	 * @param aov {@link XmlAOV}
 	 * @param validationPolicy {@link ValidationPolicy}
 	 */
 	protected AbstractAcceptanceValidation(I18nProvider i18nProvider, T token, Date currentTime, Context context,
-										ValidationPolicy validationPolicy) {
+										   XmlAOV aov, ValidationPolicy validationPolicy) {
 		super(i18nProvider, new XmlSAV());
 		this.token = token;
 		this.currentTime = currentTime;
 		this.context = context;
+		this.aov = aov;
 		this.validationPolicy = validationPolicy;
 	}
 
@@ -138,93 +132,27 @@ public abstract class AbstractAcceptanceValidation<T extends AbstractTokenProxy>
 	 */
 	protected ChainItem<XmlSAV> cryptographic(ChainItem<XmlSAV> item) {
 		// The basic signature constraints validation
-		CryptographicSuite constraint = validationPolicy.getSignatureCryptographicConstraint(context);
 		MessageTag position = ValidationProcessUtils.getCryptoPosition(context);
 
-		CryptographicChecker cc = new CryptographicChecker(i18nProvider,
-				token.getSignatureAlgorithm(), token.getKeyLengthUsedToSignThisToken(), currentTime, position, constraint);
-		XmlCC ccResult = cc.execute();
-
 		if (item == null) {
-			item = firstItem = cryptographicCheckResult(ccResult, position, constraint);
+			item = firstItem = algorithmObsolescenceValidationCheck(result, aov, position);
 		} else {
-			item = item.setNextItem(cryptographicCheckResult(ccResult, position, constraint));
-		}
-
-		cryptographicValidation = getCryptographicValidation(ccResult);
-		cryptographicValidation.setConcernedMaterial(token.getId());
-		
-		if (!isValid(ccResult)) {
-			// return if not valid
-			return item;
-		}
-		
-		// process digestMatchers
-		List<XmlDigestMatcher> digestMatchers = token.getDigestMatchers();
-		if (Utils.isCollectionNotEmpty(digestMatchers)) {
-			DigestMatcherListCryptographicChainBuilder<XmlSAV> digestMatcherCCBuilder =
-					new DigestMatcherListCryptographicChainBuilder<>(i18nProvider, result, digestMatchers, currentTime, constraint);
-			item = digestMatcherCCBuilder.build(item);
-
-			XmlCC failedCC = digestMatcherCCBuilder.getConcernedCC();
-			if (failedCC != null && !isValid(failedCC)) {
-				cryptographicValidation = getCryptographicValidation(failedCC);
-				List<String> failedMaterial = digestMatcherCCBuilder.getConcernedMaterial();
-				cryptographicValidation.setConcernedMaterial(getConcernedMaterialDescription(failedMaterial, position));
-			}
+			item = item.setNextItem(algorithmObsolescenceValidationCheck(result, aov, position));
 		}
 		
 		return item;
 	}
 
 	/**
-	 * This method verifies the validity of the used cryptographic constraints for signed-attributes
+	 * Verifies the result of the Algorithm Obsolescence Validation building block
 	 *
-	 * @param item {@link ChainItem} the last initialized chain item to be processed
+	 * @param result {@link XmlSAV}
+	 * @param aovResult {@link XmlAOV}
+	 * @param position {@link MessageTag}
 	 * @return {@link ChainItem}
 	 */
-	protected ChainItem<XmlSAV> cryptographicSignedAttributes(ChainItem<XmlSAV> item) {
-		final SigningCertificateRefDigestAlgorithmCheckChainBuilder<XmlSAV> chainBuilder =
-				new SigningCertificateRefDigestAlgorithmCheckChainBuilder<>(i18nProvider, result, currentTime, token, context, validationPolicy);
-
-		item = chainBuilder.build(item);
-
-		XmlCryptographicValidation signCertRefDigestAlgoValidation = chainBuilder.getCryptographicValidation();
-
-		// overwrite only if previous checks are secure
-		if ((cryptographicValidation == null || cryptographicValidation.isSecure())
-				&& (signCertRefDigestAlgoValidation != null && !signCertRefDigestAlgoValidation.isSecure())) {
-			cryptographicValidation = signCertRefDigestAlgoValidation;
-		}
-
-		return item;
-	}
-	
-	private ChainItem<XmlSAV> cryptographicCheckResult(XmlCC ccResult, MessageTag position, CryptographicSuite constraint) {
-		return new CryptographicCheckerResultCheck<>(i18nProvider, result, currentTime, position, ccResult, constraint);
-	}
-
-	@Override
-	protected void addAdditionalInfo() {
-		super.addAdditionalInfo();
-
-		result.setCryptographicValidation(cryptographicValidation);
-	}
-
-	private XmlCryptographicValidation getCryptographicValidation(XmlCC ccResult) {
-		XmlCryptographicValidation xmlCryptographicValidation = new XmlCryptographicValidation();
-		xmlCryptographicValidation.setAlgorithm(ccResult.getVerifiedAlgorithm());
-		xmlCryptographicValidation.setNotAfter(ccResult.getNotAfter());
-		xmlCryptographicValidation.setSecure(isValid(ccResult));
-		xmlCryptographicValidation.setValidationTime(currentTime);
-		return xmlCryptographicValidation;
-	}
-
-	private String getConcernedMaterialDescription(List<String> referenceNames, MessageTag position) {
-		if (Utils.isCollectionNotEmpty(referenceNames)) {
-			return i18nProvider.getMessage(MessageTag.ACCM_DESC_WITH_NAME, position, Utils.joinStrings(referenceNames, ", "));
-		}
-		return i18nProvider.getMessage(position);
+	protected ChainItem<XmlSAV> algorithmObsolescenceValidationCheck(XmlSAV result, XmlAOV aovResult, MessageTag position) {
+		return new AlgorithmObsolescenceValidationCheck<>(i18nProvider, result, aovResult, currentTime, position, token.getId());
 	}
 
 }

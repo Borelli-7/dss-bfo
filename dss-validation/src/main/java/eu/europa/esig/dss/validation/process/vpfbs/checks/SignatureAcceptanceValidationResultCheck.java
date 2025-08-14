@@ -41,7 +41,7 @@ public class SignatureAcceptanceValidationResultCheck<T extends XmlConstraintsCo
     private static final String SAV_BLOCK_SUFFIX = "-SAV";
 
     /** Signature Acceptance Validation result */
-    private final XmlSAV xmlSAV;
+    protected final XmlSAV xmlSAV;
 
     /**
      * Default constructor

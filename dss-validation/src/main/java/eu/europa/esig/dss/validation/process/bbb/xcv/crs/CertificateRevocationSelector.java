@@ -184,7 +184,7 @@ public class CertificateRevocationSelector extends Chain<XmlCRS> {
 
     /**
      * This method returns the latest acceptable certificate revocation data
-     *
+     * <p>
      * NOTE: method {@code execute()} shall be called before
      *
      * @return {@link CertificateRevocationWrapper}
@@ -193,7 +193,13 @@ public class CertificateRevocationSelector extends Chain<XmlCRS> {
         return latestCertificateRevocation;
     }
 
-    private ChainItem<XmlCRS> revocationAcceptable(XmlRAC racResult) {
+    /**
+     * Checks whether the revocation data has passed the Revocation Acceptance Validation
+     *
+     * @param racResult {@link XmlRAC}
+     * @return {@link ChainItem}
+     */
+    protected ChainItem<XmlCRS> revocationAcceptable(XmlRAC racResult) {
         return new RevocationAcceptanceCheckerResultCheck<>(i18nProvider, result, racResult, getWarnLevelRule());
     }
 

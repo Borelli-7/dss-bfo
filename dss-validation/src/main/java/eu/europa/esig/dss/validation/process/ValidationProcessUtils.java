@@ -20,9 +20,11 @@
  */
 package eu.europa.esig.dss.validation.process;
 
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCRS;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlCryptographicValidation;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlRAC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlSubXCV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlXCV;
@@ -392,6 +394,8 @@ public class ValidationProcessUtils {
 			return MessageTag.ACCM_POS_REVOC_SIG;
 		case CERTIFICATE:
 			return MessageTag.ACCM_POS_CERT_CHAIN;
+		case EVIDENCE_RECORD:
+			return MessageTag.ACCM_POS_EV_RECORD;
 		default:
 			throw new IllegalArgumentException("Unsupported context " + context);
 		}
@@ -574,14 +578,40 @@ public class ValidationProcessUtils {
 	 * @param subContext {@link SubContext}
 	 * @return {@link MessageTag}
 	 */
-	public static MessageTag getSubContextPosition(SubContext subContext) {
-		switch (subContext) {
-			case SIGNING_CERT:
-				return MessageTag.SIGNING_CERTIFICATE;
-			case CA_CERTIFICATE:
-				return MessageTag.CA_CERTIFICATE;
+	public static MessageTag getSubContextPosition(Context context, SubContext subContext) {
+		switch (context) {
+			case CERTIFICATE:
+				return MessageTag.CERTIFICATE;
+			case SIGNATURE:
+			case COUNTER_SIGNATURE:
+				switch (subContext) {
+					case SIGNING_CERT:
+						return MessageTag.SIGNING_CERTIFICATE;
+					case CA_CERTIFICATE:
+						return MessageTag.CA_CERTIFICATE;
+					default:
+						throw new IllegalArgumentException("Unsupported subContext " + subContext);
+				}
+			case TIMESTAMP:
+				switch (subContext) {
+					case SIGNING_CERT:
+						return MessageTag.TIMESTAMP_SIG_CERT;
+					case CA_CERTIFICATE:
+						return MessageTag.TIMESTAMP_CA_CERT;
+					default:
+						throw new IllegalArgumentException("Unsupported subContext " + subContext);
+				}
+			case REVOCATION:
+				switch (subContext) {
+					case SIGNING_CERT:
+						return MessageTag.REVOCATION_SIG_CERT;
+					case CA_CERTIFICATE:
+						return MessageTag.REVOCATION_CA_CERT;
+					default:
+						throw new IllegalArgumentException("Unsupported subContext " + subContext);
+				}
 			default:
-				throw new IllegalArgumentException("Unsupported subContext " + subContext);
+				throw new IllegalArgumentException("Unsupported context " + context);
 		}
 	}
 
@@ -667,6 +697,97 @@ public class ValidationProcessUtils {
 		} else {
 			return Utils.isCollectionEmpty(expectedValues);
 		}
+	}
+
+	/**
+	 * Returns final cryptographic validation from the AOV block.
+	 * This method returns the first algorithm which is going to expire in case of failure,
+	 * or the first applicable algorithm (which is SignatureValue's signature algorithm in most of the cases).
+	 * In case of a valid cryptographic validation, returns the first available entry
+	 *
+	 * @param aov {@link XmlAOV}
+	 * @return {@link XmlCryptographicValidation}
+	 */
+	public static XmlCryptographicValidation getFinalCryptographicValidation(XmlAOV aov) {
+		if (aov == null || aov.getConclusion() == null) {
+			return null;
+		}
+		if (Indication.PASSED == aov.getConclusion().getIndication()) {
+			return getPrimaryCryptographicValidation(aov);
+		} else {
+			return getFailCryptographicValidation(aov);
+		}
+	}
+
+	/**
+	 * Returns final cryptographic validation from the AOV block.
+	 * This method returns the first algorithm which is going to expire in case of failure,
+	 * or the first applicable algorithm (which is SignatureValue's signature algorithm in most of the cases).
+	 *
+	 * @param aov {@link XmlAOV}
+	 * @return {@link XmlCryptographicValidation}
+	 */
+	public static XmlCryptographicValidation getFailCryptographicValidation(XmlAOV aov) {
+		if (aov == null) {
+			return null;
+		}
+		XmlCryptographicValidation result = null;
+		if (aov.getSignatureCryptographicValidation() != null) {
+			result = aov.getSignatureCryptographicValidation();
+		}
+		if (aov.getSignedAttributesValidation() != null &&
+				(result == null || (Indication.PASSED == result.getConclusion().getIndication() && result.getNotAfter() == null) ||
+						(aov.getSignedAttributesValidation().getNotAfter() != null && result.getNotAfter() != null && result.getNotAfter().after(aov.getSignedAttributesValidation().getNotAfter())))) {
+			result = aov.getSignedAttributesValidation();
+		}
+		if (aov.getDigestMatchersValidation() != null &&
+				(result == null || (Indication.PASSED == result.getConclusion().getIndication() && result.getNotAfter() == null) ||
+						(aov.getDigestMatchersValidation().getNotAfter() != null && result.getNotAfter() != null && result.getNotAfter().after(aov.getDigestMatchersValidation().getNotAfter())))) {
+			result = aov.getDigestMatchersValidation();
+		}
+		if (aov.getCertificateChainCryptographicValidation() != null && (
+				Utils.isCollectionNotEmpty(aov.getCertificateChainCryptographicValidation().getCertificateCryptographicValidation()))) {
+			for (XmlCryptographicValidation cryptographicValidation : aov.getCertificateChainCryptographicValidation().getCertificateCryptographicValidation()) {
+				if (cryptographicValidation != null &&
+						(result == null || (Indication.PASSED == result.getConclusion().getIndication() && result.getNotAfter() == null) ||
+								(cryptographicValidation.getNotAfter() != null && result.getNotAfter() != null && result.getNotAfter().after(cryptographicValidation.getNotAfter())))) {
+					result = cryptographicValidation;
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the first available Cryptographic Validation entry
+	 *
+	 * @param aov {@link XmlAOV}
+	 * @return {@link XmlCryptographicValidation}
+	 */
+	public static XmlCryptographicValidation getPrimaryCryptographicValidation(XmlAOV aov) {
+		if (aov == null) {
+			return null;
+		}
+		XmlCryptographicValidation result = null;
+		if (aov.getSignatureCryptographicValidation() != null) {
+			result = aov.getSignatureCryptographicValidation();
+		}
+		if (result == null && aov.getSignedAttributesValidation() != null) {
+			result = aov.getSignedAttributesValidation();
+		}
+		if (result == null && aov.getDigestMatchersValidation() != null) {
+			result = aov.getDigestMatchersValidation();
+		}
+		if (result == null && aov.getCertificateChainCryptographicValidation() != null && (
+				Utils.isCollectionNotEmpty(aov.getCertificateChainCryptographicValidation().getCertificateCryptographicValidation()))) {
+			for (XmlCryptographicValidation cryptographicValidation : aov.getCertificateChainCryptographicValidation().getCertificateCryptographicValidation()) {
+				if (cryptographicValidation != null) {
+					result = cryptographicValidation;
+					break;
+				}
+			}
+		}
+		return result;
 	}
 
 	/**

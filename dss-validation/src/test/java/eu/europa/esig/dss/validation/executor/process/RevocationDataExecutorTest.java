@@ -21,6 +21,7 @@
 package eu.europa.esig.dss.validation.executor.process;
 
 import eu.europa.esig.dss.detailedreport.DetailedReport;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCRS;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
@@ -242,9 +243,21 @@ class RevocationDataExecutorTest extends AbstractProcessExecutorTest {
 
         // Get the Error Message as well as any extra information
         XmlSAV sav = basicBuildingBlockById.getSAV();
+        assertNotNull(sav);
+        assertEquals(Indication.INDETERMINATE, sav.getConclusion().getIndication());
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, sav.getConclusion().getSubIndication());
+
         XmlConstraint xmlConstraint = sav.getConstraint().get(0);
         XmlMessage error = xmlConstraint.getError();
+        assertEquals(MessageTag.ACCM_ANS.name(), error.getKey());
 
+        XmlAOV xmlAOV = basicBuildingBlockById.getAOV();
+        assertNotNull(xmlAOV);
+        assertEquals(Indication.INDETERMINATE, xmlAOV.getConclusion().getIndication());
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, xmlAOV.getConclusion().getSubIndication());
+
+        xmlConstraint = xmlAOV.getConstraint().get(0);
+        error = xmlConstraint.getError();
         assertEquals(MessageTag.ASCCM_PKSK_ANS.name(), error.getKey());
 
         SimpleReport simpleReport = reports.getSimpleReport();

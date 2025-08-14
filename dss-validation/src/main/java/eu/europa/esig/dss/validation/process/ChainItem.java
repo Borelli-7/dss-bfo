@@ -222,9 +222,15 @@ public abstract class ChainItem<T extends XmlConstraintsConclusion> {
 	}
 
 	private void recordConclusion() {
-		XmlConclusion conclusion = new XmlConclusion();
-		conclusion.setIndication(getFailedIndicationForConclusion());
-		conclusion.setSubIndication(getFailedSubIndicationForConclusion());
+		XmlConclusion conclusion;
+		if (result.getConclusion() != null) {
+			// For uninterrupted chains
+			conclusion = result.getConclusion();
+		} else {
+			conclusion = new XmlConclusion();
+			conclusion.setIndication(getFailedIndicationForConclusion());
+			conclusion.setSubIndication(getFailedSubIndicationForConclusion());
+		}
 
 		List<XmlMessage> previousErrors = getPreviousErrors();
 		if (Utils.isCollectionNotEmpty(previousErrors)) {
@@ -349,6 +355,9 @@ public abstract class ChainItem<T extends XmlConstraintsConclusion> {
 		} else {
 			recordInvalid();
 			recordConclusion();
+			if (continueProcessOnFail()) {
+				callNext();
+			}
 		}
 	}
 
@@ -372,6 +381,17 @@ public abstract class ChainItem<T extends XmlConstraintsConclusion> {
 	 */
 	protected SubIndication getSuccessSubIndication() {
 		return null;
+	}
+
+	/**
+	 * Gets whether the validation process shall be continued on a check failure.
+	 * Default : FALSE (break the validation process in case of a check failure).
+	 *
+	 * @return TRUE if to continue the validation process on failure,
+	 *         FALSE if to stop the validation process in case of failure
+	 */
+	protected boolean continueProcessOnFail() {
+		return false;
 	}
 
 	private void informOrWarn(Level level) {

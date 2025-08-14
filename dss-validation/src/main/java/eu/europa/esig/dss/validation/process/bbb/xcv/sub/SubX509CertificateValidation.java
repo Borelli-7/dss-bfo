@@ -20,20 +20,23 @@
  */
 package eu.europa.esig.dss.validation.process.bbb.xcv.sub;
 
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlBlockType;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCRS;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraint;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlRFC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlRevocationInformation;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlSubXCV;
 import eu.europa.esig.dss.diagnostic.CertificateRevocationWrapper;
 import eu.europa.esig.dss.diagnostic.CertificateWrapper;
+import eu.europa.esig.dss.diagnostic.RevocationWrapper;
 import eu.europa.esig.dss.enumerations.Context;
 import eu.europa.esig.dss.enumerations.Level;
 import eu.europa.esig.dss.enumerations.SubContext;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.model.policy.CertificateApplicabilityRule;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.LevelRule;
 import eu.europa.esig.dss.model.policy.MultiValuesRule;
 import eu.europa.esig.dss.model.policy.NumericValueRule;
@@ -43,7 +46,8 @@ import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.validation.process.Chain;
 import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
-import eu.europa.esig.dss.validation.process.bbb.sav.checks.CryptographicCheck;
+import eu.europa.esig.dss.validation.process.bbb.aov.RevocationDataAlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.checks.AlgorithmObsolescenceValidationCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.checks.CertificateValidationBeforeSunsetDateCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.crs.CertificateRevocationSelector;
 import eu.europa.esig.dss.validation.process.bbb.xcv.rfc.RevocationFreshnessChecker;
@@ -51,6 +55,7 @@ import eu.europa.esig.dss.validation.process.bbb.xcv.rfc.checks.RevocationDataAv
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.AuthorityInfoAccessPresentCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.BasicConstraintsCACheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.BasicConstraintsMaxPathLengthCheck;
+import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateAlgorithmObsolescenceValidationCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateForbiddenExtensionsCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateIssuedToLegalPersonCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateIssuedToNaturalPersonCheck;
@@ -126,6 +131,9 @@ public class SubX509CertificateValidation extends Chain<XmlSubXCV> {
 	/** Validation subContext */
 	private final SubContext subContext;
 
+	/** Result of cryptographic algorithms validation */
+	private final XmlAOV aov;
+
 	/** Validation policy */
 	private final ValidationPolicy validationPolicy;
 
@@ -138,10 +146,11 @@ public class SubX509CertificateValidation extends Chain<XmlSubXCV> {
 	 * @param currentTime {@link Date} time when validation is performed
 	 * @param context {@link Context}
 	 * @param subContext {@link SubContext}
+	 * @param aov {@link XmlAOV} result of algorithm obsolescence validation
 	 * @param validationPolicy {@link ValidationPolicy}
 	 */
 	public SubX509CertificateValidation(I18nProvider i18nProvider, CertificateWrapper currentCertificate, Date validationDate,
-			Date currentTime, Context context, SubContext subContext, ValidationPolicy validationPolicy) {
+			Date currentTime, Context context, SubContext subContext, XmlAOV aov, ValidationPolicy validationPolicy) {
 		super(i18nProvider, new XmlSubXCV());
 		result.setId(currentCertificate.getId());
 		result.setTrustAnchor(currentCertificate.isTrusted());
@@ -153,6 +162,8 @@ public class SubX509CertificateValidation extends Chain<XmlSubXCV> {
 
 		this.context = context;
 		this.subContext = subContext;
+
+		this.aov = aov;
 		this.validationPolicy = validationPolicy;
 	}
 	
@@ -329,7 +340,11 @@ public class SubX509CertificateValidation extends Chain<XmlSubXCV> {
 
 		// NOTE: cryptographic constraint shall be validated against the current time,
 		// and not against time returned by the used validation model
-		item = item.setNextItem(certificateCryptographic(currentCertificate, context, subContext, currentTime));
+		item = item.setNextItem(certificateCryptographic());
+
+		if (latestCertificateRevocation != null) {
+			item = item.setNextItem(revocationCryptographic(latestCertificateRevocation));
+		}
 
 		if (SubContext.SIGNING_CERT == subContext) {
 
@@ -661,11 +676,16 @@ public class SubX509CertificateValidation extends Chain<XmlSubXCV> {
 		return new CertificatePS2DQcCompetentAuthorityIdCheck(i18nProvider, result, certificate, constraint);
 	}
 
-	private ChainItem<XmlSubXCV> certificateCryptographic(CertificateWrapper certificate, Context context,
-														  SubContext subcontext, Date validationTime) {
-		CryptographicSuite cryptographicSuite = validationPolicy.getCertificateCryptographicConstraint(context, subcontext);
-		MessageTag position = ValidationProcessUtils.getCertificateChainCryptoPosition(context);
-		return new CryptographicCheck<>(i18nProvider, result, certificate, position, validationTime, cryptographicSuite);
+	private ChainItem<XmlSubXCV> certificateCryptographic() {
+		MessageTag certificatePosition = ValidationProcessUtils.getSubContextPosition(Context.CERTIFICATE, subContext);
+		return new CertificateAlgorithmObsolescenceValidationCheck<>(i18nProvider, result, aov, currentTime, certificatePosition, currentCertificate.getId());
+	}
+
+	private ChainItem<XmlSubXCV> revocationCryptographic(RevocationWrapper revocationData) {
+		// NOTE: we need to execute it explicitly in order to avoid a circular reference on revocation data validation
+		RevocationDataAlgorithmObsolescenceValidation aov = new RevocationDataAlgorithmObsolescenceValidation(i18nProvider, revocationData, currentTime, validationPolicy);
+		MessageTag position = ValidationProcessUtils.getCryptoPosition(Context.REVOCATION);
+		return new AlgorithmObsolescenceValidationCheck<>(i18nProvider, result, aov.execute(), currentTime, position, revocationData.getId());
 	}
 
 	private boolean isTrustAnchorReached(CertificateWrapper certificateWrapper, SubContext subContext) {
@@ -687,6 +707,16 @@ public class SubX509CertificateValidation extends Chain<XmlSubXCV> {
 		XmlRFC xmlRFC = result.getRFC();
 		if (xmlRFC != null && isValid(xmlRFC)) {
 			collectAllMessages(conclusion, xmlRFC.getConclusion());
+		}
+		if (aov != null && isValid(aov)) {
+			collectAllMessages(conclusion, aov.getConclusion());
+		}
+	}
+
+	@Override
+	protected void collectMessages(XmlConclusion conclusion, XmlConstraint constraint) {
+		if (XmlBlockType.AOV != constraint.getBlockType()) {
+			super.collectMessages(conclusion, constraint);
 		}
 	}
 

@@ -21,6 +21,7 @@
 package eu.europa.esig.dss.validation.process.vpfswatsp.checks.psv.checks;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraintsConclusion;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlRAC;
 import eu.europa.esig.dss.diagnostic.CertificateRevocationWrapper;
 import eu.europa.esig.dss.diagnostic.RevocationWrapper;
 import eu.europa.esig.dss.enumerations.Indication;
@@ -44,19 +45,24 @@ public class PastValidationAcceptableRevocationDataAvailable<T extends XmlConstr
     /** Revocation data to check */
     private final List<CertificateRevocationWrapper> revocationData;
 
+    /** List of Revocation Acceptance Checks */
+    private final List<XmlRAC> revocationAcceptanceResults;
+
     /**
      * Constructor without certificate
      *
      * @param i18nProvider {@link I18nProvider}
      * @param result the result
      * @param revocationData a list of {@link CertificateRevocationWrapper}s
+     * @param revocationAcceptanceResults a list of {@link XmlRAC}s
      * @param constraint {@link LevelRule}
      */
     public PastValidationAcceptableRevocationDataAvailable(I18nProvider i18nProvider, T result,
                                                            List<CertificateRevocationWrapper> revocationData,
-                                                           LevelRule constraint) {
+                                                           final List<XmlRAC> revocationAcceptanceResults, LevelRule constraint) {
         super(i18nProvider, result, constraint);
         this.revocationData = revocationData;
+        this.revocationAcceptanceResults = revocationAcceptanceResults;
     }
 
     @Override
@@ -81,7 +87,17 @@ public class PastValidationAcceptableRevocationDataAvailable<T extends XmlConstr
 
     @Override
     protected SubIndication getFailedSubIndicationForConclusion() {
-        return SubIndication.CERTIFICATE_CHAIN_GENERAL_FAILURE;
+        return isCryptoFailure() ? SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE : SubIndication.CERTIFICATE_CHAIN_GENERAL_FAILURE;
+    }
+
+    private boolean isCryptoFailure() {
+        for (XmlRAC xmlRAC : revocationAcceptanceResults) {
+            if (Indication.INDETERMINATE == xmlRAC.getConclusion().getIndication() &&
+                    SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE == xmlRAC.getConclusion().getSubIndication()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

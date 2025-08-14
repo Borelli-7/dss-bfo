@@ -548,7 +548,7 @@ class RFC5280ValidationExecutorTest extends AbstractProcessExecutorTest {
         assertEquals(Indication.INDETERMINATE, simpleReport.getIndication(timestampId));
         assertEquals(SubIndication.CHAIN_CONSTRAINTS_FAILURE, simpleReport.getSubIndication(timestampId));
         assertTrue(checkMessageValuePresence(simpleReport.getAdESValidationErrors(timestampId),
-                i18nProvider.getMessage(MessageTag.BBB_XCV_ISCGEKU_ANS, MessageTag.SIGNING_CERTIFICATE, MessageTag.TIMESTAMP)));
+                i18nProvider.getMessage(MessageTag.BBB_XCV_ISCGEKU_ANS, MessageTag.TIMESTAMP_SIG_CERT)));
 
         DetailedReport detailedReport = reports.getDetailedReport();
         assertEquals(Indication.INDETERMINATE, detailedReport.getBasicTimestampValidationIndication(timestampId));
@@ -639,7 +639,7 @@ class RFC5280ValidationExecutorTest extends AbstractProcessExecutorTest {
         assertEquals(Indication.INDETERMINATE, timestamp.getIndication());
         assertEquals(SubIndication.CHAIN_CONSTRAINTS_FAILURE, timestamp.getSubIndication());
         assertTrue(checkMessageValuePresence(convertMessages(timestamp.getAdESValidationDetails().getError()),
-                i18nProvider.getMessage(MessageTag.BBB_XCV_ISCGEKU_ANS, MessageTag.SIGNING_CERTIFICATE, MessageTag.TIMESTAMP)));
+                i18nProvider.getMessage(MessageTag.BBB_XCV_ISCGEKU_ANS, MessageTag.TIMESTAMP_SIG_CERT, MessageTag.TIMESTAMP)));
 
     }
 

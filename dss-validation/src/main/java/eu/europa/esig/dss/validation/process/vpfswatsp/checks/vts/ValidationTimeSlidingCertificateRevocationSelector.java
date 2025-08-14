@@ -140,6 +140,7 @@ public class ValidationTimeSlidingCertificateRevocationSelector extends LongTerm
             }
 
         };
+
     }
 
 }

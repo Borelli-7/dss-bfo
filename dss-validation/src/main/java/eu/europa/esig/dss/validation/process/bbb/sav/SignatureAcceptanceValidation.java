@@ -20,6 +20,7 @@
  */
 package eu.europa.esig.dss.validation.process.bbb.sav;
 
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBlockType;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
@@ -85,12 +86,13 @@ public class SignatureAcceptanceValidation extends AbstractAcceptanceValidation<
 	 * @param signature {@link SignatureWrapper}
 	 * @param context {@link Context}
 	 * @param bbbs a map of {@link XmlBasicBuildingBlocks}
+	 * @param aov {@link XmlAOV}
 	 * @param validationPolicy {@link ValidationPolicy}
 	 */
 	public SignatureAcceptanceValidation(I18nProvider i18nProvider, DiagnosticData diagnosticData, Date currentTime,
 										 SignatureWrapper signature, Context context,
-										 Map<String, XmlBasicBuildingBlocks> bbbs, ValidationPolicy validationPolicy) {
-		super(i18nProvider, signature, currentTime, context, validationPolicy);
+										 Map<String, XmlBasicBuildingBlocks> bbbs, XmlAOV aov, ValidationPolicy validationPolicy) {
+		super(i18nProvider, signature, currentTime, context, aov, validationPolicy);
 		this.diagnosticData = diagnosticData;
 		this.bbbs = bbbs;
 	}
@@ -214,9 +216,6 @@ public class SignatureAcceptanceValidation extends AbstractAcceptanceValidation<
 
 		// cryptographic check
 		item = cryptographic(item);
-
-		// cryptographic check on signed attributes
-		item = cryptographicSignedAttributes(item);
 	}
 
 	private ChainItem<XmlSAV> structuralValidation() {

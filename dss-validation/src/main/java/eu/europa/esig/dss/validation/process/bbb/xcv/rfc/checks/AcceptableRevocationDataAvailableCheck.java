@@ -37,24 +37,25 @@ import eu.europa.esig.dss.validation.process.ChainItem;
 public class AcceptableRevocationDataAvailableCheck<T extends XmlConstraintsConclusion> extends ChainItem<T> {
 
 	/** Revocation data to check */
-	private final RevocationWrapper revocationData;
+	private final RevocationWrapper acceptableRevocationData;
 
 	/**
 	 * Default constructor
 	 *
 	 * @param i18nProvider {@link I18nProvider}
 	 * @param result the result
-	 * @param revocationData {@link RevocationWrapper}
+	 * @param acceptableRevocationData {@link RevocationWrapper}
 	 * @param constraint {@link LevelRule}
 	 */
-	public AcceptableRevocationDataAvailableCheck(I18nProvider i18nProvider, T result, RevocationWrapper revocationData, LevelRule constraint) {
+	public AcceptableRevocationDataAvailableCheck(I18nProvider i18nProvider, T result, RevocationWrapper acceptableRevocationData,
+												  LevelRule constraint) {
 		super(i18nProvider, result, constraint);
-		this.revocationData = revocationData;
+		this.acceptableRevocationData = acceptableRevocationData;
 	}
 
 	@Override
 	protected boolean process() {
-		return revocationData != null;
+		return acceptableRevocationData != null;
 	}
 
 	@Override
@@ -79,8 +80,8 @@ public class AcceptableRevocationDataAvailableCheck<T extends XmlConstraintsConc
 
 	@Override
 	protected String buildAdditionalInfo() {
-		if (revocationData != null) {
-			return i18nProvider.getMessage(MessageTag.LAST_ACCEPTABLE_REVOCATION, revocationData.getId());
+		if (acceptableRevocationData != null) {
+			return i18nProvider.getMessage(MessageTag.LAST_ACCEPTABLE_REVOCATION, acceptableRevocationData.getId());
 		}
 		return null;
 	}

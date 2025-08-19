@@ -153,8 +153,8 @@ public class XAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 	}
 
 	private String getReferenceName(ReferenceValidation referenceValidation) {
-		if (Utils.isStringNotEmpty(referenceValidation.getDocumentName())) {
-			return referenceValidation.getDocumentName();
+		if (referenceValidation.getDocument() != null && Utils.isStringNotEmpty(referenceValidation.getDocument().getName())) {
+			return referenceValidation.getDocument().getName();
 		} else if (Utils.isStringNotEmpty(referenceValidation.getId())) {
 			return DomUtils.getId(referenceValidation.getId());
 		} else if (referenceValidation.getUri() != null) { // URI can be empty ""
@@ -191,8 +191,8 @@ public class XAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 	}
 
 	private String getReferencedDocumentName(ReferenceValidation referenceValidation) {
-		if (Utils.isStringNotEmpty(referenceValidation.getDocumentName())) {
-			return referenceValidation.getDocumentName();
+		if (referenceValidation.getDocument() != null && Utils.isStringNotEmpty(referenceValidation.getDocument().getName())) {
+			return referenceValidation.getDocument().getName();
 		} else if (Utils.isStringNotEmpty(referenceValidation.getUri())) {
 			// used for a document extraction, empty URI is not acceptable
 			return DomUtils.getId(referenceValidation.getUri());

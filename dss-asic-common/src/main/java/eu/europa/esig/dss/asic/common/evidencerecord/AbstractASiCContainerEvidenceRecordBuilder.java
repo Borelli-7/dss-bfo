@@ -244,7 +244,7 @@ public abstract class AbstractASiCContainerEvidenceRecordBuilder {
         }
 
         List<String> manifestCoveredFilenames = manifestFile.getEntries().stream()
-                .map(ManifestEntry::getDocumentName).collect(Collectors.toList());
+                .map(ManifestEntry::getDocument).map(DSSDocument::getName).collect(Collectors.toList());
         assertSignedDataCovered(asicContent, manifestCoveredFilenames);
     }
 
@@ -253,9 +253,8 @@ public abstract class AbstractASiCContainerEvidenceRecordBuilder {
         List<DSSDocument> allDocuments = asicContent.getAllDocuments();
         List<String> allDocumentFilenames = DSSUtils.getDocumentNames(allDocuments);
         for (ReferenceValidation referenceValidation : evidenceRecord.getReferenceValidation()) {
-            String documentName = referenceValidation.getDocumentName();
-            if (allDocumentFilenames.contains(referenceValidation.getDocumentName())) {
-                coveredDocuments.add(DSSUtils.getDocumentWithName(allDocuments, documentName));
+            if (referenceValidation.getDocument() != null && allDocumentFilenames.contains(referenceValidation.getDocument().getName())) {
+                coveredDocuments.add(DSSUtils.getDocumentWithName(allDocuments, referenceValidation.getDocument().getName()));
             }
         }
         return coveredDocuments;
@@ -405,9 +404,9 @@ public abstract class AbstractASiCContainerEvidenceRecordBuilder {
         for (ReferenceValidation referenceValidation : evidenceRecord.getReferenceValidation()) {
             if (DigestMatcherType.EVIDENCE_RECORD_ORPHAN_REFERENCE != referenceValidation.getType()) {
                 if (!referenceValidation.isIntact()) {
-                    if (referenceValidation.getDocumentName() != null) {
+                    if (referenceValidation.getDocument() != null) {
                         throw new IllegalInputException(String.format("The digest of document '%s' has not been found " +
-                                "within the manifest file or/and evidence record!", referenceValidation.getDocumentName()));
+                                "within the manifest file or/and evidence record!", referenceValidation.getDocument().getName()));
                     } else {
                         throw new IllegalInputException(errorMessage);
                     }

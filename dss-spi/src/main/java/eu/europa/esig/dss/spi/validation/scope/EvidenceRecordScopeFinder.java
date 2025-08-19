@@ -138,7 +138,7 @@ public class EvidenceRecordScopeFinder extends AbstractSignatureScopeFinder {
         if (Utils.isCollectionNotEmpty(detachedDocuments)) {
             for (DSSDocument document : detachedDocuments) {
                 Objects.requireNonNull(document.getName(), "Name shall be defined when multiple documents provided!");
-                if (referenceValidation.getDocumentName().equals(document.getName())) {
+                if (referenceValidation.getDocument() != null && referenceValidation.getDocument().getName().equals(document.getName())) {
                     return document;
                 }
             }

@@ -693,9 +693,11 @@ public class JAdESSignature extends DefaultAdvancedSignature {
 
 					} else if (SigDMechanism.OBJECT_ID_BY_URI.equals(sigDMechanism)) {
 						// detached with OBJECT_ID_BY_URI mechanism
-						byte[] payload = getPayloadForObjectIdByUriMechanism();
+						List<String> signedDataUriList = getSignedDataUriList();
+						byte[] payload = getPayloadForObjectIdByUriMechanism(signedDataUriList);
 						jws.setPayloadOctets(payload);
 						signatureValueReferenceValidation.setFound(payload != null);
+						signatureValueReferenceValidation.setDataObjectReferences(signedDataUriList);
 
 					} else if (SigDMechanism.OBJECT_ID_BY_URI_HASH.equals(sigDMechanism)) {
 						// the sigD itself is signed with OBJECT_ID_BY_URI_HASH mechanism
@@ -851,12 +853,12 @@ public class JAdESSignature extends DefaultAdvancedSignature {
 		return signedDocuments;
 	}
 	
-	private byte[] getPayloadForObjectIdByUriMechanism() {
+	private byte[] getPayloadForObjectIdByUriMechanism(List<String> signedDataUriList) {
 		if (Utils.isCollectionEmpty(detachedContents)) {
 			throw new IllegalArgumentException("The detached contents shall be provided for validating a detached signature!");
 		}
 
-		List<DSSDocument> signedDocumentsByUri = getSignedDocumentsForObjectIdByUriMechanism();
+		List<DSSDocument> signedDocumentsByUri = getSignedDocumentsForUris(signedDataUriList);
 		return DSSJsonUtils.concatenateDSSDocuments(signedDocumentsByUri, !jws.isRfc7797UnencodedPayload());
 	}
 
@@ -868,6 +870,10 @@ public class JAdESSignature extends DefaultAdvancedSignature {
 	 */
 	public List<DSSDocument> getSignedDocumentsForObjectIdByUriMechanism() {
 		List<String> signedDataUriList = getSignedDataUriList();
+		return getSignedDocumentsForUris(signedDataUriList);
+	}
+
+	private List<DSSDocument> getSignedDocumentsForUris(List<String> signedDataUriList) {
 		List<DSSDocument> signedDocumentsByUri = Collections.emptyList();
 		if (Utils.collectionSize(signedDataUriList) == 1 && Utils.collectionSize(detachedContents) == 1) {
 			signedDocumentsByUri = Collections.singletonList(detachedContents.iterator().next());

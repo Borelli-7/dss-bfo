@@ -82,17 +82,17 @@ public class JAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 						// only one document shall be present
 						return Collections.singletonList(new CounterSignatureScope(jadesSignature.getMasterSignature(), originalDocuments.get(0)));
 					} else {
-						return Collections.singletonList(getSignatureScopeFromOriginalDocument(originalDocuments.get(0)));
+						return Collections.singletonList(getSignatureScopeFromOriginalDocument(originalDocuments.get(0), referenceValidation));
 					}
-					
-				} else if (referenceValidations.size() == 1) {
-					return getSignatureScopeFromOriginalDocuments(originalDocuments);
-					
+
 				} else if (referenceValidation.getUri() != null) {
 					DSSDocument document = referenceValidation.getDocument();
-					result.add(getSignatureScopeFromOriginalDocument(document));
-					
+					result.add(getSignatureScopeFromOriginalDocument(document, referenceValidation));
+
+				} else if (referenceValidations.size() == 1) {
+					return getSignatureScopeFromOriginalDocuments(originalDocuments);
 				}
+
 			}
 		}
 		
@@ -118,15 +118,23 @@ public class JAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 	 * Returns a {@code SignatureScope} for the given {@code originalDocument}
 	 * 
 	 * @param originalDocument {@link DSSDocument} to get a SignatureScope for
+	 * @param referenceValidation {@link ReferenceValidation}
 	 * @return {@link SignatureScope}
 	 */
-	protected SignatureScope getSignatureScopeFromOriginalDocument(DSSDocument originalDocument) {
+	protected SignatureScope getSignatureScopeFromOriginalDocument(DSSDocument originalDocument, ReferenceValidation referenceValidation) {
+		String documentName = null;
+		if (originalDocument != null && originalDocument.getName() != null) {
+			documentName = originalDocument.getName();
+		} else if (referenceValidation.getUri() != null) {
+			documentName = referenceValidation.getUri();
+		} else if (Utils.collectionSize(referenceValidation.getDataObjectReferences()) == 1) {
+			documentName = referenceValidation.getDataObjectReferences().get(0);
+		}
 		if (originalDocument instanceof DigestDocument) {
 			DigestDocument digestDocument = (DigestDocument) originalDocument;
-			return new DigestSignatureScope(originalDocument.getName(), digestDocument);
-			
+			return new DigestSignatureScope(documentName, digestDocument);
 		} else {
-			return new FullSignatureScope(originalDocument.getName(), originalDocument);
+			return new FullSignatureScope(documentName, originalDocument);
 		}
 	}
 
@@ -143,7 +151,7 @@ public class JAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 		}
 		
 		for (DSSDocument originalDocument : originalDocuments) {
-			String documentName = originalDocument.getName() != null ? originalDocument.getName() : "Detached content";
+			String documentName = originalDocument.getName();
 			if (originalDocument instanceof HTTPHeader) {
 				// only http header documents shall be present
 				return getHttpHeaderSignatureScope(originalDocuments);

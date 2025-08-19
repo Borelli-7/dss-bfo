@@ -4,32 +4,30 @@ import eu.europa.esig.dss.diagnostic.DiagnosticData;
 import eu.europa.esig.dss.diagnostic.SignatureWrapper;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestMatcher;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlSignatureScope;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlSignerData;
 import eu.europa.esig.dss.enumerations.DigestMatcherType;
 import eu.europa.esig.dss.enumerations.SigDMechanism;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignaturePackaging;
-import eu.europa.esig.dss.enumerations.SignatureScopeType;
 import eu.europa.esig.dss.jades.JAdESSignatureParameters;
 import eu.europa.esig.dss.jades.JAdESTimestampParameters;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.signature.MultipleDocumentsSignatureService;
 import eu.europa.esig.dss.utils.Utils;
+import eu.europa.esig.dss.validation.SignedDocumentValidator;
+import eu.europa.esig.validationreport.jaxb.SignatureIdentifierType;
+import eu.europa.esig.validationreport.jaxb.SignersDocumentType;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class JAdESLevelBDetachedByUriByHashHttpParsDuplicateNameTest extends AbstractJAdESMultipleDocumentSignatureTest {
+class JAdESLevelBDetachedByUryWithHttpParsDuplicateNameTest extends AbstractJAdESMultipleDocumentSignatureTest {
 
     private static final String DOC_ONE_NAME = "https://nowina.lu/pub/JAdES/ObjectIdByURIHash-1.html";
     private static final String DOC_TWO_NAME = "https://nowina.lu/pub/JAdES/ObjectIdByURIHash-2.html";
@@ -52,7 +50,7 @@ class JAdESLevelBDetachedByUriByHashHttpParsDuplicateNameTest extends AbstractJA
         signatureParameters.setSigningCertificate(getSigningCert());
         signatureParameters.setCertificateChain(getCertificateChain());
         signatureParameters.setSignaturePackaging(SignaturePackaging.DETACHED);
-        signatureParameters.setSigDMechanism(SigDMechanism.OBJECT_ID_BY_URI_HASH);
+        signatureParameters.setSigDMechanism(SigDMechanism.OBJECT_ID_BY_URI);
         signatureParameters.setSignatureLevel(SignatureLevel.JAdES_BASELINE_B);
     }
 
@@ -68,45 +66,49 @@ class JAdESLevelBDetachedByUriByHashHttpParsDuplicateNameTest extends AbstractJA
     @Override
     protected void checkDigestMatchers(DiagnosticData diagnosticData) {
         SignatureWrapper signatureWrapper = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
-        int matchingNameSigDCounter = 0;
-        int misMatchingNameSigDCounter = 0;
-        for (XmlDigestMatcher digestMatcher : signatureWrapper.getDigestMatchers()) {
-            if (DigestMatcherType.SIG_D_ENTRY == digestMatcher.getType()) {
-                assertTrue(digestMatcher.isDataFound());
-                assertTrue(digestMatcher.isDataIntact());
-                assertNull(digestMatcher.getId());
-                assertNotNull(digestMatcher.getUri());
-                assertNotNull(digestMatcher.getDocumentName());
-                if (Utils.areStringsEqual(digestMatcher.getUri(), digestMatcher.getDocumentName())) {
-                    ++matchingNameSigDCounter;
-                } else {
-                    ++misMatchingNameSigDCounter;
-                }
-            }
-        }
-        assertEquals(1, matchingNameSigDCounter);
-        assertEquals(1, misMatchingNameSigDCounter);
+        List<XmlDigestMatcher> digestMatchers = signatureWrapper.getDigestMatchers();
+        assertEquals(1, digestMatchers.size());
+
+        XmlDigestMatcher digestMatcher = digestMatchers.get(0);
+        assertEquals(DigestMatcherType.JWS_SIGNING_INPUT_DIGEST, digestMatcher.getType());
+        assertFalse(digestMatcher.isDataFound());
+        assertFalse(digestMatcher.isDataIntact());
+    }
+
+    @Override
+    protected void checkBLevelValid(DiagnosticData diagnosticData) {
+        assertFalse(diagnosticData.isBLevelTechnicallyValid(diagnosticData.getFirstSignatureId()));
     }
 
     @Override
     protected void checkSignatureScopes(DiagnosticData diagnosticData) {
-        super.checkSignatureScopes(diagnosticData);
-
         SignatureWrapper signature = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
         List<XmlSignatureScope> signatureScopes = signature.getSignatureScopes();
-        assertEquals(2, signatureScopes.size());
+        assertEquals(0, signatureScopes.size());
+    }
 
-        Set<String> signerDataIds = new HashSet<>();
-        for (XmlSignatureScope signatureScope : signatureScopes) {
-            assertNotNull(signatureScope.getName());
-            assertEquals(SignatureScopeType.FULL, signatureScope.getScope());
+    @Override
+    protected void checkDTBSR(DiagnosticData diagnosticData) {
+        SignatureWrapper signatureWrapper = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
+        assertNull(signatureWrapper.getDataToBeSignedRepresentation());
+    }
 
-            XmlSignerData signerData = signatureScope.getSignerData();
-            assertNotNull(signerData);
-            assertNotNull(signerData.getId());
-            assertFalse(signerDataIds.contains(signerData.getId()));
-            signerDataIds.add(signerData.getId());
-        }
+    @Override
+    protected void validateETSISignatureIdentifier(SignatureIdentifierType signatureIdentifier) {
+        assertNotNull(signatureIdentifier);
+        assertNotNull(signatureIdentifier.getId());
+        assertNull(signatureIdentifier.getDigestAlgAndValue());
+    }
+
+    @Override
+    protected void validateETSISignersDocument(SignersDocumentType signersDocument) {
+        assertNull(signersDocument);
+    }
+
+    @Override
+    protected void verifyOriginalDocuments(SignedDocumentValidator validator, DiagnosticData diagnosticData) {
+        List<DSSDocument> retrievedOriginalDocuments = validator.getOriginalDocuments(diagnosticData.getFirstSignatureId());
+        assertFalse(Utils.isCollectionNotEmpty(retrievedOriginalDocuments));
     }
 
     @Override

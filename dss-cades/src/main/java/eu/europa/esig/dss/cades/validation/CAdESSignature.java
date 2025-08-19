@@ -797,7 +797,7 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 
 	/**
 	 * This method extracts a document content that was signed
-	 *
+	 * <p>
 	 * NOTE: Some differences are possible with PAdES
 	 *
 	 * @return {@link DSSDocument}
@@ -923,7 +923,7 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 	
 	/**
 	 * TS 119 442 - V1.1.1 - Electronic Signatures and Infrastructures (ESI), ch. 5.1.4.2.1.3 XML component:
-	 * 
+	 * <p>
 	 * In case of CAdES signatures, the input to the digest value computation shall be one of the DER-encoded
 	 * instances of SignedInfo type present within the CMS structure. 
 	 */

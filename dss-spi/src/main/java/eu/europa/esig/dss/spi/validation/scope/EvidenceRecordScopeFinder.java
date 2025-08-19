@@ -114,8 +114,8 @@ public class EvidenceRecordScopeFinder extends AbstractSignatureScopeFinder {
                             detachedDocument = getDetachedDocument(referenceValidation, detachedContents);
                         }
                         if (detachedDocument != null && !coveredDocuments.contains(detachedDocument)) {
-                            signatureScopes.add(new FullSignatureScope(detachedDocument.getName() != null ?
-                                    detachedDocument.getName() : "Full document", detachedDocument));
+                            String fileName = detachedDocument.getName();
+                            signatureScopes.add(new FullSignatureScope(fileName, detachedDocument));
                             coveredDocuments.add(detachedDocument); // do not add documents with the same digests
                         }
                         break;

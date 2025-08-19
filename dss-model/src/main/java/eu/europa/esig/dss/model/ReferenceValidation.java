@@ -60,6 +60,12 @@ public class ReferenceValidation implements Serializable {
 	/** The reference to the original document. (E.g. for XAdES : reference URI attribute value) */
 	private String uri;
 
+	/**
+	 * List of data object references covered by the current reference validation
+	 * (e.g. used in JAdES for {@code SigDMechanism.OBJECT_ID_BY_URI}
+	 */
+	private List<String> dataObjectReferences;
+
 	/** The matching document (when applicable) */
 	private DSSDocument document;
 
@@ -191,6 +197,26 @@ public class ReferenceValidation implements Serializable {
 	}
 
 	/**
+	 * Gets extracted data object reference URIs, covered by the current reference
+	 * Example: JAdES signatures with {@code SigDMechanism.OBJECT_ID_BY_URI}
+	 *
+	 * @return a list of {@link String}s
+	 */
+	public List<String> getDataObjectReferences() {
+		return dataObjectReferences;
+	}
+
+	/**
+	 * Sets extracted data object reference URIs, covered by the current reference
+	 * Example: JAdES signatures with {@code SigDMechanism.OBJECT_ID_BY_URI}
+	 *
+	 * @param dataObjectReferences a list of {@link String}s
+	 */
+	public void setDataObjectReferences(List<String> dataObjectReferences) {
+		this.dataObjectReferences = dataObjectReferences;
+	}
+
+	/**
 	 * Gets matching document name
 	 *
 	 * @return {@link String}
@@ -233,7 +259,7 @@ public class ReferenceValidation implements Serializable {
 	/**
 	 * Returns a list of transformations contained in the {@code reference}
 	 * 
-	 * @return list of {@link String} transfor names
+	 * @return list of {@link String} transform names
 	 */
 	public List<String> getTransformationNames() {
 		return transforms;

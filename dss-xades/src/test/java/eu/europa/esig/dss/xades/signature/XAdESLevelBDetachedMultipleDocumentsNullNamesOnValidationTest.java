@@ -93,7 +93,7 @@ class XAdESLevelBDetachedMultipleDocumentsNullNamesOnValidationTest extends Abst
 
         Set<String> signerDataIds = new HashSet<>();
         for (XmlSignatureScope signatureScope : signatureScopes) {
-            assertNull(signatureScope.getName());
+            assertNotNull(signatureScope.getName()); // obtained from initial references
             assertEquals(SignatureScopeType.FULL, signatureScope.getScope());
 
             XmlSignerData signerData = signatureScope.getSignerData();

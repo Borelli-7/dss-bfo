@@ -3,10 +3,13 @@ package eu.europa.esig.dss.jades.signature;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
 import eu.europa.esig.dss.diagnostic.SignatureWrapper;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestMatcher;
+import eu.europa.esig.dss.diagnostic.jaxb.XmlSignatureScope;
+import eu.europa.esig.dss.diagnostic.jaxb.XmlSignerData;
 import eu.europa.esig.dss.enumerations.DigestMatcherType;
 import eu.europa.esig.dss.enumerations.SigDMechanism;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignaturePackaging;
+import eu.europa.esig.dss.enumerations.SignatureScopeType;
 import eu.europa.esig.dss.jades.JAdESSignatureParameters;
 import eu.europa.esig.dss.jades.JAdESTimestampParameters;
 import eu.europa.esig.dss.model.DSSDocument;
@@ -15,9 +18,12 @@ import eu.europa.esig.dss.signature.MultipleDocumentsSignatureService;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -75,6 +81,27 @@ class JAdESLevelBDetachedByUriByHashHttpParsNullNameTest extends AbstractJAdESMu
             }
         }
         assertEquals(2, sigDCounter);
+    }
+
+    @Override
+    protected void checkSignatureScopes(DiagnosticData diagnosticData) {
+        super.checkSignatureScopes(diagnosticData);
+
+        SignatureWrapper signature = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
+        List<XmlSignatureScope> signatureScopes = signature.getSignatureScopes();
+        assertEquals(2, signatureScopes.size());
+
+        Set<String> signerDataIds = new HashSet<>();
+        for (XmlSignatureScope signatureScope : signatureScopes) {
+            assertNotNull(signatureScope.getName()); // obtained from initial references
+            assertEquals(SignatureScopeType.FULL, signatureScope.getScope());
+
+            XmlSignerData signerData = signatureScope.getSignerData();
+            assertNotNull(signerData);
+            assertNotNull(signerData.getId());
+            assertFalse(signerDataIds.contains(signerData.getId()));
+            signerDataIds.add(signerData.getId());
+        }
     }
 
     @Override

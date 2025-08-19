@@ -158,8 +158,8 @@ class XAdESManifestLevelBValidationNullFilenamesTest extends AbstractXAdESTestSi
         }
         assertEquals(3, fullDocumentScope);
         assertEquals(1, digestDocumentScope);
-        assertEquals(1, nameDefinedScope);
-        assertEquals(3, nameNotDefinedScope);
+        assertEquals(4, nameDefinedScope);
+        assertEquals(0, nameNotDefinedScope);
     }
 
     @Override

@@ -56,7 +56,7 @@ class XAdESExtensionBToLTADetachedWithDetachedContentTest extends AbstractXAdEST
         extensionParameters.setDetachedContents(Collections.singletonList(WRONG_DOCUMENT));
 
         AlertException exception = assertThrows(AlertException.class, () -> super.extendSignature(signedDocument));
-        assertTrue(exception.getMessage().contains("Cryptographic signature verification has failed / Best candidate validation failed"));
+        assertTrue(exception.getMessage().contains("Cryptographic signature verification has failed / Signature verification failed against the best candidate."));
 
         extensionParameters.setDetachedContents(Collections.singletonList(originalDocument));
         return super.extendSignature(signedDocument);

@@ -152,16 +152,6 @@ public class XAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 		
 	}
 
-	private String getReferencedDocumentName(ReferenceValidation referenceValidation) {
-		if (Utils.isStringNotEmpty(referenceValidation.getDocumentName())) {
-			return referenceValidation.getDocumentName();
-		} else if (Utils.isStringNotEmpty(referenceValidation.getUri())) {
-			// used for a document extraction, empty URI is not acceptable
-			return DomUtils.getId(referenceValidation.getUri());
-		}
-		return null;
-	}
-
 	private String getReferenceName(ReferenceValidation referenceValidation) {
 		if (Utils.isStringNotEmpty(referenceValidation.getDocumentName())) {
 			return referenceValidation.getDocumentName();
@@ -198,6 +188,16 @@ public class XAdESSignatureScopeFinder extends AbstractSignatureScopeFinder impl
 		} else {
 			return new FullSignatureScope(fileName, detachedDocument);
 		}
+	}
+
+	private String getReferencedDocumentName(ReferenceValidation referenceValidation) {
+		if (Utils.isStringNotEmpty(referenceValidation.getDocumentName())) {
+			return referenceValidation.getDocumentName();
+		} else if (Utils.isStringNotEmpty(referenceValidation.getUri())) {
+			// used for a document extraction, empty URI is not acceptable
+			return DomUtils.getId(referenceValidation.getUri());
+		}
+		return null;
 	}
 
 	private boolean isEverythingCovered(XAdESSignature signature, String coveredObjectId) {

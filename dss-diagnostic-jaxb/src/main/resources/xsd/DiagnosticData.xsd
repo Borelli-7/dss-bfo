@@ -1000,13 +1000,7 @@
 			<xs:element name="Description" type="xs:string" minOccurs="0" />
 			<xs:element name="DocumentationReferences" type="DocumentationReferences" minOccurs="0" />
 			<xs:choice minOccurs="0">
-				<xs:element name="ObjectReferences">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="ObjectReference" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
-						</xs:sequence>
-					</xs:complexType>
-				</xs:element>
+				<xs:element name="ObjectReferences" type="ObjectReferences"/>
 				<xs:element name="AllDataSignedObjects" type="xs:boolean"/>
 			</xs:choice>
 		</xs:sequence>
@@ -1015,6 +1009,12 @@
 	<xs:complexType name="DocumentationReferences">
 		<xs:sequence>
 			<xs:element name="DocumentationReference" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ObjectReferences">
+		<xs:sequence>
+			<xs:element name="ObjectReference" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 	
@@ -1041,6 +1041,7 @@
 				<xs:sequence>
 					<xs:element name="DataFound" type="xs:boolean" />
 					<xs:element name="DataIntact" type="xs:boolean" />
+					<xs:element name="DataObjectReferences" type="ObjectReferences" minOccurs="0" />
 				</xs:sequence>
 				<xs:attribute name="type" type="DigestMatcherType" use="required" />
 				<xs:attribute name="id" type="xs:string" use="optional"/>

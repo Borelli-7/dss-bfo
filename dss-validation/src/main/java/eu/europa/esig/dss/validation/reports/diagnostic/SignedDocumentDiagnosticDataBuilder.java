@@ -637,7 +637,8 @@ public class SignedDocumentDiagnosticDataBuilder extends DiagnosticDataBuilder {
 		ref.setType(referenceValidation.getType());
 		ref.setId(referenceValidation.getId());
 		ref.setUri(referenceValidation.getUri());
-		ref.setDocumentName(referenceValidation.getDocumentName());
+		ref.setDataObjectReferences(referenceValidation.getDataObjectReferences());
+		ref.setDocumentName(referenceValidation.getDocument() != null ? referenceValidation.getDocument().getName() : null);
 		Digest digest = referenceValidation.getDigest();
 		if (digest != null) {
 			ref.setDigestValue(digest.getValue());

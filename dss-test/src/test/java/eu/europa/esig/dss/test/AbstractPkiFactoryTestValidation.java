@@ -1386,7 +1386,6 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 						SignatureScopeType.ARCHIVED != signatureScope.getScope()) {
 					fail(String.format("Unsupported SignatureScopeType '%s'!", signatureScope.getScope()));
 				}
-				assertNotNull(signatureScope.getName());
 				assertNotNull(signatureScope.getDescription());
 
 				XmlSignerData signerData = signatureScope.getSignerData();

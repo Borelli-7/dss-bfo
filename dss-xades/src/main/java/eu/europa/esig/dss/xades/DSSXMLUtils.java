@@ -1331,15 +1331,28 @@ public final class DSSXMLUtils {
 	 *
 	 * @param reference {@link Reference} to get a name of the linked document for
 	 * @return {@link String} document name
+	 * @deprecated since DSS 6.4. Please use {@code getDocument(reference).getName()} method instead
 	 */
+	@Deprecated
 	public static String getDocumentName(Reference reference) {
+		DSSDocument document = getDocument(reference);
+		return document != null ? document.getName() : null;
+	}
+
+	/**
+	 * This method returns a name of the linked document to the reference (when applicable)
+	 *
+	 * @param reference {@link Reference} to get a name of the linked document for
+	 * @return {@link String} document name
+	 */
+	public static DSSDocument getDocument(Reference reference) {
 		try {
 			XMLSignatureInput xmlSignatureInput = getClosedContentsBeforeTransformation(reference);
 			if (xmlSignatureInput instanceof DSSDocumentXMLSignatureInput) {
-				return ((DSSDocumentXMLSignatureInput) xmlSignatureInput).getDocumentName();
+				return ((DSSDocumentXMLSignatureInput) xmlSignatureInput).getDocument();
 			}
 		} catch (Exception e) {
-			String errorMessage = "Unable to verify matching document name for a reference with Id [{}] : {}";
+			String errorMessage = "Unable to verify matching document for a reference with Id [{}] : {}";
 			if (LOG.isDebugEnabled()) {
 				LOG.warn(errorMessage, reference.getId(), e.getMessage(), e);
 			} else {

@@ -20,16 +20,12 @@
  */
 package eu.europa.esig.dss.xades.signature;
 
-import eu.europa.esig.dss.diagnostic.DiagnosticData;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignaturePackaging;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
-import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.signature.MultipleDocumentsSignatureService;
-import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
-import eu.europa.esig.dss.xades.DSSXMLUtils;
 import eu.europa.esig.dss.xades.XAdESSignatureParameters;
 import eu.europa.esig.dss.xades.XAdESTimestampParameters;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,10 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-class DetachedXmlMultiDocSignatureTest extends AbstractXAdESMultipleDocumentsSignatureService {
+public class XAdESLevelBDetachedMultipleDocumentsWithKeyInfoTest extends AbstractXAdESMultipleDocumentsSignatureService {
 
 	private XAdESSignatureParameters signatureParameters;
 	private List<DSSDocument> documentToSigns;
@@ -48,14 +41,14 @@ class DetachedXmlMultiDocSignatureTest extends AbstractXAdESMultipleDocumentsSig
 	@BeforeEach
 	void init() throws Exception {
 		documentToSigns = Arrays.asList(new FileDocument("src/test/resources/sample.xml"),
-				new FileDocument("src/test/resources/sampleWithPlaceOfSignature.xml"),
-				new InMemoryDocument(DSSUtils.EMPTY_BYTE_ARRAY, "emptyByteArray"));
+				new FileDocument("src/test/resources/sampleWithPlaceOfSignature.xml"));
 
 		signatureParameters = new XAdESSignatureParameters();
 		signatureParameters.setSigningCertificate(getSigningCert());
 		signatureParameters.setCertificateChain(getCertificateChain());
 		signatureParameters.setSignaturePackaging(SignaturePackaging.DETACHED);
 		signatureParameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_B);
+		signatureParameters.setSignKeyInfo(true);
 	}
 
 	@Override
@@ -65,27 +58,6 @@ class DetachedXmlMultiDocSignatureTest extends AbstractXAdESMultipleDocumentsSig
 		validator.setCertificateVerifier(getOfflineCertificateVerifier());
 		validator.setSignaturePolicyProvider(getSignaturePolicyProvider());
 		return validator;
-	}
-
-	@Override
-	protected void onDocumentSigned(byte[] byteArray) {
-		super.onDocumentSigned(byteArray);
-
-		assertFalse(DSSXMLUtils.isDuplicateIdsDetected(new InMemoryDocument(byteArray)));
-	}
-
-	@Override
-	protected void verifyOriginalDocuments(SignedDocumentValidator validator, DiagnosticData diagnosticData) {
-		List<DSSDocument> retrievedDocuments = validator.getOriginalDocuments(diagnosticData.getFirstSignatureId());
-		for (DSSDocument document : documentToSigns) {
-			boolean found = false;
-			for (DSSDocument retrievedDoc : retrievedDocuments) {
-				if (Arrays.equals(DSSUtils.toByteArray(document), DSSUtils.toByteArray(retrievedDoc))) {
-					found = true;
-				}
-			}
-			assertTrue(found);
-		}
 	}
 
 	@Override

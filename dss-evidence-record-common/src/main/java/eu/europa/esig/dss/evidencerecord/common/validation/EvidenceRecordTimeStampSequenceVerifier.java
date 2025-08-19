@@ -391,7 +391,8 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
         }
 
         // create empty ReferenceValidations for not found manifest entries, when applicable
-        List<String> foundDocumentNames = referenceValidations.stream().map(ReferenceValidation::getDocumentName).filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> foundDocumentNames = referenceValidations.stream().map(ReferenceValidation::getDocument).filter(Objects::nonNull)
+                .map(DSSDocument::getName).filter(Objects::nonNull).collect(Collectors.toList());
         if (Utils.collectionSize(manifestFile.getEntries()) > Utils.collectionSize(foundDocumentNames)) {
             List<ReferenceValidation> failedReferences = referenceValidations.stream().filter(r -> !r.isIntact()).collect(Collectors.toList());
             if (Utils.collectionSize(manifestFile.getEntries()) - Utils.collectionSize(foundDocumentNames) >= Utils.collectionSize(failedReferences)) {
@@ -411,7 +412,7 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
                     referenceValidation.setType(DigestMatcherType.EVIDENCE_RECORD_ARCHIVE_OBJECT);
                     referenceValidation.setDigest(manifestEntry.getDigest());
                     referenceValidation.setUri(manifestEntry.getUri());
-                    referenceValidation.setDocumentName(matchingDocument != null ? matchingDocument.getName() : null);
+                    referenceValidation.setDocument(matchingDocument);
                     referenceValidation.setFound(matchingDocument != null);
                     referenceValidation.setIntact(false);
                     referenceValidations.add(referenceValidation);
@@ -428,7 +429,7 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
         if (firstTimeStamp) {
             for (ManifestEntry manifestEntry : manifestFile.getEntries()) {
                 for (ReferenceValidation reference : referenceValidations) {
-                    if (manifestEntry.getUri().equals(reference.getDocumentName()) &&
+                    if (reference.getDocument() != null && manifestEntry.getUri().equals(reference.getDocument().getName()) &&
                             manifestEntry.getDigest() != null && reference.getDigest() != null &&
                             !manifestEntry.getDigest().getAlgorithm().equals(reference.getDigest().getAlgorithm())) {
                         LOG.warn("The digest algorithm '{}' defined in a manifest file with name '{}' does not match " +
@@ -480,10 +481,10 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
                     referenceValidation.setFound(matchingManifestEntry.isFound() || matchingDocument != null);
                     referenceValidation.setIntact(matchingManifestEntry.isIntact() && matchingDocument != null);
                     referenceValidation.setUri(matchingManifestEntry.getUri());
-                    referenceValidation.setDocumentName(matchingManifestEntry.getDocumentName());
+                    referenceValidation.setDocument(matchingManifestEntry.getDocument());
 
                 } else if (matchingDocument != null) {
-                    referenceValidation.setDocumentName(matchingDocument.getName());
+                    referenceValidation.setDocument(matchingDocument);
 
                 } else {
                     referenceValidation.setType(DigestMatcherType.EVIDENCE_RECORD_ORPHAN_REFERENCE);
@@ -494,13 +495,13 @@ public abstract class EvidenceRecordTimeStampSequenceVerifier {
             } else if (matchingDocument != null) {
                 referenceValidation.setFound(true);
                 referenceValidation.setIntact(true);
-                referenceValidation.setDocumentName(matchingDocument.getName());
+                referenceValidation.setDocument(matchingDocument);
 
             } else if (Utils.collectionSize(digestValues) == 1 && Utils.collectionSize(detachedContents) == 1 && !evidenceRecord.isEmbedded()) {
                 // if one document is expected and provided -> assume it as a signed data
                 referenceValidation.setFound(true);
                 referenceValidation.setIntact(false);
-                referenceValidation.setDocumentName(detachedContents.get(0).getName());
+                referenceValidation.setDocument(detachedContents.get(0));
 
             } else {
                 referenceValidation.setType(DigestMatcherType.EVIDENCE_RECORD_ORPHAN_REFERENCE);

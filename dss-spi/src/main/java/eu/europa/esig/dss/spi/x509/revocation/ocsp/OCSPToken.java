@@ -26,6 +26,7 @@ import eu.europa.esig.dss.enumerations.RevocationReason;
 import eu.europa.esig.dss.enumerations.RevocationType;
 import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureValidity;
+import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.Digest;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.model.x509.revocation.ocsp.OCSP;
@@ -49,11 +50,13 @@ import org.bouncycastle.cert.ocsp.RevokedStatus;
 import org.bouncycastle.cert.ocsp.SingleResp;
 import org.bouncycastle.cert.ocsp.UnknownStatus;
 import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.x500.X500Principal;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.List;
@@ -301,9 +304,7 @@ public class OCSPToken extends RevocationToken<OCSP> {
 	protected SignatureValidity checkIsSignedBy(final PublicKey publicKey) {
 		try {
 			signatureInvalidityReason = "";
-			JcaContentVerifierProviderBuilder jcaContentVerifierProviderBuilder = new JcaContentVerifierProviderBuilder();
-			jcaContentVerifierProviderBuilder.setProvider(DSSSecurityProvider.getSecurityProvider());
-			ContentVerifierProvider contentVerifierProvider = jcaContentVerifierProviderBuilder.build(publicKey);
+			ContentVerifierProvider contentVerifierProvider = buildContentVerifierProvider(publicKey);
 			signatureValidity = SignatureValidity.get(basicOCSPResp.isSignatureValid(contentVerifierProvider));
 		} catch (Exception e) {
 			LOG.warn("An error occurred during in attempt to check signature owner : ", e);
@@ -311,6 +312,41 @@ public class OCSPToken extends RevocationToken<OCSP> {
 			signatureValidity = SignatureValidity.INVALID;
 		}
 		return signatureValidity;
+	}
+
+	private ContentVerifierProvider buildContentVerifierProvider(final PublicKey publicKey) {
+		try {
+			return buildContentVerifierProvider(publicKey, DSSSecurityProvider.getSecurityProvider());
+		} catch (Exception e) {
+			String errorMessage = "Unable to build ContentVerifierProvider using a default security provider " +
+					"for algorithm with name '{}'. {}";
+			if (LOG.isDebugEnabled()) {
+				LOG.warn(errorMessage, publicKey.getAlgorithm(), e.getMessage(), e);
+			} else {
+				LOG.warn(errorMessage, publicKey.getAlgorithm(), e.getMessage());
+			}
+		}
+		for (Provider provider : DSSSecurityProvider.getAlternativeSecurityProviders()) {
+			try {
+				return buildContentVerifierProvider(publicKey, provider);
+			} catch (Exception e) {
+				String errorMessage = "Unable to build ContentVerifierProvider using an alternative security provider '{}' " +
+						"for algorithm with name '{}'. {}";
+				if (LOG.isDebugEnabled()) {
+					LOG.warn(errorMessage, provider.getName(), publicKey.getAlgorithm(), e.getMessage(), e);
+				} else {
+					LOG.warn(errorMessage, provider.getName(), publicKey.getAlgorithm(), e.getMessage());
+				}
+			}
+		}
+		throw new DSSException(String.format("Unable to load ContentVerifierProvider for " +
+				"the algorithm with name '%s'. All security providers have failed. More detail in debug mode.", publicKey.getAlgorithm()));
+	}
+
+	private ContentVerifierProvider buildContentVerifierProvider(final PublicKey publicKey, final Provider provider) throws OperatorCreationException {
+		JcaContentVerifierProviderBuilder jcaContentVerifierProviderBuilder = new JcaContentVerifierProviderBuilder();
+		jcaContentVerifierProviderBuilder.setProvider(provider);
+		return jcaContentVerifierProviderBuilder.build(publicKey);
 	}
 
 	/**

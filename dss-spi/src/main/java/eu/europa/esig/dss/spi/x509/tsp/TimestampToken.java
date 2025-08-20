@@ -58,7 +58,7 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.operator.OperatorException;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.slf4j.Logger;
@@ -66,6 +66,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -460,14 +461,38 @@ public class TimestampToken extends Token {
 		}
 	}
 
-	private SignerInformationVerifier getSignerInformationVerifier(final CertificateToken candidate) {
+	private SignerInformationVerifier getSignerInformationVerifier(final CertificateToken certificateToken) {
 		try {
-			final JcaSimpleSignerInfoVerifierBuilder verifier = new JcaSimpleSignerInfoVerifierBuilder();
-			verifier.setProvider(DSSSecurityProvider.getSecurityProviderName());
-			return verifier.build(candidate.getCertificate());
-		} catch (OperatorException e) {
-			throw new DSSException("Unable to build an instance of SignerInformationVerifier", e);
+			return buildSignerInformationVerifier(certificateToken, DSSSecurityProvider.getSecurityProvider());
+		} catch (Exception e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.warn("Unable to build SignerInformationVerifier using a default security provider " +
+						"for certificate. {}. Certificate: {}", e.getMessage(), Utils.toBase64(certificateToken.getEncoded()), e);
+			} else {
+				LOG.warn("Unable to build SignerInformationVerifier using a default security provider " +
+						"for certificate. {}.", e.getMessage());
+			}
 		}
+		for (Provider provider : DSSSecurityProvider.getAlternativeSecurityProviders()) {
+			try {
+				return buildSignerInformationVerifier(certificateToken, provider);
+			} catch (Exception e) {
+				String errorMessage = "Unable to build SignerInformationVerifier using an alternative security provider '{}'. {}";
+				if (LOG.isDebugEnabled()) {
+					LOG.warn(errorMessage, provider.getName(), e.getMessage(), e);
+				} else {
+					LOG.warn(errorMessage, provider.getName(), e.getMessage());
+				}
+			}
+		}
+		throw new DSSException("Unable to load SignerInformationVerifier for timestamp certificate. " +
+				"All security providers have failed. More detail in debug mode.");
+	}
+
+	private SignerInformationVerifier buildSignerInformationVerifier(final CertificateToken certificateToken, final Provider provider) throws OperatorCreationException {
+		JcaSimpleSignerInfoVerifierBuilder jcaSimpleSignerInfoVerifierBuilder = new JcaSimpleSignerInfoVerifierBuilder();
+		jcaSimpleSignerInfoVerifierBuilder.setProvider(provider);
+		return jcaSimpleSignerInfoVerifierBuilder.build(certificateToken.getCertificate());
 	}
 	
 	@Override

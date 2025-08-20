@@ -35,6 +35,7 @@ import eu.europa.esig.dss.utils.Utils;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,6 +51,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
@@ -58,7 +60,6 @@ import java.security.interfaces.ECPrivateKey;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -83,6 +84,11 @@ class DSSUtilsTest {
 	static void init() {
 		certificate = DSSUtils.loadCertificate(new File("src/test/resources/TSP_Certificate_2014.crt"));
 		assertNotNull(certificate);
+	}
+
+	@AfterEach
+	void resetAlternativeProviders() {
+		DSSSecurityProvider.setAlternativeSecurityProviders(new Provider[] {});
 	}
 
 	@Test
@@ -164,14 +170,19 @@ class DSSUtilsTest {
 	@Test
 	void testLoadP7cPEM() throws DSSException, IOException {
 		Collection<CertificateToken> certs = DSSUtils.loadCertificateFromP7c(Files.newInputStream(Paths.get("src/test/resources/certchain.p7c")));
-		assertTrue(Utils.isCollectionNotEmpty(certs));
-		assertTrue(certs.size() > 1);
+		assertEquals(3, Utils.collectionSize(certs));
+
+		certs = DSSUtils.loadCertificateFromP7c(new File("src/test/resources/certchain.p7c"));
+		assertEquals(3, Utils.collectionSize(certs));
 	}
 
 	@Test
 	void testLoadP7cNotPEM() throws DSSException, IOException {
 		Collection<CertificateToken> certs = DSSUtils.loadCertificateFromP7c(Files.newInputStream(Paths.get("src/test/resources/AdobeCA.p7c")));
-		assertTrue(Utils.isCollectionNotEmpty(certs));
+		assertEquals(1, Utils.collectionSize(certs));
+
+		certs = DSSUtils.loadCertificateFromP7c(new File("src/test/resources/AdobeCA.p7c"));
+		assertEquals(1, Utils.collectionSize(certs));
 	}
 
 	@Test
@@ -669,10 +680,13 @@ class DSSUtilsTest {
 	}
 
 	@Test
-	void loadATTLTest() {
-		DSSSecurityProvider.setAlternativeSecurityProviders(Collections.singletonList(Security.getProvider("SUN")));
-
+	void loadCertificateWithAlternativeSecurityProviderTest() {
 		byte[] certificate = Utils.fromBase64("MIIDDjCCAnegAwIBAgIBATANBgkqhkiG9w0BAQUFADCBmjELMAkGA1UEBhMCQVQxSDBGBgNVBAoTP0EtVHJ1c3QgR2VzLiBmLiBTaWNoZXJoZWl0c3N5c3RlbWUgaW0gZWxla3RyLiBEYXRlbnZlcmtlaHIgR21iSDEXMBUGA1UECxMOd3d3LmEtdHJ1c3QuYXQxEzARBgNVBAsTCmEtc2lnbiB1bmkxEzARBgNVBAMTCmEtc2lnbiB1bmkwHhcNMDIwOTEzMTgzMjM4WhcNMzIwOTEzMTgzMjM4WjCBmjELMAkGA1UEBhMCQVQxSDBGBgNVBAoTP0EtVHJ1c3QgR2VzLiBmLiBTaWNoZXJoZWl0c3N5c3RlbWUgaW0gZWxla3RyLiBEYXRlbnZlcmtlaHIgR21iSDEXMBUGA1UECxMOd3d3LmEtdHJ1c3QuYXQxEzARBgNVBAsTCmEtc2lnbiB1bmkxEzARBgNVBAMTCmEtc2lnbiB1bmkwgZ4wCwYJKoZIhvcNAQEBA4GOADCBigKBgQCvBqGXYw0rNZyQR8YG+EQ4GeoQgMRdsYPhnuvkl6aEMWdMvDuvAPlLi4rXNNq3mb4yKKCswSp5SPiRo43uwrpfCjLxu9RT+Fi3wDE1Z5tBr7iQOnOCx5IKs2X94hcdsJClWHYoxT4f5Jnq86kNVYys+T8TUJCrsHm/8TCr3x7vuwIEAAAAA6NjMGEwDgYDVR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFBXzfvl2WIKcUwhZzt+1wC1ShQPBMB8GA1UdIwQYMBaAFBXzfvl2WIKcUwhZzt+1wC1ShQPBMA0GCSqGSIb3DQEBBQUAA4GBAALtJ7UT/H4ZwUAeKV1X1Gz+pIqVtCsECNKWHiZeXx0ly/insjh+vbNVNy2RyOimKWtms0GZ0Kj/oDK81efRL9YvHKMlCLlz6FBKaUTUztO1FYa2othUGsu8LsBtPPU6u0wMPGhE3DEdo5/4lA6gMbsOvKQ6jQyeCjqOB22EjbJd");
+		Exception exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(certificate));
+		assertTrue(exception.getMessage().contains("Unable to load certificate"));
+
+		DSSSecurityProvider.setAlternativeSecurityProviders("SUN");
+
 		CertificateToken certificateToken = DSSUtils.loadCertificate(certificate);
 		assertNotNull(certificateToken);
 	}

@@ -267,18 +267,92 @@ public final class DSSUtils {
 	 * <p>
 	 * If the certificate is provided in Base64 encoding, it must be bounded at the beginning by
 	 * {@code -----BEGIN CERTIFICATE-----}, and must be bounded at the end by {@code -----END CERTIFICATE-----}.
+	 * <p>
+	 * This method will at first try to load the certificate with a default security Provider,
+	 * if it fails, it will try to load the certificate using alternative security providers, until the first success.
+	 * In case of a success, the first obtained implementation of a certificate is returned, otherwise,
+	 * if all security providers fail to load the certificate, an exception is thrown.
 	 * 
 	 * @param file
 	 *            the file with the certificate
 	 * @return the certificate token
 	 */
 	public static CertificateToken loadCertificate(final File file) {
+		Objects.requireNonNull(file, "Input file cannot be null");
 		try {
-			final InputStream inputStream = Files.newInputStream(file.toPath());
-			return loadCertificate(inputStream);
+			final InputStream inputStream = Files.newInputStream(file.toPath()); // closed inside
+			return loadCertificate(inputStream, DSSSecurityProvider.getSecurityProviderName());
 		} catch (IOException e) {
 			throw new DSSException(String.format("Unable to find a file '%s' : %s", file.getAbsolutePath(), e.getMessage()), e);
+		} catch (Exception e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.warn("Unable to load certificate using a default security provider. {}. Input file: {}",
+						e.getMessage(), file.getAbsolutePath(), e);
+			} else {
+				LOG.warn("Unable to load certificate using a default security provider. {}", e.getMessage());
+			}
 		}
+		for (String providerName : DSSSecurityProvider.getAlternativeSecurityProviderNames()) {
+			try {
+				final InputStream inputStream = Files.newInputStream(file.toPath()); // closed inside
+				return loadCertificate(inputStream, providerName);
+			} catch (Exception e) {
+				String errorMessage = "Unable to load certificate using an alternative security provider '{}'. {}.";
+				if (LOG.isDebugEnabled()) {
+					LOG.warn(errorMessage, providerName, e.getMessage(), e);
+				} else {
+					LOG.warn(errorMessage, providerName, e.getMessage());
+				}
+			}
+		}
+		throw new DSSException("Unable to load certificate from a file. All security providers have failed. More detail in debug mode.");
+	}
+
+	/**
+	 * This method loads a certificate from the byte array. The certificate must be DER-encoded and may be supplied in
+	 * binary or printable (Base64) encoding.
+	 * <p>
+	 * If the certificate is provided in Base64 encoding, it must be bounded at the beginning by
+	 * -----BEGIN CERTIFICATE-----, and
+	 * must be bounded at the end by -----END CERTIFICATE-----. It throws an {@code DSSException} or return {@code null}
+	 * when the
+	 * certificate cannot be loaded.
+	 * <p>
+	 * This method will at first try to load the certificate with a default security Provider,
+	 * if it fails, it will try to load the certificate using alternative security providers, until the first success.
+	 * In case of a success, the first obtained implementation of a certificate is returned, otherwise,
+	 * if all security providers fail to load the certificate, an exception is thrown.
+	 *
+	 * @param input
+	 *            array of bytes containing the certificate
+	 * @return the certificate token
+	 */
+	public static CertificateToken loadCertificate(final byte[] input) {
+		Objects.requireNonNull(input, "Input binary cannot be null");
+		try {
+			final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
+			return loadCertificate(inputStream, DSSSecurityProvider.getSecurityProviderName());
+		} catch (Exception e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.warn("Unable to load certificate using a default security provider. {}. Input: {}", e.getMessage(), Utils.toBase64(input), e);
+			} else {
+				LOG.warn("Unable to load certificate using a default security provider. {}", e.getMessage());
+			}
+		}
+		for (String providerName : DSSSecurityProvider.getAlternativeSecurityProviderNames()) {
+			try {
+				final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
+				return loadCertificate(inputStream, providerName);
+			} catch (Exception e) {
+				String errorMessage = "Unable to load certificate using an alternative security provider '{}'. {}.";
+				if (LOG.isDebugEnabled()) {
+					LOG.warn(errorMessage, providerName, e.getMessage(), e);
+				} else {
+					LOG.warn(errorMessage, providerName, e.getMessage());
+				}
+			}
+		}
+		throw new DSSException("Unable to load certificate. All security providers have failed. More detail in debug mode.");
 	}
 
 	/**
@@ -287,19 +361,35 @@ public final class DSSUtils {
 	 * <p>
 	 * If the certificate is provided in Base64 encoding, it must be bounded at the beginning by
 	 * {@code -----BEGIN CERTIFICATE-----}, and must be bounded at the end by {@code -----END CERTIFICATE-----}.
+	 * <p>
+	 * NOTE: As the certificate is provided in the form of an {@code InputStream}, only single reading of the stream is possible.
+	 *       Therefore, the method uses only a default security provider to load a certificate.
+	 *       Should you need to use an alternative security provider, please use
+	 *       {@code #loadCertificate(InputStream inputStream, String providerName)} method instead.
 	 * 
 	 * @param inputStream
 	 *            input stream containing the certificate
 	 * @return the certificate token
 	 */
 	public static CertificateToken loadCertificate(final InputStream inputStream) {
-		List<CertificateToken> certificates = loadCertificates(inputStream, DSSSecurityProvider.getSecurityProviderName());
-		if (certificates.size() == 1) {
-			return certificates.get(0);
-		}
-		throw new DSSException("Could not parse certificate");
+		return loadCertificate(inputStream, DSSSecurityProvider.getSecurityProviderName());
 	}
 
+	/**
+	 * This method loads a certificate from the given location using a security Provider with the given {@code providerName}.
+	 * The certificate must be DER-encoded and may be supplied in binary or printable (PEM / Base64) encoding.
+	 * <p>
+	 * If the certificate is provided in Base64 encoding, it must be bounded at the beginning by
+	 * {@code -----BEGIN CERTIFICATE-----}, and must be bounded at the end by {@code -----END CERTIFICATE-----}.
+	 * <p>
+	 * NOTE: This method tries to load the certificate only once using the specified provider.
+	 *
+	 * @param inputStream
+	 *            input stream containing the certificate
+	 * @param providerName
+	 *            {@link String} representing the security Provider's name
+	 * @return the certificate token
+	 */
 	public static CertificateToken loadCertificate(final InputStream inputStream, final String providerName) {
 		List<CertificateToken> certificates = loadCertificates(inputStream, providerName);
 		if (certificates.size() == 1) {
@@ -309,13 +399,115 @@ public final class DSSUtils {
 	}
 
 	/**
-	 * Loads a collection of certificates from a p7c source
+	 * Loads a collection of certificates from a p7c file
+	 * <p>
+	 * This method will at first try to load the certificate with a default security Provider,
+	 * if it fails, it will try to load the certificate using alternative security providers, until the first success.
+	 * In case of a success, the first obtained implementation of a certificate is returned, otherwise,
+	 * if all security providers fail to load the certificate, an exception is thrown.
+	 *
+	 * @param file {@link File} p7c
+	 * @return a list of {@link CertificateToken}s
+	 */
+	public static List<CertificateToken> loadCertificateFromP7c(File file) {
+		Objects.requireNonNull(file, "Input file cannot be null");
+		try {
+			final InputStream inputStream = Files.newInputStream(file.toPath());
+			return loadCertificateFromP7c(inputStream, DSSSecurityProvider.getSecurityProviderName());
+		} catch (IOException e) {
+			throw new DSSException(String.format("Unable to find a file '%s' : %s", file.getAbsolutePath(), e.getMessage()), e);
+		} catch (Exception e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.warn("Unable to load p7c certificates using a default security provider. {}. Input file: {}",
+						e.getMessage(), file.getAbsolutePath(), e);
+			} else {
+				LOG.warn("Unable to load p7c certificates using a default security provider. {}", e.getMessage());
+			}
+		}
+		for (String providerName : DSSSecurityProvider.getAlternativeSecurityProviderNames()) {
+			try {
+				final InputStream inputStream = Files.newInputStream(file.toPath());
+				return loadCertificateFromP7c(inputStream, providerName);
+			} catch (Exception e) {
+				String errorMessage = "Unable to load certificate using an alternative security provider '{}'. {}.";
+				if (LOG.isDebugEnabled()) {
+					LOG.warn(errorMessage, providerName, e.getMessage(), e);
+				} else {
+					LOG.warn(errorMessage, providerName, e.getMessage());
+				}
+			}
+		}
+		throw new DSSException("Unable to load p7c certificates from a file. All security providers have failed. More detail in debug mode.");
+	}
+
+	/**
+	 * Loads a collection of certificates from a p7c byte array
+	 * <p>
+	 * This method will at first try to load the certificate with a default security Provider,
+	 * if it fails, it will try to load the certificate using alternative security providers, until the first success.
+	 * In case of a success, the first obtained implementation of a certificate is returned, otherwise,
+	 * if all security providers fail to load the certificate, an exception is thrown.
+	 *
+	 * @param input {@link InputStream} p7c
+	 * @return a list of {@link CertificateToken}s
+	 */
+	public static List<CertificateToken> loadCertificateFromP7c(byte[] input) {
+		Objects.requireNonNull(input, "Input binary cannot be null");
+		try {
+			final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
+			return loadCertificateFromP7c(inputStream, DSSSecurityProvider.getSecurityProviderName());
+		} catch (Exception e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.warn("Unable to load p7c certificates using a default security provider. {}. Input: {}", e.getMessage(), Utils.toBase64(input), e);
+			} else {
+				LOG.warn("Unable to load p7c certificates using a default security provider. {}", e.getMessage());
+			}
+		}
+		for (String providerName : DSSSecurityProvider.getAlternativeSecurityProviderNames()) {
+			try {
+				final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
+				return loadCertificateFromP7c(inputStream, providerName);
+			} catch (Exception e) {
+				String errorMessage = "Unable to load p7c certificates using an alternative security provider '{}'. {}.";
+				if (LOG.isDebugEnabled()) {
+					LOG.warn(errorMessage, providerName, e.getMessage(), e);
+				} else {
+					LOG.warn(errorMessage, providerName, e.getMessage());
+				}
+			}
+		}
+		throw new DSSException("Unable to load p7c certificates. All security providers have failed. More detail in debug mode.");
+	}
+
+	/**
+	 * Loads a collection of certificates from a p7c {@code InputStream}
+	 * <p>
+	 * NOTE: As the certificate is provided in the form of an {@code InputStream}, only single reading of the stream is possible.
+	 *       Therefore, the method uses only a default security provider to load p7c certificates.
+	 *       Should you need to use an alternative security provider, please use
+	 *       {@code #loadCertificateFromP7c(InputStream inputStream, String providerName)} method instead.
 	 *
 	 * @param inputStream {@link InputStream} p7c
 	 * @return a list of {@link CertificateToken}s
 	 */
 	public static List<CertificateToken> loadCertificateFromP7c(InputStream inputStream) {
-		return loadCertificates(inputStream, DSSSecurityProvider.getSecurityProviderName());
+		return loadCertificateFromP7c(inputStream, DSSSecurityProvider.getSecurityProviderName());
+	}
+
+	/**
+	 * Loads a collection of certificates from a p7c {@code InputStream} using a security Provider with the given {@code providerName}
+	 * <p>
+	 * NOTE: As the certificate is provided in the form of an {@code InputStream}, only single reading of the stream is possible.
+	 *       Therefore, the method uses only a default security provider to load p7c certificates.
+	 *       Should you need to use an alternative security provider, please use
+	 *       {@code #loadCertificateFromP7c(InputStream inputStream, String providerName)} method instead.
+	 *
+	 * @param inputStream {@link InputStream} p7c
+	 * @param providerName {@link String} name of the security provider
+	 * @return a list of {@link CertificateToken}s
+	 */
+	public static List<CertificateToken> loadCertificateFromP7c(InputStream inputStream, String providerName) {
+		return loadCertificates(inputStream, providerName);
 	}
 
 	private static List<CertificateToken> loadCertificates(InputStream inputStream, String providerName) {
@@ -338,38 +530,6 @@ public final class DSSUtils {
 		} catch (Exception e) {
 			throw new DSSException("Unable to load certificate(s) : " + e.getMessage(), e);
 		}
-	}
-
-	/**
-	 * This method loads a certificate from the byte array. The certificate must be DER-encoded and may be supplied in
-	 * binary or printable
-	 * (Base64) encoding. If the certificate is provided in Base64 encoding, it must be bounded at the beginning by
-	 * -----BEGIN CERTIFICATE-----, and
-	 * must be bounded at the end by -----END CERTIFICATE-----. It throws an {@code DSSException} or return {@code null}
-	 * when the
-	 * certificate cannot be loaded.
-	 *
-	 * @param input
-	 *            array of bytes containing the certificate
-	 * @return the certificate token
-	 */
-	public static CertificateToken loadCertificate(final byte[] input) {
-		Objects.requireNonNull(input, "Input binary cannot be null");
-		try {
-			final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
-			return loadCertificate(inputStream);
-		} catch (Exception e) {
-			LOG.warn("Unable to load certificate with default security provider.");
-		}
-		for (Provider provider : DSSSecurityProvider.getAlternativeSecurityProviders()) {
-			try {
-				final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
-				return loadCertificate(inputStream, provider.getName());
-			} catch (Exception e) {
-				LOG.warn("Unable to load certificate with alternative security provider with name '{}'.", provider.getName());
-			}
-		}
-		throw new DSSException(String.format("Unable to load certificate : %s", Utils.toBase64(input)));
 	}
 
 	/**

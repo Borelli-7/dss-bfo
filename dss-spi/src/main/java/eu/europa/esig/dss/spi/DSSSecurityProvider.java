@@ -20,13 +20,14 @@
  */
 package eu.europa.esig.dss.spi;
 
+import eu.europa.esig.dss.utils.Utils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.Provider;
-import java.util.Collections;
-import java.util.List;
+import java.security.Security;
+import java.util.Objects;
 
 /**
  * The default security provider
@@ -35,14 +36,18 @@ public final class DSSSecurityProvider {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DSSSecurityProvider.class);
 
+	/**
+	 * Empty constructor
+	 */
 	private DSSSecurityProvider() {
 		// empty
 	}
 
-	/** Provider */
+	/** Primary security provider */
 	private static Provider securityProvider;
 
-	private static List<Provider> alternativeSecurityProviders;
+	/** Array of alternative security providers (optional) */
+	private static Provider[] alternativeSecurityProviders;
 
 	/**
 	 * Gets the provider
@@ -72,19 +77,110 @@ public final class DSSSecurityProvider {
 	 * @param provider {@link Provider}
 	 */
 	public static void setSecurityProvider(Provider provider) {
-		LOG.debug("DSSSecurityProvider initialized with {}", provider.getClass());
+		assertProvidersNotNull(provider);
 		DSSSecurityProvider.securityProvider = provider;
+		LOG.debug("DSSSecurityProvider initialized with {}", provider.getClass());
 	}
 
-	public static List<Provider> getAlternativeSecurityProviders() {
+	/**
+	 * Sets the security provider by the given Provider name
+	 *
+	 * @param providerName {@link String}
+	 * @throws SecurityException if unable to instantiate the Provider by the given name
+	 */
+	public static void setSecurityProvider(String providerName) throws SecurityException {
+		assertProviderNamesNotNull(providerName);
+		DSSSecurityProvider.securityProvider = initProvider(providerName);
+		LOG.debug("DSSSecurityProvider initialized with {}", providerName);
+	}
+
+	/**
+	 * Gets an array of alternative security providers
+	 *
+	 * @return an array of {@link Provider}s
+	 */
+	public static Provider[] getAlternativeSecurityProviders() {
 		if (alternativeSecurityProviders == null) {
-			alternativeSecurityProviders = Collections.emptyList();
+			alternativeSecurityProviders = new Provider[] {};
 		}
 		return alternativeSecurityProviders;
 	}
 
-	public static void setAlternativeSecurityProviders(List<Provider> alternativeSecurityProviders) {
+	/**
+	 * Gets an array of alternative security provider names
+	 *
+	 * @return an array of {@link String}s
+	 */
+	public static String[] getAlternativeSecurityProviderNames() {
+		if (Utils.isArrayEmpty(alternativeSecurityProviders)) {
+			return new String[] {};
+		}
+		final String[] providerNames = new String[alternativeSecurityProviders.length];
+		for (int i = 0; i < alternativeSecurityProviders.length; i++) {
+			providerNames[i] = alternativeSecurityProviders[i].getName();
+		}
+		return providerNames;
+	}
+
+	/**
+	 * Sets alternative security providers.
+	 * In case the primary security providers fails on operation, DSS will load the alternative
+	 * security providers in provided order, until the first provider succeeding the operation
+	 *
+	 * @param alternativeSecurityProviders array of {@link Provider}s
+	 */
+	public static void setAlternativeSecurityProviders(Provider... alternativeSecurityProviders) {
+		assertProvidersNotNull(alternativeSecurityProviders);
 		DSSSecurityProvider.alternativeSecurityProviders = alternativeSecurityProviders;
+	}
+
+	/**
+	 * Sets alternative security providers by their names.
+	 * In case the primary security providers fails on operation, DSS will load the alternative
+	 * security providers in provided order, until the first provider succeeding the operation
+	 *
+	 * @param alternativeSecurityProviderNames array of {@link String}s
+	 * @throws SecurityException if unable to instantiate the Provider by the given name
+	 */
+	public static void setAlternativeSecurityProviders(String... alternativeSecurityProviderNames) throws SecurityException {
+		assertProviderNamesNotNull(alternativeSecurityProviderNames);
+		if (Utils.isArrayEmpty(alternativeSecurityProviderNames)) {
+			return;
+		}
+		final Provider[] providerArray = new Provider[alternativeSecurityProviderNames.length];
+		for (int i = 0; i < providerArray.length; i++) {
+			providerArray[i] = initProvider(alternativeSecurityProviderNames[i]);
+		}
+		DSSSecurityProvider.alternativeSecurityProviders = providerArray;
+	}
+
+	private static void assertProvidersNotNull(Provider... providers) {
+		Objects.requireNonNull(providers, "Array of providers cannot be null!");
+		for (Provider provider : providers) {
+			Objects.requireNonNull(provider, "Provider cannot be null!");
+		}
+	}
+
+	private static void assertProviderNamesNotNull(String... providerNames) {
+		Objects.requireNonNull(providerNames, "Array of provider names cannot be null!");
+		for (String providerName : providerNames) {
+			Objects.requireNonNull(providerName, "Provider name cannot be null!");
+		}
+	}
+
+	private static Provider initProvider(String providerName) throws SecurityException {
+		try {
+			Provider provider = Security.getProvider(providerName);
+			if (provider == null) {
+				throw new IllegalArgumentException(String.format(
+						"Unable to instantiate security Provider for name '%s'! The implementation is not found.", providerName));
+			}
+			return provider;
+
+		} catch (Exception e) {
+			throw new SecurityException(String.format(
+					"An error occurred on security Provider initialization : %s", e.getMessage()), e);
+		}
 	}
 
 }

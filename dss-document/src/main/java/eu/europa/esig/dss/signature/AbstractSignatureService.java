@@ -20,24 +20,27 @@
  */
 package eu.europa.esig.dss.signature;
 
+import eu.europa.esig.dss.enumerations.MimeType;
 import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignaturePackaging;
 import eu.europa.esig.dss.enumerations.SigningOperation;
 import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.enumerations.MimeType;
+import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.SerializableSignatureParameters;
 import eu.europa.esig.dss.model.SerializableTimestampParameters;
 import eu.europa.esig.dss.model.SignatureValue;
 import eu.europa.esig.dss.model.ToBeSigned;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.spi.DSSSecurityProvider;
-import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
 import eu.europa.esig.dss.spi.validation.CertificateVerifier;
+import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 import java.security.Security;
 import java.security.Signature;
 import java.util.Objects;
@@ -196,7 +199,7 @@ public abstract class AbstractSignatureService<SP extends SerializableSignatureP
         Objects.requireNonNull(signingCertificate, "CertificateToken cannot be null!");
 
         try {
-            Signature signature = Signature.getInstance(signatureValue.getAlgorithm().getJCEId(), DSSSecurityProvider.getSecurityProviderName());
+            Signature signature = getSignatureInstance(signatureValue.getAlgorithm().getJCEId());
             signature.initVerify(signingCertificate.getPublicKey());
             signature.update(toBeSigned.getBytes());
             return signature.verify(signatureValue.getValue());
@@ -204,6 +207,39 @@ public abstract class AbstractSignatureService<SP extends SerializableSignatureP
             LOG.error("Unable to verify the signature value : {}", e.getMessage());
             return false;
         }
+    }
+
+    private Signature getSignatureInstance(String algorithmName) {
+        try {
+            return getSignatureInstance(algorithmName, DSSSecurityProvider.getSecurityProvider());
+        } catch (Exception e) {
+            String errorMessage = "Unable to instantiate Signature using a default security provider " +
+                    "for algorithm with name '{}'. {}";
+            if (LOG.isDebugEnabled()) {
+                LOG.warn(errorMessage, algorithmName, e.getMessage(), e);
+            } else {
+                LOG.warn(errorMessage, algorithmName, e.getMessage());
+            }
+        }
+        for (Provider provider : DSSSecurityProvider.getAlternativeSecurityProviders()) {
+            try {
+                return getSignatureInstance(algorithmName, provider);
+            } catch (Exception e) {
+                String errorMessage = "Unable to instantiate Signature using an alternative security provider '{}' " +
+                        "for algorithm with name '{}'. {}";
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn(errorMessage, provider.getName(), algorithmName, e.getMessage(), e);
+                } else {
+                    LOG.warn(errorMessage, provider.getName(), algorithmName, e.getMessage());
+                }
+            }
+        }
+        throw new DSSException(String.format("Unable to instantiate Signature for the algorithm with name '%s'. " +
+                        "All security providers have failed. More detail in debug mode.", algorithmName));
+    }
+
+    private Signature getSignatureInstance(final String algorithmName, final Provider provider) throws NoSuchAlgorithmException {
+        return Signature.getInstance(algorithmName, provider);
     }
 
 }

@@ -59,7 +59,7 @@ import java.util.Objects;
  * Base class for extending a CAdESSignature.
  *
  */
-abstract class CAdESSignatureExtension implements SignatureExtension<CAdESSignatureParameters> {
+public abstract class CAdESSignatureExtension implements SignatureExtension<CAdESSignatureParameters> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CAdESSignatureExtension.class);
 

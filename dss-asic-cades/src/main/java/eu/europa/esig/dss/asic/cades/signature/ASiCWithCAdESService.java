@@ -277,22 +277,22 @@ public class ASiCWithCAdESService extends AbstractASiCSignatureService<ASiCWithC
 			throw new IllegalInputException("The container type of the provided document is not supported or cannot be extracted!");
 		}
 
-		CAdESSignatureParameters cadesParameters = getCAdESParameters(parameters);
-
-		boolean addASiCEArchiveManifest = isAddASiCEArchiveManifest(parameters.getSignatureLevel(), containerType);
+//		CAdESSignatureParameters cadesParameters = getCAdESParameters(parameters);
+//
+//		boolean addASiCEArchiveManifest = isAddASiCEArchiveManifest(parameters.getSignatureLevel(), containerType);
 		final ASiCWithCAdESSignatureExtension extensionProfile = getExtensionProfile(parameters.getSignatureLevel(), containerType);
 
-		if (addASiCEArchiveManifest) {
-			cadesParameters.setSignatureLevel(SignatureLevel.CAdES_BASELINE_LT);
-		}
+//		if (addASiCEArchiveManifest) {
+//			cadesParameters.setSignatureLevel(SignatureLevel.CAdES_BASELINE_LT);
+//		}
 
-		try {
+//		try {
 			asicContent = extensionProfile.extend(asicContent, parameters);
-		} finally {
-			if (addASiCEArchiveManifest) {
-				cadesParameters.setSignatureLevel(SignatureLevel.CAdES_BASELINE_LTA);
-			}
-		}
+//		} finally {
+//			if (addASiCEArchiveManifest) {
+//				cadesParameters.setSignatureLevel(SignatureLevel.CAdES_BASELINE_LTA);
+//			}
+//		}
 
 		final DSSDocument extensionResult = buildASiCContainer(asicContent, parameters.getZipCreationDate());
 		extensionResult.setName(getFinalDocumentName(toExtendDocument, SigningOperation.EXTEND, parameters.getSignatureLevel(),

@@ -29,6 +29,8 @@ import eu.europa.esig.dss.asic.common.ASiCContent;
 import eu.europa.esig.dss.asic.common.ASiCUtils;
 import eu.europa.esig.dss.asic.common.validation.ASiCManifestParser;
 import eu.europa.esig.dss.cades.CAdESSignatureParameters;
+import eu.europa.esig.dss.cades.signature.CAdESLevelBaselineLT;
+import eu.europa.esig.dss.cades.signature.CAdESSignatureExtension;
 import eu.europa.esig.dss.cades.signature.CMSBuilder;
 import eu.europa.esig.dss.cms.CMS;
 import eu.europa.esig.dss.cms.CMSUtils;
@@ -231,6 +233,11 @@ public class ASiCWithCAdESLevelBaselineLTA extends ASiCWithCAdESSignatureExtensi
     @Override
     protected boolean extensionRequired(CAdESSignatureParameters parameters, boolean coveredByManifest) {
         return !coveredByManifest;
+    }
+
+    @Override
+    protected CAdESSignatureExtension getLTAExtensionProfile(TSPSource tspSource, CertificateVerifier certificateVerifier) {
+        return new CAdESLevelBaselineLT(tspSource, certificateVerifier);
     }
 
     @Override

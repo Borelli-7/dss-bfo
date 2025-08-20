@@ -24,8 +24,11 @@ import eu.europa.esig.dss.asic.common.ASiCContent;
 import eu.europa.esig.dss.asic.common.ASiCUtils;
 import eu.europa.esig.dss.asic.common.validation.ASiCManifestParser;
 import eu.europa.esig.dss.cades.CAdESSignatureParameters;
-import eu.europa.esig.dss.cades.CAdESUtils;
+import eu.europa.esig.dss.cades.signature.CAdESLevelBaselineLT;
+import eu.europa.esig.dss.cades.signature.CAdESLevelBaselineLTA;
+import eu.europa.esig.dss.cades.signature.CAdESLevelBaselineT;
 import eu.europa.esig.dss.cades.signature.CAdESService;
+import eu.europa.esig.dss.cades.signature.CAdESSignatureExtension;
 import eu.europa.esig.dss.enumerations.ASiCContainerType;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
@@ -38,6 +41,7 @@ import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static eu.europa.esig.dss.enumerations.SignatureLevel.CAdES_BASELINE_LT;
 import static eu.europa.esig.dss.enumerations.SignatureLevel.CAdES_BASELINE_T;
@@ -119,7 +123,7 @@ public class ASiCWithCAdESSignatureExtension implements Serializable {
         cadesParameters.getContext().setDetachedContents(detachedContents);
 
         String originalName = signature.getName();
-        DSSDocument extendDocument = getCAdESService().extendDocument(signature, cadesParameters);
+        DSSDocument extendDocument = getExtensionProfile(cadesParameters).extendSignatures(signature, cadesParameters);
         extendDocument.setName(originalName);
         return extendDocument;
     }
@@ -145,15 +149,45 @@ public class ASiCWithCAdESSignatureExtension implements Serializable {
         return params.getReferenceDigestAlgorithm() != null ? params.getReferenceDigestAlgorithm() : params.getDigestAlgorithm();
     }
 
-    private CAdESService getCAdESService() {
-        if (cadesService == null) {
-            cadesService = new CAdESService(certificateVerifier);
-            cadesService.setTspSource(tspSource);
-            if (CAdESUtils.DEFAULT_RESOURCES_HANDLER_BUILDER != resourcesHandlerBuilder) {
-                cadesService.setResourcesHandlerBuilder(resourcesHandlerBuilder);
-            }
+    /**
+     * This method returns the extension profile to be used for a CAdES signature augmentation
+     *
+     * @param parameters
+     *            set of driving signing parameters
+     * @return {@code CAdESSignatureExtension} related to the pre-defined profile
+     */
+    private CAdESSignatureExtension getExtensionProfile(final CAdESSignatureParameters parameters) {
+        final SignatureLevel signatureLevel = parameters.getSignatureLevel();
+        Objects.requireNonNull(signatureLevel, "SignatureLevel must be defined!");
+        CAdESSignatureExtension cadesSignatureExtension;
+        switch (signatureLevel) {
+            case CAdES_BASELINE_T:
+                cadesSignatureExtension = new CAdESLevelBaselineT(tspSource, certificateVerifier);
+                break;
+            case CAdES_BASELINE_LT:
+                cadesSignatureExtension = new CAdESLevelBaselineLT(tspSource, certificateVerifier);
+                break;
+            case CAdES_BASELINE_LTA:
+                cadesSignatureExtension = getLTAExtensionProfile(tspSource, certificateVerifier);
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        String.format("Unsupported signature format '%s' for extension.", signatureLevel));
         }
-        return cadesService;
+        cadesSignatureExtension.setResourcesHandlerBuilder(resourcesHandlerBuilder);
+        return cadesSignatureExtension;
+    }
+
+    /**
+     * This method returns a profile required for an LTA-level signature augmentation according
+     * to the given container type
+     *
+     * @param tspSource {@link TSPSource}
+     * @param certificateVerifier {@link CertificateVerifier}
+     * @return {@link CAdESSignatureExtension}
+     */
+    protected CAdESSignatureExtension getLTAExtensionProfile(TSPSource tspSource, CertificateVerifier certificateVerifier) {
+        return new CAdESLevelBaselineLTA(tspSource, certificateVerifier);
     }
 
     /**

@@ -35,6 +35,7 @@ import eu.europa.esig.dss.utils.Utils;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,8 +51,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.Provider;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
@@ -78,10 +79,20 @@ class DSSUtilsTest {
 
 	private static CertificateToken certificate;
 
+	static {
+		DSSSecurityProvider.initSystemProviders();
+	}
+
 	@BeforeAll
 	static void init() {
 		certificate = DSSUtils.loadCertificate(new File("src/test/resources/TSP_Certificate_2014.crt"));
 		assertNotNull(certificate);
+	}
+
+	@AfterEach
+	void resetToDefault() {
+		DSSSecurityProvider.setSecurityProvider(new BouncyCastleProvider());
+		DSSSecurityProvider.setAlternativeSecurityProviders(new Provider[] {});
 	}
 
 	@Test
@@ -123,8 +134,6 @@ class DSSUtilsTest {
 
 	@Test
 	void digestTest() {
-		Security.addProvider(DSSSecurityProvider.getSecurityProvider());
-
 		byte[] data = "Hello world!".getBytes(StandardCharsets.UTF_8);
 		assertEquals("d3486ae9136e7856bc42212385ea797094475802", Utils.toHex(DSSUtils.digest(DigestAlgorithm.SHA1, data)));
 		assertEquals("7e81ebe9e604a0c97fef0e4cfe71f9ba0ecba13332bde953ad1c66e4", Utils.toHex(DSSUtils.digest(DigestAlgorithm.SHA224, data)));
@@ -156,21 +165,26 @@ class DSSUtilsTest {
 	void testDontSkipCertificatesWhenMultipleAreFoundInP7c() throws IOException {
 		try (FileInputStream fis = new FileInputStream("src/test/resources/certchain.p7c")) {
 			DSSException exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(fis));
-			assertEquals("Could not parse certificate", exception.getMessage());
+			assertTrue(exception.getMessage().contains("Unable to load CertificateFactory for the given certificate"));
 		}
 	}
 
 	@Test
 	void testLoadP7cPEM() throws DSSException, IOException {
 		Collection<CertificateToken> certs = DSSUtils.loadCertificateFromP7c(Files.newInputStream(Paths.get("src/test/resources/certchain.p7c")));
-		assertTrue(Utils.isCollectionNotEmpty(certs));
-		assertTrue(certs.size() > 1);
+		assertEquals(3, Utils.collectionSize(certs));
+
+		certs = DSSUtils.loadCertificateFromP7c(new File("src/test/resources/certchain.p7c"));
+		assertEquals(3, Utils.collectionSize(certs));
 	}
 
 	@Test
 	void testLoadP7cNotPEM() throws DSSException, IOException {
 		Collection<CertificateToken> certs = DSSUtils.loadCertificateFromP7c(Files.newInputStream(Paths.get("src/test/resources/AdobeCA.p7c")));
-		assertTrue(Utils.isCollectionNotEmpty(certs));
+		assertEquals(1, Utils.collectionSize(certs));
+
+		certs = DSSUtils.loadCertificateFromP7c(new File("src/test/resources/AdobeCA.p7c"));
+		assertEquals(1, Utils.collectionSize(certs));
 	}
 
 	@Test
@@ -432,8 +446,6 @@ class DSSUtilsTest {
 
 		// RFC 8410
 
-		Security.addProvider(DSSSecurityProvider.getSecurityProvider());
-		
 		CertificateToken token = DSSUtils.loadCertificateFromBase64EncodedString(
 				"MIIBLDCB36ADAgECAghWAUdKKo3DMDAFBgMrZXAwGTEXMBUGA1UEAwwOSUVURiBUZXN0IERlbW8wHhcNMTYwODAxMTIxOTI0WhcNNDAxMjMxMjM1OTU5WjAZMRcwFQYDVQQDDA5JRVRGIFRlc3QgRGVtbzAqMAUGAytlbgMhAIUg8AmJMKdUdIt93LQ+91oNvzoNJjga9OukqY6qm05qo0UwQzAPBgNVHRMBAf8EBTADAQEAMA4GA1UdDwEBAAQEAwIDCDAgBgNVHQ4BAQAEFgQUmx9e7e0EM4Xk97xiPFl1uQvIuzswBQYDK2VwA0EAryMB/t3J5v/BzKc9dNZIpDmAgs3babFOTQbs+BolzlDUwsPrdGxO3YNGhW7Ibz3OGhhlxXrCe1Cgw1AH9efZBw==");
 		assertNotNull(token);
@@ -511,7 +523,6 @@ class DSSUtilsTest {
 
 	@Test
 	void signAndConvertECSignatureValueTest() throws Exception {
-		Security.addProvider(new BouncyCastleProvider());
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("ECDSA");
 		KeyPair pair = gen.generateKeyPair();
 
@@ -665,6 +676,46 @@ class DSSUtilsTest {
 		assertFalse(DSSUtils.isEmpty(new InMemoryDocument(new byte[] { 'a' })));
 		assertFalse(DSSUtils.isEmpty(new InMemoryDocument(getClass().getResourceAsStream("/good-user.crt"))));
 		assertFalse(DSSUtils.isEmpty(new FileDocument("src/test/resources/good-user.crt")));
+	}
+
+	@Test
+	void loadCertificateWithAlternativeSecurityProviderTest() throws IOException {
+		File certificateFile = new File("src/test/resources/at_sdi.cer");
+		Exception exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(certificateFile));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setAlternativeSecurityProviders("SUN");
+
+		CertificateToken certificateToken = DSSUtils.loadCertificate(certificateFile);
+		assertNotNull(certificateToken);
+
+		DSSSecurityProvider.setAlternativeSecurityProviders(new Provider[]{});
+
+		byte[] certBinaries = certificateToken.getEncoded();
+		exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(certBinaries));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setAlternativeSecurityProviders("SUN");
+
+		certificateToken = DSSUtils.loadCertificate(certBinaries);
+		assertNotNull(certificateToken);
+
+		DSSSecurityProvider.setAlternativeSecurityProviders(new Provider[]{});
+
+		exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(Files.newInputStream(certificateFile.toPath())));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setAlternativeSecurityProviders("SUN");
+
+		// InputStream can be read only once, therefore it fails with BC
+
+		exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(Files.newInputStream(certificateFile.toPath())));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setSecurityProvider("SUN");
+
+		certificateToken = DSSUtils.loadCertificate(Files.newInputStream(certificateFile.toPath()));
+		assertNotNull(certificateToken);
 	}
 
 }

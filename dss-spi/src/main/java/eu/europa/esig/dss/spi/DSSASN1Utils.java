@@ -27,6 +27,7 @@ import eu.europa.esig.dss.model.Digest;
 import eu.europa.esig.dss.model.TimestampBinary;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.model.x509.X500PrincipalHelper;
+import eu.europa.esig.dss.spi.security.DSSCertificateTokenSecurityFactory;
 import eu.europa.esig.dss.spi.x509.CertificateRef;
 import eu.europa.esig.dss.spi.x509.SignerIdentifier;
 import eu.europa.esig.dss.utils.Utils;
@@ -66,7 +67,6 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 import org.bouncycastle.cert.ocsp.OCSPException;
 import org.bouncycastle.cert.ocsp.OCSPResp;
@@ -86,9 +86,6 @@ import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PublicKey;
-import java.security.Security;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -108,7 +105,7 @@ public final class DSSASN1Utils {
 	private static final Logger LOG = LoggerFactory.getLogger(DSSASN1Utils.class);
 
 	static {
-		Security.addProvider(DSSSecurityProvider.getSecurityProvider());
+		DSSSecurityProvider.initSystemProviders();
 	}
 
 	/**
@@ -554,15 +551,7 @@ public final class DSSASN1Utils {
 	 * @return {@link CertificateToken}
 	 */
 	public static CertificateToken getCertificate(final X509CertificateHolder x509CertificateHolder) {
-		try {
-			JcaX509CertificateConverter converter = new JcaX509CertificateConverter().setProvider(DSSSecurityProvider.getSecurityProviderName());
-			X509Certificate x509Certificate = converter.getCertificate(x509CertificateHolder);
-			return new CertificateToken(x509Certificate);
-
-		} catch (CertificateException e) {
-			throw new DSSException(String.format(
-					"Unable to get a CertificateToken from X509CertificateHolder : %s", e.getMessage()), e);
-		}
+		return DSSCertificateTokenSecurityFactory.X509_CERTIFICATE_HOLDER_INSTANCE.build(x509CertificateHolder);
 	}
 
 	/**

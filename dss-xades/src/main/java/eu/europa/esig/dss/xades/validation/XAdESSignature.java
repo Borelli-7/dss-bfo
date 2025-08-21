@@ -152,7 +152,8 @@ public class XAdESSignature extends DefaultAdvancedSignature {
 		DSSXMLUtils.registerXAdESNamespaces();
 
 		//
-		// Set the default JCE algorithms
+		// Set the default JCE algorithms.
+		// NOTE: The primary security provider is used, as Apache Santuario re-uses the instance within its code.
 		//
 		JCEMapper.setProviderId(DSSSecurityProvider.getSecurityProviderName());
 		JCEMapper.registerDefaultAlgorithms();

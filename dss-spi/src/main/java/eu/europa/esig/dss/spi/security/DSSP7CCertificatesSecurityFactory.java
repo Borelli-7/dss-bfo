@@ -47,7 +47,7 @@ public abstract class DSSP7CCertificatesSecurityFactory<I> extends DSSSecurityFa
         public List<CertificateToken> build(InputStream input) {
             // NOTE: possible to process InputStream only once
             List<CertificateToken> certificateTokens = buildWithPrimarySecurityProvider(input);
-            if (Utils.isCollectionNotEmpty(certificateTokens)) {
+            if (certificateTokens != null && certificateTokens.size() != 0) {
                 return certificateTokens;
             }
             throw new DSSException(String.format("Unable to load %s for the given certificate chain provided as a %s. " +

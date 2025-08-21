@@ -20,7 +20,6 @@
  */
 package eu.europa.esig.dss.spi;
 
-import eu.europa.esig.dss.utils.Utils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +116,7 @@ public final class DSSSecurityProvider {
 	 * @return an array of {@link String}s
 	 */
 	public static String[] getAlternativeSecurityProviderNames() {
-		if (Utils.isArrayEmpty(alternativeSecurityProviders)) {
+		if (alternativeSecurityProviders == null || alternativeSecurityProviders.length == 0) {
 			return new String[] {};
 		}
 		final String[] providerNames = new String[alternativeSecurityProviders.length];
@@ -149,7 +148,7 @@ public final class DSSSecurityProvider {
 	 */
 	public static void setAlternativeSecurityProviders(String... alternativeSecurityProviderNames) throws SecurityException {
 		assertProviderNamesNotNull(alternativeSecurityProviderNames);
-		if (Utils.isArrayEmpty(alternativeSecurityProviderNames)) {
+		if (alternativeSecurityProviderNames == null || alternativeSecurityProviderNames.length == 0) {
 			return;
 		}
 		final Provider[] providerArray = new Provider[alternativeSecurityProviderNames.length];
@@ -197,8 +196,9 @@ public final class DSSSecurityProvider {
 	 */
 	public static void initSystemProviders() {
 		Security.addProvider(getSecurityProvider());
-		if (Utils.isArrayNotEmpty(getAlternativeSecurityProviders())) {
-			for (Provider provider : getAlternativeSecurityProviders()) {
+		Provider[] securityProviders = getAlternativeSecurityProviders();
+		if (securityProviders != null && securityProviders.length != 0) {
+			for (Provider provider : securityProviders) {
 				Security.addProvider(provider);
 			}
 		}

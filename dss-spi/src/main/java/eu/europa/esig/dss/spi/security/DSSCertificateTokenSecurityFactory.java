@@ -61,14 +61,14 @@ public abstract class DSSCertificateTokenSecurityFactory<I> extends DSSSecurityF
         @Override
         protected CertificateToken buildWithProvider(InputStream input, Provider securityProvider) throws Exception {
             List<CertificateToken> certificateTokens = DSSP7CCertificatesSecurityFactory.INPUT_STREAM_INSTANCE.buildWithProvider(input, securityProvider);
-            if (Utils.collectionSize(certificateTokens) == 0) {
+            if (certificateTokens == null || certificateTokens.size() == 0) {
                 throw new DSSException("Could not parse certificate.");
-            } else if (Utils.collectionSize(certificateTokens) == 1) {
+            } else if (certificateTokens.size() == 1) {
                 return certificateTokens.get(0);
             } else {
                 throw new DSSException(String.format("'%s' certificate obtained instead of one. " +
-                        "Please provide a single certificate to load or use a different method to read multiple certificates.", 
-                        Utils.collectionSize(certificateTokens)));
+                        "Please provide a single certificate to load or use a different method to read multiple certificates.",
+                        certificateTokens.size()));
             }
         }
 

@@ -73,7 +73,7 @@ public abstract class DSSP7CCertificatesSecurityFactory<I> extends DSSSecurityFa
             } catch (DSSException e) {
                 throw e;
             } catch (Exception e) {
-                throw new DSSException(String.format("Unable to load certificate(s). %s", e.getMessage()), e);
+                throw new DSSException(String.format("Failed to load certificate(s) : %s", e.getMessage()), e);
             }
         }
 

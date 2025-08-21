@@ -93,7 +93,7 @@ public final class DSSUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(DSSUtils.class);
 
 	static {
-		Security.addProvider(DSSSecurityProvider.getSecurityProvider());
+		DSSSecurityProvider.initSystemProviders();
 	}
 
 	/** Empty byte array */

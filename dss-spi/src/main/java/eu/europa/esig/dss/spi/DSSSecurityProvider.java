@@ -30,7 +30,12 @@ import java.security.Security;
 import java.util.Objects;
 
 /**
- * The default security provider
+ * The default security provider.
+ * <p>
+ * In order to initialize the providers within the system, please call the {@code #initSystemProviders} method.
+ * NOTE: once {@code #initSystemProviders} method called, all the primary and alternative security providers
+ *       will be added within the system's Security providers list.
+ *       They won't be removed automatically, if the security providers configuration is changed within the class.
  */
 public final class DSSSecurityProvider {
 
@@ -90,7 +95,7 @@ public final class DSSSecurityProvider {
 	 */
 	public static void setSecurityProvider(String providerName) throws SecurityException {
 		assertProviderNamesNotNull(providerName);
-		DSSSecurityProvider.securityProvider = initProvider(providerName);
+		DSSSecurityProvider.securityProvider = getProvider(providerName);
 		LOG.debug("DSSSecurityProvider initialized with {}", providerName);
 	}
 
@@ -149,7 +154,7 @@ public final class DSSSecurityProvider {
 		}
 		final Provider[] providerArray = new Provider[alternativeSecurityProviderNames.length];
 		for (int i = 0; i < providerArray.length; i++) {
-			providerArray[i] = initProvider(alternativeSecurityProviderNames[i]);
+			providerArray[i] = getProvider(alternativeSecurityProviderNames[i]);
 		}
 		DSSSecurityProvider.alternativeSecurityProviders = providerArray;
 	}
@@ -168,7 +173,7 @@ public final class DSSSecurityProvider {
 		}
 	}
 
-	private static Provider initProvider(String providerName) throws SecurityException {
+	private static Provider getProvider(String providerName) throws SecurityException {
 		try {
 			Provider provider = Security.getProvider(providerName);
 			if (provider == null) {
@@ -180,6 +185,22 @@ public final class DSSSecurityProvider {
 		} catch (Exception e) {
 			throw new SecurityException(String.format(
 					"An error occurred on security Provider initialization : %s", e.getMessage()), e);
+		}
+	}
+
+	/**
+	 * This method adds the configured within the {@code java.security.Security} providers' list.
+	 * This method shall be called before the use of the security providers is required by the code.
+	 * NOTE: once called, all the primary and alternative security providers will be added within
+	 *       the system's Security providers list. They won't be removed automatically,
+	 *       if the security providers configuration is changed within the class.
+	 */
+	public static void initSystemProviders() {
+		Security.addProvider(getSecurityProvider());
+		if (Utils.isArrayNotEmpty(getAlternativeSecurityProviders())) {
+			for (Provider provider : getAlternativeSecurityProviders()) {
+				Security.addProvider(provider);
+			}
 		}
 	}
 

@@ -54,7 +54,7 @@ public abstract class AbstractSignatureService<SP extends SerializableSignatureP
         implements DocumentSignatureService<SP, TP> {
 
     static {
-        Security.addProvider(DSSSecurityProvider.getSecurityProvider());
+        DSSSecurityProvider.initSystemProviders();
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractSignatureService.class);

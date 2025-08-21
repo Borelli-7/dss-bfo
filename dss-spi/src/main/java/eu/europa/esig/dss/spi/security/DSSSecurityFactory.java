@@ -59,10 +59,10 @@ public abstract class DSSSecurityFactory<I, O> {
             return buildWithProvider(input, DSSSecurityProvider.getSecurityProvider());
         } catch (Exception e) {
             if (LOG.isDebugEnabled()) {
-                LOG.warn("Unable to build {} using a default security provider. {}. Input: {}",
+                LOG.warn("Unable to build {} using the default security provider. {}. Input: {}",
                         getFactoryClassName(), e.getMessage(), toString(input), e);
             } else {
-                LOG.warn("Unable to build {} using a default security provider. {}.",
+                LOG.warn("Unable to build {} using the default security provider. {}.",
                         getFactoryClassName(), e.getMessage());
             }
             return null;
@@ -81,9 +81,14 @@ public abstract class DSSSecurityFactory<I, O> {
     protected O buildWithAlternativeSecurityProviders(I input) {
         for (Provider provider : DSSSecurityProvider.getAlternativeSecurityProviders()) {
             try {
-                return buildWithProvider(input, provider);
+                O result = buildWithProvider(input, provider);
+                if (result != null) {
+                    LOG.info("{} has been successfully built using the alternative security provider '{}'. " +
+                                    "More detail in debug mode.", getFactoryClassName(), provider.getName());
+                    return result;
+                }
             } catch (Exception e) {
-                String errorMessage = "Unable to build {} using an alternative security provider '{}'. {}";
+                String errorMessage = "Unable to build {} using the alternative security provider '{}'. {}";
                 if (LOG.isDebugEnabled()) {
                     LOG.warn(errorMessage, getFactoryClassName(), provider.getName(), e.getMessage(), e);
                 } else {

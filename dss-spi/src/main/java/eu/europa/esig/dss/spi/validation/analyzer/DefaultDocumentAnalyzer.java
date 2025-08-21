@@ -76,7 +76,7 @@ public abstract class DefaultDocumentAnalyzer implements DocumentAnalyzer {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultDocumentAnalyzer.class);
 
     static {
-        Security.addProvider(DSSSecurityProvider.getSecurityProvider());
+        DSSSecurityProvider.initSystemProviders();
     }
 
     /**

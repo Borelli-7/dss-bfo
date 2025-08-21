@@ -27,6 +27,7 @@ import eu.europa.esig.dss.model.Digest;
 import eu.europa.esig.dss.model.TimestampBinary;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.model.x509.X500PrincipalHelper;
+import eu.europa.esig.dss.spi.security.DSSCertificateTokenSecurityFactory;
 import eu.europa.esig.dss.spi.x509.CertificateRef;
 import eu.europa.esig.dss.spi.x509.SignerIdentifier;
 import eu.europa.esig.dss.utils.Utils;
@@ -66,7 +67,6 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 import org.bouncycastle.cert.ocsp.OCSPException;
 import org.bouncycastle.cert.ocsp.OCSPResp;
@@ -85,11 +85,8 @@ import org.slf4j.LoggerFactory;
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Security;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -555,40 +552,7 @@ public final class DSSASN1Utils {
 	 * @return {@link CertificateToken}
 	 */
 	public static CertificateToken getCertificate(final X509CertificateHolder x509CertificateHolder) {
-		X509Certificate x509Certificate = getX509Certificate(x509CertificateHolder);
-		return new CertificateToken(x509Certificate);
-	}
-
-	private static X509Certificate getX509Certificate(final X509CertificateHolder x509CertificateHolder) {
-		try {
-			return getX509Certificate(x509CertificateHolder, DSSSecurityProvider.getSecurityProvider());
-		} catch (Exception e) {
-			String errorMessage = "Unable to get X509Certificate using a default security provider. {}.";
-			if (LOG.isDebugEnabled()) {
-				LOG.warn(errorMessage, e.getMessage(), e);
-			} else {
-				LOG.warn(errorMessage, e.getMessage());
-			}
-		}
-		for (Provider provider : DSSSecurityProvider.getAlternativeSecurityProviders()) {
-			try {
-				return getX509Certificate(x509CertificateHolder, provider);
-			} catch (Exception e) {
-				String errorMessage = "Unable to get X509Certificate using an alternative security provider '{}'. {}.";
-				if (LOG.isDebugEnabled()) {
-					LOG.warn(errorMessage, provider.getName(), e.getMessage(), e);
-				} else {
-					LOG.warn(errorMessage, provider.getName(), e.getMessage());
-				}
-			}
-		}
-		throw new DSSException("Unable to get X509Certificate for. All security providers have failed. More detail in debug mode.");
-	}
-
-	private static X509Certificate getX509Certificate(final X509CertificateHolder x509CertificateHolder, final Provider provider) throws CertificateException {
-		JcaX509CertificateConverter jcaX509CertificateConverter = new JcaX509CertificateConverter();
-		jcaX509CertificateConverter.setProvider(provider);
-		return jcaX509CertificateConverter.getCertificate(x509CertificateHolder);
+		return DSSCertificateTokenSecurityFactory.X509_CERTIFICATE_HOLDER_INSTANCE.build(x509CertificateHolder);
 	}
 
 	/**

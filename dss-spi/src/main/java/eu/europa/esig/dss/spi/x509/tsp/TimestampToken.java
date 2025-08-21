@@ -29,7 +29,6 @@ import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureValidity;
 import eu.europa.esig.dss.enumerations.TimestampType;
 import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.DSSMessageDigest;
 import eu.europa.esig.dss.model.Digest;
 import eu.europa.esig.dss.model.ManifestFile;
@@ -39,8 +38,8 @@ import eu.europa.esig.dss.model.scope.SignatureScope;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.model.x509.Token;
 import eu.europa.esig.dss.spi.DSSASN1Utils;
-import eu.europa.esig.dss.spi.DSSSecurityProvider;
 import eu.europa.esig.dss.spi.DSSUtils;
+import eu.europa.esig.dss.spi.security.DSSSignerInformationVerifierSecurityFactory;
 import eu.europa.esig.dss.spi.x509.CandidatesForSigningCertificate;
 import eu.europa.esig.dss.spi.x509.CertificateRef;
 import eu.europa.esig.dss.spi.x509.SignerIdentifier;
@@ -57,8 +56,6 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.SignerInformationVerifier;
-import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.slf4j.Logger;
@@ -66,7 +63,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
-import java.security.Provider;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -401,7 +397,7 @@ public class TimestampToken extends Token {
 
 		final X509CertificateHolder x509CertificateHolder = DSSASN1Utils.getX509CertificateHolder(candidate);
 		if (timeStamp.getSID().match(x509CertificateHolder)) {
-			SignerInformationVerifier signerInformationVerifier = getSignerInformationVerifier(candidate);
+			SignerInformationVerifier signerInformationVerifier = DSSSignerInformationVerifierSecurityFactory.CERTIFICATE_TOKEN_INSTANCE.build(candidate);
 
 			// Try firstly to validate as a Timestamp and if that fails try to validate the
 			// timestamp as a CMSSignedData
@@ -459,40 +455,6 @@ public class TimestampToken extends Token {
 			signatureInvalidityReason = e.getClass().getSimpleName() + " : " + e.getMessage();
 			return false;
 		}
-	}
-
-	private SignerInformationVerifier getSignerInformationVerifier(final CertificateToken certificateToken) {
-		try {
-			return buildSignerInformationVerifier(certificateToken, DSSSecurityProvider.getSecurityProvider());
-		} catch (Exception e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.warn("Unable to build SignerInformationVerifier using a default security provider " +
-						"for certificate. {}. Certificate: {}", e.getMessage(), Utils.toBase64(certificateToken.getEncoded()), e);
-			} else {
-				LOG.warn("Unable to build SignerInformationVerifier using a default security provider " +
-						"for certificate. {}.", e.getMessage());
-			}
-		}
-		for (Provider provider : DSSSecurityProvider.getAlternativeSecurityProviders()) {
-			try {
-				return buildSignerInformationVerifier(certificateToken, provider);
-			} catch (Exception e) {
-				String errorMessage = "Unable to build SignerInformationVerifier using an alternative security provider '{}'. {}";
-				if (LOG.isDebugEnabled()) {
-					LOG.warn(errorMessage, provider.getName(), e.getMessage(), e);
-				} else {
-					LOG.warn(errorMessage, provider.getName(), e.getMessage());
-				}
-			}
-		}
-		throw new DSSException("Unable to load SignerInformationVerifier for timestamp certificate. " +
-				"All security providers have failed. More detail in debug mode.");
-	}
-
-	private SignerInformationVerifier buildSignerInformationVerifier(final CertificateToken certificateToken, final Provider provider) throws OperatorCreationException {
-		JcaSimpleSignerInfoVerifierBuilder jcaSimpleSignerInfoVerifierBuilder = new JcaSimpleSignerInfoVerifierBuilder();
-		jcaSimpleSignerInfoVerifierBuilder.setProvider(provider);
-		return jcaSimpleSignerInfoVerifierBuilder.build(certificateToken.getCertificate());
 	}
 	
 	@Override

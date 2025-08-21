@@ -87,7 +87,8 @@ class DSSUtilsTest {
 	}
 
 	@AfterEach
-	void resetAlternativeProviders() {
+	void resetToDefault() {
+		DSSSecurityProvider.setSecurityProvider(new BouncyCastleProvider());
 		DSSSecurityProvider.setAlternativeSecurityProviders(new Provider[] {});
 	}
 
@@ -163,7 +164,7 @@ class DSSUtilsTest {
 	void testDontSkipCertificatesWhenMultipleAreFoundInP7c() throws IOException {
 		try (FileInputStream fis = new FileInputStream("src/test/resources/certchain.p7c")) {
 			DSSException exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(fis));
-			assertEquals("Could not parse certificate", exception.getMessage());
+			assertTrue(exception.getMessage().contains("Unable to load CertificateFactory for the given certificate"));
 		}
 	}
 
@@ -680,14 +681,42 @@ class DSSUtilsTest {
 	}
 
 	@Test
-	void loadCertificateWithAlternativeSecurityProviderTest() {
-		byte[] certificate = Utils.fromBase64("MIIDDjCCAnegAwIBAgIBATANBgkqhkiG9w0BAQUFADCBmjELMAkGA1UEBhMCQVQxSDBGBgNVBAoTP0EtVHJ1c3QgR2VzLiBmLiBTaWNoZXJoZWl0c3N5c3RlbWUgaW0gZWxla3RyLiBEYXRlbnZlcmtlaHIgR21iSDEXMBUGA1UECxMOd3d3LmEtdHJ1c3QuYXQxEzARBgNVBAsTCmEtc2lnbiB1bmkxEzARBgNVBAMTCmEtc2lnbiB1bmkwHhcNMDIwOTEzMTgzMjM4WhcNMzIwOTEzMTgzMjM4WjCBmjELMAkGA1UEBhMCQVQxSDBGBgNVBAoTP0EtVHJ1c3QgR2VzLiBmLiBTaWNoZXJoZWl0c3N5c3RlbWUgaW0gZWxla3RyLiBEYXRlbnZlcmtlaHIgR21iSDEXMBUGA1UECxMOd3d3LmEtdHJ1c3QuYXQxEzARBgNVBAsTCmEtc2lnbiB1bmkxEzARBgNVBAMTCmEtc2lnbiB1bmkwgZ4wCwYJKoZIhvcNAQEBA4GOADCBigKBgQCvBqGXYw0rNZyQR8YG+EQ4GeoQgMRdsYPhnuvkl6aEMWdMvDuvAPlLi4rXNNq3mb4yKKCswSp5SPiRo43uwrpfCjLxu9RT+Fi3wDE1Z5tBr7iQOnOCx5IKs2X94hcdsJClWHYoxT4f5Jnq86kNVYys+T8TUJCrsHm/8TCr3x7vuwIEAAAAA6NjMGEwDgYDVR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFBXzfvl2WIKcUwhZzt+1wC1ShQPBMB8GA1UdIwQYMBaAFBXzfvl2WIKcUwhZzt+1wC1ShQPBMA0GCSqGSIb3DQEBBQUAA4GBAALtJ7UT/H4ZwUAeKV1X1Gz+pIqVtCsECNKWHiZeXx0ly/insjh+vbNVNy2RyOimKWtms0GZ0Kj/oDK81efRL9YvHKMlCLlz6FBKaUTUztO1FYa2othUGsu8LsBtPPU6u0wMPGhE3DEdo5/4lA6gMbsOvKQ6jQyeCjqOB22EjbJd");
-		Exception exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(certificate));
-		assertTrue(exception.getMessage().contains("Unable to load certificate"));
+	void loadCertificateWithAlternativeSecurityProviderTest() throws IOException {
+		File certificateFile = new File("src/test/resources/at_sdi.cer");
+		Exception exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(certificateFile));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
 
 		DSSSecurityProvider.setAlternativeSecurityProviders("SUN");
 
-		CertificateToken certificateToken = DSSUtils.loadCertificate(certificate);
+		CertificateToken certificateToken = DSSUtils.loadCertificate(certificateFile);
+		assertNotNull(certificateToken);
+
+		DSSSecurityProvider.setAlternativeSecurityProviders(new Provider[]{});
+
+		byte[] certBinaries = certificateToken.getEncoded();
+		exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(certBinaries));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setAlternativeSecurityProviders("SUN");
+
+		certificateToken = DSSUtils.loadCertificate(certBinaries);
+		assertNotNull(certificateToken);
+
+		DSSSecurityProvider.setAlternativeSecurityProviders(new Provider[]{});
+
+		exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(Files.newInputStream(certificateFile.toPath())));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setAlternativeSecurityProviders("SUN");
+
+		// InputStream can be read only once, therefore it fails with BC
+
+		exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(Files.newInputStream(certificateFile.toPath())));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setSecurityProvider("SUN");
+
+		certificateToken = DSSUtils.loadCertificate(Files.newInputStream(certificateFile.toPath()));
 		assertNotNull(certificateToken);
 	}
 

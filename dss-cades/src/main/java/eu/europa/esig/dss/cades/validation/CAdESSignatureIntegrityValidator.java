@@ -21,17 +21,14 @@
 package eu.europa.esig.dss.cades.validation;
 
 import eu.europa.esig.dss.model.DSSException;
-import eu.europa.esig.dss.spi.DSSSecurityProvider;
+import eu.europa.esig.dss.spi.security.DSSSignerInformationVerifierSecurityFactory;
 import eu.europa.esig.dss.spi.x509.SignatureIntegrityValidator;
 import org.bouncycastle.cms.CMSSignerDigestMismatchException;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationVerifier;
-import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.Provider;
 import java.security.PublicKey;
 
 /**
@@ -56,49 +53,13 @@ public class CAdESSignatureIntegrityValidator extends SignatureIntegrityValidato
 	@Override
 	protected boolean verify(PublicKey publicKey) throws DSSException {
 		try {
-			final SignerInformationVerifier signerInformationVerifier = buildSignerInformationVerifier(publicKey);
+			final SignerInformationVerifier signerInformationVerifier = DSSSignerInformationVerifierSecurityFactory.PUBLIC_TOKEN_INSTANCE.build(publicKey);
 			return signerInformation.verify(signerInformationVerifier);
 		} catch (CMSSignerDigestMismatchException e) {
 			throw new DSSException(String.format("Unable to validate CMS Signature : %s", e.getMessage()));
 		} catch (Exception e) {
 			throw new DSSException(String.format("Unable to validate CMS Signature : %s", e.getMessage()), e);
 		}
-	}
-
-	private SignerInformationVerifier buildSignerInformationVerifier(final PublicKey publicKey) {
-		try {
-			return buildSignerInformationVerifier(publicKey, DSSSecurityProvider.getSecurityProvider());
-		} catch (Exception e) {
-			String errorMessage = "Unable to build SignerInformationVerifier using a default security provider " +
-					"for algorithm with name '{}'. {}";
-			if (LOG.isDebugEnabled()) {
-				LOG.warn(errorMessage, publicKey.getAlgorithm(), e.getMessage(), e);
-			} else {
-				LOG.warn(errorMessage, publicKey.getAlgorithm(), e.getMessage());
-			}
-		}
-		for (Provider provider : DSSSecurityProvider.getAlternativeSecurityProviders()) {
-			try {
-				return buildSignerInformationVerifier(publicKey, provider);
-			} catch (Exception e) {
-				String errorMessage = "Unable to build SignerInformationVerifier using an alternative security provider '{}' " +
-						"for algorithm with name '{}'. {}";
-				if (LOG.isDebugEnabled()) {
-					LOG.warn(errorMessage, provider.getName(), publicKey.getAlgorithm(), e.getMessage(), e);
-				} else {
-					LOG.warn(errorMessage, provider.getName(), publicKey.getAlgorithm(), e.getMessage());
-				}
-			}
-		}
-		throw new DSSException(String.format("Unable to load SignerInformationVerifier for " +
-				"the algorithm with name '%s'. All security providers have failed. More detail in debug mode.",
-				publicKey.getAlgorithm()));
-	}
-
-	private SignerInformationVerifier buildSignerInformationVerifier(final PublicKey publicKey, final Provider provider) throws OperatorCreationException {
-		JcaSimpleSignerInfoVerifierBuilder jcaSimpleSignerInfoVerifierBuilder = new JcaSimpleSignerInfoVerifierBuilder();
-		jcaSimpleSignerInfoVerifierBuilder.setProvider(provider);
-		return jcaSimpleSignerInfoVerifierBuilder.build(publicKey);
 	}
 
 }

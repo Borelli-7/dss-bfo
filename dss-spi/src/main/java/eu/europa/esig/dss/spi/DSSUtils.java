@@ -34,6 +34,8 @@ import eu.europa.esig.dss.model.SignatureValue;
 import eu.europa.esig.dss.model.UserNotice;
 import eu.europa.esig.dss.model.identifier.TokenIdentifier;
 import eu.europa.esig.dss.model.x509.CertificateToken;
+import eu.europa.esig.dss.spi.security.DSSCertificateTokenSecurityFactory;
+import eu.europa.esig.dss.spi.security.DSSP7CCertificatesSecurityFactory;
 import eu.europa.esig.dss.utils.Utils;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSException;
@@ -71,8 +73,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -279,33 +279,7 @@ public final class DSSUtils {
 	 */
 	public static CertificateToken loadCertificate(final File file) {
 		Objects.requireNonNull(file, "Input file cannot be null");
-		try {
-			final InputStream inputStream = Files.newInputStream(file.toPath()); // closed inside
-			return loadCertificate(inputStream, DSSSecurityProvider.getSecurityProviderName());
-		} catch (IOException e) {
-			throw new DSSException(String.format("Unable to find a file '%s' : %s", file.getAbsolutePath(), e.getMessage()), e);
-		} catch (Exception e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.warn("Unable to load certificate using a default security provider. {}. Input file: {}",
-						e.getMessage(), file.getAbsolutePath(), e);
-			} else {
-				LOG.warn("Unable to load certificate using a default security provider. {}", e.getMessage());
-			}
-		}
-		for (String providerName : DSSSecurityProvider.getAlternativeSecurityProviderNames()) {
-			try {
-				final InputStream inputStream = Files.newInputStream(file.toPath()); // closed inside
-				return loadCertificate(inputStream, providerName);
-			} catch (Exception e) {
-				String errorMessage = "Unable to load certificate using an alternative security provider '{}'. {}.";
-				if (LOG.isDebugEnabled()) {
-					LOG.warn(errorMessage, providerName, e.getMessage(), e);
-				} else {
-					LOG.warn(errorMessage, providerName, e.getMessage());
-				}
-			}
-		}
-		throw new DSSException("Unable to load certificate from a file. All security providers have failed. More detail in debug mode.");
+		return DSSCertificateTokenSecurityFactory.FILE_INSTANCE.build(file);
 	}
 
 	/**
@@ -329,30 +303,7 @@ public final class DSSUtils {
 	 */
 	public static CertificateToken loadCertificate(final byte[] input) {
 		Objects.requireNonNull(input, "Input binary cannot be null");
-		try {
-			final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
-			return loadCertificate(inputStream, DSSSecurityProvider.getSecurityProviderName());
-		} catch (Exception e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.warn("Unable to load certificate using a default security provider. {}. Input: {}", e.getMessage(), Utils.toBase64(input), e);
-			} else {
-				LOG.warn("Unable to load certificate using a default security provider. {}", e.getMessage());
-			}
-		}
-		for (String providerName : DSSSecurityProvider.getAlternativeSecurityProviderNames()) {
-			try {
-				final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
-				return loadCertificate(inputStream, providerName);
-			} catch (Exception e) {
-				String errorMessage = "Unable to load certificate using an alternative security provider '{}'. {}.";
-				if (LOG.isDebugEnabled()) {
-					LOG.warn(errorMessage, providerName, e.getMessage(), e);
-				} else {
-					LOG.warn(errorMessage, providerName, e.getMessage());
-				}
-			}
-		}
-		throw new DSSException("Unable to load certificate. All security providers have failed. More detail in debug mode.");
+		return DSSCertificateTokenSecurityFactory.BINARY_INSTANCE.build(input);
 	}
 
 	/**
@@ -372,30 +323,8 @@ public final class DSSUtils {
 	 * @return the certificate token
 	 */
 	public static CertificateToken loadCertificate(final InputStream inputStream) {
-		return loadCertificate(inputStream, DSSSecurityProvider.getSecurityProviderName());
-	}
-
-	/**
-	 * This method loads a certificate from the given location using a security Provider with the given {@code providerName}.
-	 * The certificate must be DER-encoded and may be supplied in binary or printable (PEM / Base64) encoding.
-	 * <p>
-	 * If the certificate is provided in Base64 encoding, it must be bounded at the beginning by
-	 * {@code -----BEGIN CERTIFICATE-----}, and must be bounded at the end by {@code -----END CERTIFICATE-----}.
-	 * <p>
-	 * NOTE: This method tries to load the certificate only once using the specified provider.
-	 *
-	 * @param inputStream
-	 *            input stream containing the certificate
-	 * @param providerName
-	 *            {@link String} representing the security Provider's name
-	 * @return the certificate token
-	 */
-	public static CertificateToken loadCertificate(final InputStream inputStream, final String providerName) {
-		List<CertificateToken> certificates = loadCertificates(inputStream, providerName);
-		if (certificates.size() == 1) {
-			return certificates.get(0);
-		}
-		throw new DSSException("Could not parse certificate");
+		Objects.requireNonNull(inputStream, "InputStream cannot be null");
+		return DSSCertificateTokenSecurityFactory.INPUT_STREAM_INSTANCE.build(inputStream);
 	}
 
 	/**
@@ -411,33 +340,7 @@ public final class DSSUtils {
 	 */
 	public static List<CertificateToken> loadCertificateFromP7c(File file) {
 		Objects.requireNonNull(file, "Input file cannot be null");
-		try {
-			final InputStream inputStream = Files.newInputStream(file.toPath());
-			return loadCertificateFromP7c(inputStream, DSSSecurityProvider.getSecurityProviderName());
-		} catch (IOException e) {
-			throw new DSSException(String.format("Unable to find a file '%s' : %s", file.getAbsolutePath(), e.getMessage()), e);
-		} catch (Exception e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.warn("Unable to load p7c certificates using a default security provider. {}. Input file: {}",
-						e.getMessage(), file.getAbsolutePath(), e);
-			} else {
-				LOG.warn("Unable to load p7c certificates using a default security provider. {}", e.getMessage());
-			}
-		}
-		for (String providerName : DSSSecurityProvider.getAlternativeSecurityProviderNames()) {
-			try {
-				final InputStream inputStream = Files.newInputStream(file.toPath());
-				return loadCertificateFromP7c(inputStream, providerName);
-			} catch (Exception e) {
-				String errorMessage = "Unable to load certificate using an alternative security provider '{}'. {}.";
-				if (LOG.isDebugEnabled()) {
-					LOG.warn(errorMessage, providerName, e.getMessage(), e);
-				} else {
-					LOG.warn(errorMessage, providerName, e.getMessage());
-				}
-			}
-		}
-		throw new DSSException("Unable to load p7c certificates from a file. All security providers have failed. More detail in debug mode.");
+		return DSSP7CCertificatesSecurityFactory.FILE_INSTANCE.build(file);
 	}
 
 	/**
@@ -453,30 +356,7 @@ public final class DSSUtils {
 	 */
 	public static List<CertificateToken> loadCertificateFromP7c(byte[] input) {
 		Objects.requireNonNull(input, "Input binary cannot be null");
-		try {
-			final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
-			return loadCertificateFromP7c(inputStream, DSSSecurityProvider.getSecurityProviderName());
-		} catch (Exception e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.warn("Unable to load p7c certificates using a default security provider. {}. Input: {}", e.getMessage(), Utils.toBase64(input), e);
-			} else {
-				LOG.warn("Unable to load p7c certificates using a default security provider. {}", e.getMessage());
-			}
-		}
-		for (String providerName : DSSSecurityProvider.getAlternativeSecurityProviderNames()) {
-			try {
-				final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
-				return loadCertificateFromP7c(inputStream, providerName);
-			} catch (Exception e) {
-				String errorMessage = "Unable to load p7c certificates using an alternative security provider '{}'. {}.";
-				if (LOG.isDebugEnabled()) {
-					LOG.warn(errorMessage, providerName, e.getMessage(), e);
-				} else {
-					LOG.warn(errorMessage, providerName, e.getMessage());
-				}
-			}
-		}
-		throw new DSSException("Unable to load p7c certificates. All security providers have failed. More detail in debug mode.");
+		return DSSP7CCertificatesSecurityFactory.BINARY_INSTANCE.build(input);
 	}
 
 	/**
@@ -491,45 +371,7 @@ public final class DSSUtils {
 	 * @return a list of {@link CertificateToken}s
 	 */
 	public static List<CertificateToken> loadCertificateFromP7c(InputStream inputStream) {
-		return loadCertificateFromP7c(inputStream, DSSSecurityProvider.getSecurityProviderName());
-	}
-
-	/**
-	 * Loads a collection of certificates from a p7c {@code InputStream} using a security Provider with the given {@code providerName}
-	 * <p>
-	 * NOTE: As the certificate is provided in the form of an {@code InputStream}, only single reading of the stream is possible.
-	 *       Therefore, the method uses only a default security provider to load p7c certificates.
-	 *       Should you need to use an alternative security provider, please use
-	 *       {@code #loadCertificateFromP7c(InputStream inputStream, String providerName)} method instead.
-	 *
-	 * @param inputStream {@link InputStream} p7c
-	 * @param providerName {@link String} name of the security provider
-	 * @return a list of {@link CertificateToken}s
-	 */
-	public static List<CertificateToken> loadCertificateFromP7c(InputStream inputStream, String providerName) {
-		return loadCertificates(inputStream, providerName);
-	}
-
-	private static List<CertificateToken> loadCertificates(InputStream inputStream, String providerName) {
-		final List<CertificateToken> certificates = new ArrayList<>();
-		try (InputStream is = inputStream) {
-			@SuppressWarnings("unchecked")
-			final Collection<X509Certificate> certificatesCollection = (Collection<X509Certificate>) CertificateFactory
-					.getInstance("X.509", providerName).generateCertificates(is);
-			if (certificatesCollection != null) {
-				for (X509Certificate cert : certificatesCollection) {
-					certificates.add(new CertificateToken(cert));
-				}
-			}
-			if (certificates.isEmpty()) {
-				throw new DSSException("No certificate found in the InputStream");
-			}
-			return certificates;
-		} catch (DSSException e) {
-		  	throw e;
-		} catch (Exception e) {
-			throw new DSSException("Unable to load certificate(s) : " + e.getMessage(), e);
-		}
+		return DSSP7CCertificatesSecurityFactory.INPUT_STREAM_INSTANCE.build(inputStream);
 	}
 
 	/**

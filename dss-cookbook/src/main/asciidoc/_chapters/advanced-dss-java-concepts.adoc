@@ -323,6 +323,44 @@ The `dss-diagnostic-jaxb` module contains an XSLT stylesheet that creates an SVG
 include::{sourcetestdir}/eu/europa/esig/dss/cookbook/example/snippets/SVGGenerationSnippet.java[tags=demo]
 ----
 
+[[securityProvider]]
+=== Security Provider
+
+DSS provides a configuration option of the default security provider used across the framework. The security provider is used to provide an implementation for performing certain cryptographic operations, such as encryption, signature validation, etc. The configuration class is called `DSSSecurityProvider` which contains the main logic for handling the providers.
+
+WARNING: This represents highly advanced settings and modification of the security provider may seriously impact the functioning of the application. Please do at your own risk.
+
+By default, DSS uses a `org.bouncycastle.jce.provider.BouncyCastleProvider` class as the primary security provider. To modify the main security provider, the following code can be used:
+
+[source,java,indent=0]
+.Set primary security provider
+----
+include::{sourcetestdir}/eu/europa/esig/dss/cookbook/example/snippets/DSSSecurityProviderSnippetTest.java[tags=main-provider]
+----
+
+In certain cases, DSS allows processing using multiple security providers (available since DSS `6.4`), such as on tokens loading (certificates, OCSP responses, etc.). This can be helpful, when the main security provider is not able to load the token, but it is possible to execute the same process successfully using an alternative security provider. To provide a collection of alternative security providers, the following method can be used:
+
+[source,java,indent=0]
+.Set alternative security providers
+----
+include::{sourcetestdir}/eu/europa/esig/dss/cookbook/example/snippets/DSSSecurityProviderSnippetTest.java[tags=alt-providers]
+----
+
+NOTE: The main and alternative providers may be set either using a `Provider` class instance or using a `String` provider's name (shall be discoverable in the classpath).
+
+In order to instantiate the security providers within the system's `java.security.Security` properties, the following code can be used:
+
+[source,java,indent=0]
+.Initialize security providers
+----
+include::{sourcetestdir}/eu/europa/esig/dss/cookbook/example/snippets/DSSSecurityProviderSnippetTest.java[tags=init-providers]
+----
+
+This code will ensure that all security providers defined within the class instance, will be added in runtime within the system's `java.security.Security` properties. Please note that DSS does execute this method on its own when the use of security providers is required, therefore it is very unlikely you would ever need to call the method.
+
+NOTE: Once the security providers have been added within the system's `java.security.Security` properties, modifications of the `DSSSecurityProvider` class configuration will not result to a removal of the providers from the `java.security.Security` properties. If you need to remove certain providers, you have to do it using the `java.security.Security` class directly.
+
+
 [[xmlSecurities]]
 === XML securities
 

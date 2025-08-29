@@ -21,25 +21,38 @@
 package eu.europa.esig.dss.validation.policy;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
+import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.SignatureAlgorithmWithMinKeySize;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteEvaluation;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteParameter;
 import eu.europa.esig.dss.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * This class contains supporting methods for processing a {@code eu.europa.esig.dss.model.policy.CryptographicSuite}
  *
  */
 public final class CryptographicSuiteUtils {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CryptographicSuiteUtils.class);
+
+    /** Key size parameter used by RSA algorithms */
+    public static final String MODULES_LENGTH_PARAMETER = "moduluslength";
+
+    /** P Length key size parameter used by DSA algorithms (supported) */
+    public static final String PLENGTH_PARAMETER = "plength";
+
+    /** Q Length key size parameter used by DSA algorithms (not supported) */
+    public static final String QLENGTH_PARAMETER = "qlength";
 
     /**
      * Singleton
@@ -59,7 +72,7 @@ public final class CryptographicSuiteUtils {
         if (cryptographicSuite == null) {
             return true;
         }
-        return signatureAlgorithm != null && cryptographicSuite.getAcceptableSignatureAlgorithms().contains(signatureAlgorithm);
+        return signatureAlgorithm != null && cryptographicSuite.getAcceptableSignatureAlgorithms().containsKey(signatureAlgorithm);
     }
 
     /**
@@ -73,14 +86,7 @@ public final class CryptographicSuiteUtils {
         if (cryptographicSuite == null) {
             return true;
         }
-        if (digestAlgorithm != null) {
-            for (DigestAlgorithm acceptableDigestAlgorithm : cryptographicSuite.getAcceptableDigestAlgorithms()) {
-                if (digestAlgorithm == acceptableDigestAlgorithm) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return digestAlgorithm != null && cryptographicSuite.getAcceptableDigestAlgorithms().containsKey(digestAlgorithm);
     }
 
     /**
@@ -110,19 +116,27 @@ public final class CryptographicSuiteUtils {
         if (cryptographicSuite == null) {
             return true;
         }
-        boolean foundAlgorithm = false;
-        if (signatureAlgorithm != null && keySize != 0) {
-            for (SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize : cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes()) {
-                int minKeySize = signatureAlgorithmWithMinKeySize.getMinKeySize();
-                if (signatureAlgorithm == signatureAlgorithmWithMinKeySize.getSignatureAlgorithm()) {
-                    foundAlgorithm = true;
-                    if (minKeySize <= keySize) {
+
+        if (signatureAlgorithm != null && keySize != null) {
+            Map<SignatureAlgorithm, Set<CryptographicSuiteEvaluation>> acceptableSignatureAlgorithms = cryptographicSuite.getAcceptableSignatureAlgorithms();
+            if (!acceptableSignatureAlgorithms.containsKey(signatureAlgorithm)) {
+                return false;
+            }
+
+            Set<CryptographicSuiteEvaluation> evaluations = acceptableSignatureAlgorithms.get(signatureAlgorithm);
+            if (Utils.isCollectionNotEmpty(evaluations)) {
+                for (CryptographicSuiteEvaluation evaluation : evaluations) {
+                    if (isEvaluationApplicable(signatureAlgorithm.getEncryptionAlgorithm(), keySize, evaluation)) {
                         return true;
                     }
                 }
+
+            } else {
+                // no evaluations -> return true
+                return true;
             }
         }
-        return !foundAlgorithm;
+        return false;
     }
 
     private static int parseKeySize(String keyLength) {
@@ -155,35 +169,30 @@ public final class CryptographicSuiteUtils {
      */
     public static Date getExpirationDate(CryptographicSuite cryptographicSuite,
                                          SignatureAlgorithm signatureAlgorithm, Integer keySize) {
-        final TreeMap<Integer, Date> dates = new TreeMap<>();
-
-        Map<SignatureAlgorithmWithMinKeySize, Date> signatureAlgorithmsWithExpirationDates =
-                cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates();
-        for (Map.Entry<SignatureAlgorithmWithMinKeySize, Date> entry : signatureAlgorithmsWithExpirationDates.entrySet()) {
-            SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize = entry.getKey();
-            if (signatureAlgorithm == signatureAlgorithmWithMinKeySize.getSignatureAlgorithm()) {
-                dates.put(signatureAlgorithmWithMinKeySize.getMinKeySize(), entry.getValue());
-            }
+        if (cryptographicSuite == null) {
+            return null;
         }
 
-        for (SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize : cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes()) {
-            if (signatureAlgorithm == signatureAlgorithmWithMinKeySize.getSignatureAlgorithm()) {
-                Map.Entry<Integer, Date> floorEntry = dates.floorEntry(signatureAlgorithmWithMinKeySize.getMinKeySize());
-                if (floorEntry == null) {
-                    Map.Entry<Integer, Date> ceilingEntry = dates.ceilingEntry(signatureAlgorithmWithMinKeySize.getMinKeySize());
-                    if (ceilingEntry != null) {
-                        dates.put(signatureAlgorithmWithMinKeySize.getMinKeySize(), ceilingEntry.getValue());
+        Date expirationDate = null;
+        if (signatureAlgorithm != null && keySize != null) {
+            Map<SignatureAlgorithm, Set<CryptographicSuiteEvaluation>> acceptableSignatureAlgorithms = cryptographicSuite.getAcceptableSignatureAlgorithms();
+            Set<CryptographicSuiteEvaluation> evaluations = acceptableSignatureAlgorithms.get(signatureAlgorithm);
+            if (Utils.isCollectionNotEmpty(evaluations)) {
+                for (CryptographicSuiteEvaluation evaluation : evaluations) {
+                    if (isEvaluationApplicable(signatureAlgorithm.getEncryptionAlgorithm(), keySize, evaluation)) {
+                        // return the last expiration date (at least one evaluation shall match)
+                        Date validityEnd = evaluation.getValidityEnd();
+                        if (validityEnd == null) {
+                            return null;
+                        }
+                        if (expirationDate == null || validityEnd.after(expirationDate)) {
+                            expirationDate = validityEnd;
+                        }
                     }
                 }
             }
         }
-
-        Map.Entry<Integer, Date> floorEntry = dates.floorEntry(keySize);
-        if (floorEntry == null) {
-            return null;
-        } else {
-            return floorEntry.getValue();
-        }
+        return expirationDate;
     }
 
     /**
@@ -195,8 +204,28 @@ public final class CryptographicSuiteUtils {
      * @return {@link Date}
      */
     public static Date getExpirationDate(CryptographicSuite cryptographicSuite, DigestAlgorithm digestAlgorithm) {
-        Map<DigestAlgorithm, Date> digestAlgorithmsWithExpirationDates = cryptographicSuite.getAcceptableDigestAlgorithmsWithExpirationDates();
-        return digestAlgorithmsWithExpirationDates.get(digestAlgorithm);
+        if (cryptographicSuite == null) {
+            return null;
+        }
+
+        Date expirationDate = null;
+        if (digestAlgorithm != null) {
+            Map<DigestAlgorithm, Set<CryptographicSuiteEvaluation>> acceptableDigestAlgorithms = cryptographicSuite.getAcceptableDigestAlgorithms();
+            Set<CryptographicSuiteEvaluation> evaluations = acceptableDigestAlgorithms.get(digestAlgorithm);
+            if (Utils.isCollectionNotEmpty(evaluations)) {
+                for (CryptographicSuiteEvaluation evaluation : evaluations) {
+                    // return the last expiration date (at least one evaluation shall match)
+                    Date validityEnd = evaluation.getValidityEnd();
+                    if (validityEnd == null) {
+                        return null;
+                    }
+                    if (expirationDate == null || validityEnd.after(expirationDate)) {
+                        expirationDate = validityEnd;
+                    }
+                }
+            }
+        }
+        return expirationDate;
     }
 
     /**
@@ -205,37 +234,23 @@ public final class CryptographicSuiteUtils {
      *
      * @param cryptographicSuite {@link CryptographicSuite}
      * @param validationTime {@link Date} to verify against
-     * @return a list of {@link DigestAlgorithm}s
+     * @return a set of {@link DigestAlgorithm}s
      */
-    public static List<DigestAlgorithm> getReliableDigestAlgorithmsAtTime(CryptographicSuite cryptographicSuite, Date validationTime) {
-        final List<DigestAlgorithm> reliableDigestAlgorithms = new ArrayList<>();
-
-        List<DigestAlgorithm> acceptableDigestAlgorithms = cryptographicSuite.getAcceptableDigestAlgorithms();
-        Map<DigestAlgorithm, Date> digestAlgorithmsWithExpirationDates = cryptographicSuite.getAcceptableDigestAlgorithmsWithExpirationDates();
-        for (Map.Entry<DigestAlgorithm, Date> entry : digestAlgorithmsWithExpirationDates.entrySet()) {
-            DigestAlgorithm digestAlgorithm = entry.getKey();
-            if (acceptableDigestAlgorithms.contains(digestAlgorithm)) {
-                Date expirationDate = entry.getValue();
-                if (isReliableAtTime(expirationDate, validationTime)) {
-                    reliableDigestAlgorithms.add(digestAlgorithm);
+    public static Set<DigestAlgorithm> getReliableDigestAlgorithmsAtTime(CryptographicSuite cryptographicSuite, Date validationTime) {
+        final Set<DigestAlgorithm> reliableDigestAlgorithms = new HashSet<>();
+        for (Map.Entry<DigestAlgorithm, Set<CryptographicSuiteEvaluation>> entry : cryptographicSuite.getAcceptableDigestAlgorithms().entrySet()) {
+            Set<CryptographicSuiteEvaluation> evaluations = entry.getValue();
+            if (Utils.isCollectionNotEmpty(evaluations)) {
+                for (CryptographicSuiteEvaluation evaluation : evaluations) {
+                    Date validityEnd = evaluation.getValidityEnd();
+                    if (validityEnd == null || validityEnd.after(validationTime)) { // TODO : include validationStart date
+                        reliableDigestAlgorithms.add(entry.getKey());
+                        break;
+                    }
                 }
             }
         }
-
-        for (DigestAlgorithm digestAlgorithm : acceptableDigestAlgorithms) {
-            if (!reliableDigestAlgorithms.contains(digestAlgorithm)) {
-                Date expirationDate = digestAlgorithmsWithExpirationDates.get(digestAlgorithm);
-                if (isReliableAtTime(expirationDate, validationTime)) {
-                    reliableDigestAlgorithms.add(digestAlgorithm);
-                }
-            }
-        }
-
         return reliableDigestAlgorithms;
-    }
-
-    private static boolean isReliableAtTime(Date expirationDate, Date validationTime) {
-        return expirationDate == null || !expirationDate.before(validationTime);
     }
 
     /**
@@ -244,58 +259,94 @@ public final class CryptographicSuiteUtils {
      *
      * @param cryptographicSuite {@link CryptographicSuite}
      * @param validationTime {@link Date} to verify against
-     * @return a list of {@link SignatureAlgorithmWithMinKeySize}s
+     * @return a set of {@link SignatureAlgorithmWithMinKeySize}s
      */
-    public static List<SignatureAlgorithmWithMinKeySize> getReliableSignatureAlgorithmsWithMinimalKeyLengthAtTime(
+    public static Set<SignatureAlgorithmWithMinKeySize> getReliableSignatureAlgorithmsWithMinimalKeyLengthAtTime(
             CryptographicSuite cryptographicSuite, Date validationTime) {
-        final Map<SignatureAlgorithm, Integer> reliableSignatureAlgorithms = new EnumMap<>(SignatureAlgorithm.class);
-        Set<SignatureAlgorithm> processedSignatureAlgorithms = new HashSet<>();
+        final Set<SignatureAlgorithmWithMinKeySize> result = new HashSet<>();
+        for (Map.Entry<SignatureAlgorithm, Set<CryptographicSuiteEvaluation>> entry : cryptographicSuite.getAcceptableSignatureAlgorithms().entrySet()) {
+            SignatureAlgorithm signatureAlgorithm = entry.getKey();
+            Set<CryptographicSuiteEvaluation> evaluations = entry.getValue();
 
-        List<SignatureAlgorithm> acceptableSignatureAlgorithms = cryptographicSuite.getAcceptableSignatureAlgorithms();
-        Map<SignatureAlgorithmWithMinKeySize, Date> signatureAlgorithmsWithExpirationDates =
-                cryptographicSuite.getAcceptableSignatureAlgorithmsWithExpirationDates();
-        for (Map.Entry<SignatureAlgorithmWithMinKeySize, Date> entry : signatureAlgorithmsWithExpirationDates.entrySet()) {
-            SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize = entry.getKey();
-            SignatureAlgorithm signatureAlgorithm = signatureAlgorithmWithMinKeySize.getSignatureAlgorithm();
-            int keySize = signatureAlgorithmWithMinKeySize.getMinKeySize();
-            if (acceptableSignatureAlgorithms.contains(signatureAlgorithm)) {
-                Integer minKeySize = reliableSignatureAlgorithms.get(signatureAlgorithm);
-                if (minKeySize == null || minKeySize > keySize) {
-                    Date expirationDate = entry.getValue();
-                    if (isReliableAtTime(expirationDate, validationTime)) {
-                        reliableSignatureAlgorithms.put(signatureAlgorithm, keySize);
+            Integer minKeyLength = null;
+            if (Utils.isCollectionNotEmpty(evaluations)) {
+                for (CryptographicSuiteEvaluation evaluation : evaluations) {
+                    if (isEvaluationApplicable(signatureAlgorithm.getEncryptionAlgorithm(), null, evaluation)) {
+                        Date validityEnd = evaluation.getValidityEnd();
+                        if (validityEnd == null || validityEnd.after(validationTime)) { // TODO : include validationStart date
+                            int keyLength = getMinKeyLength(signatureAlgorithm.getEncryptionAlgorithm(), evaluation);
+                            if (minKeyLength == null || minKeyLength > keyLength) {
+                                minKeyLength = keyLength;
+                            }
+                        }
                     }
                 }
             }
-            processedSignatureAlgorithms.add(signatureAlgorithm);
-        }
-
-        for (SignatureAlgorithmWithMinKeySize signatureAlgorithmWithMinKeySize : cryptographicSuite.getAcceptableSignatureAlgorithmsWithMinKeySizes()) {
-            SignatureAlgorithm signatureAlgorithm = signatureAlgorithmWithMinKeySize.getSignatureAlgorithm();
-            int keySize = signatureAlgorithmWithMinKeySize.getMinKeySize();
-            if (!processedSignatureAlgorithms.contains(signatureAlgorithm)) {
-                reliableSignatureAlgorithms.put(signatureAlgorithm, keySize);
-
-            } else if (reliableSignatureAlgorithms.containsKey(signatureAlgorithm)) {
-                Integer minKeySize = reliableSignatureAlgorithms.get(signatureAlgorithm);
-                if (minKeySize == null || minKeySize < keySize) {
-                    reliableSignatureAlgorithms.put(signatureAlgorithm, keySize);
-                }
+            if (minKeyLength != null) {
+                result.add(new SignatureAlgorithmWithMinKeySize(signatureAlgorithm, minKeyLength));
             }
-            processedSignatureAlgorithms.add(signatureAlgorithm);
-        }
-
-        for (SignatureAlgorithm signatureAlgorithm : acceptableSignatureAlgorithms) {
-            if (!processedSignatureAlgorithms.contains(signatureAlgorithm)) {
-                reliableSignatureAlgorithms.put(signatureAlgorithm, 0);
-            }
-        }
-
-        final List<SignatureAlgorithmWithMinKeySize> result = new ArrayList<>();
-        for (Map.Entry<SignatureAlgorithm, Integer> entry : reliableSignatureAlgorithms.entrySet()) {
-            result.add(new SignatureAlgorithmWithMinKeySize(entry.getKey(), entry.getValue()));
         }
         return result;
+    }
+
+    private static boolean isEvaluationApplicable(EncryptionAlgorithm algorithm, Integer keySize, CryptographicSuiteEvaluation evaluation) {
+        List<CryptographicSuiteParameter> parameterList = evaluation.getParameterList();
+        if (parameterList == null || parameterList.isEmpty()) {
+            return true;
+        }
+        for (CryptographicSuiteParameter parameter : parameterList) {
+            if (!isSupported(algorithm, parameter)) {
+                continue;
+            }
+            if (keySize != null && parameter.getMin() != null && keySize < parameter.getMin()) {
+                continue;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static int getMinKeyLength(EncryptionAlgorithm algorithm, CryptographicSuiteEvaluation evaluation) {
+        Integer minKeyLength = null;
+        List<CryptographicSuiteParameter> parameterList = evaluation.getParameterList();
+        if (parameterList != null && !parameterList.isEmpty()) {
+            for (CryptographicSuiteParameter parameter : parameterList) {
+                if (!isSupported(algorithm, parameter)) {
+                    continue;
+                }
+                if (parameter.getMin() == null) {
+                    return 0;
+                }
+                if (minKeyLength == null || minKeyLength > parameter.getMin()) {
+                    minKeyLength = parameter.getMin();
+                }
+            }
+        }
+        return minKeyLength != null ? minKeyLength : 0;
+    }
+
+    private static boolean isSupported(EncryptionAlgorithm encryptionAlgorithm, CryptographicSuiteParameter parameter) {
+        String parameterName = parameter.getName();
+        // first come, first served logic
+        if (MODULES_LENGTH_PARAMETER.equals(parameterName)) {
+            if (EncryptionAlgorithm.RSA.isEquivalent(encryptionAlgorithm)) {
+                return true;
+            }
+
+        } else if (PLENGTH_PARAMETER.equals(parameterName)) {
+            if (EncryptionAlgorithm.DSA.isEquivalent(encryptionAlgorithm) ||
+                    EncryptionAlgorithm.ECDSA.isEquivalent(encryptionAlgorithm) ||
+                    EncryptionAlgorithm.EDDSA.isEquivalent(encryptionAlgorithm)) {
+                return true;
+            }
+
+        } else if (QLENGTH_PARAMETER.equals(parameterName)) {
+            // process silently (not supported)
+
+        } else {
+            LOG.debug("Unknown Algorithms Parameter type '{}'!", parameterName);
+        }
+        return false;
     }
 
 }

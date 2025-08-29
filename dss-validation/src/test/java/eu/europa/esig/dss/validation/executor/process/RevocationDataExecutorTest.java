@@ -46,6 +46,8 @@ import eu.europa.esig.dss.diagnostic.SignatureWrapper;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDiagnosticData;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlRevocation;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlTimestamp;
+import eu.europa.esig.dss.enumerations.Context;
+import eu.europa.esig.dss.enumerations.CryptographicSuiteAlgorithmUsage;
 import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.Level;
 import eu.europa.esig.dss.enumerations.SignatureQualification;
@@ -53,14 +55,18 @@ import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.enumerations.TimestampQualification;
 import eu.europa.esig.dss.enumerations.ValidationLevel;
 import eu.europa.esig.dss.i18n.MessageTag;
+import eu.europa.esig.dss.model.InMemoryDocument;
+import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.policy.EtsiValidationPolicy;
 import eu.europa.esig.dss.policy.jaxb.BasicSignatureConstraints;
 import eu.europa.esig.dss.policy.jaxb.CertificateConstraints;
 import eu.europa.esig.dss.policy.jaxb.LevelConstraint;
 import eu.europa.esig.dss.policy.jaxb.RevocationConstraints;
 import eu.europa.esig.dss.simplereport.SimpleReport;
+import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.validation.executor.signature.DefaultSignatureProcessExecutor;
+import eu.europa.esig.dss.validation.policy.ValidationPolicyLoader;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
 import eu.europa.esig.dss.validation.reports.Reports;
 import org.junit.jupiter.api.Test;
@@ -209,6 +215,263 @@ class RevocationDataExecutorTest extends AbstractProcessExecutorTest {
         SimpleReport simpleReport = reports.getSimpleReport();
         assertEquals(Indication.TOTAL_PASSED, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
         assertEquals(SignatureQualification.QESIG, simpleReport.getSignatureQualification(simpleReport.getFirstSignatureId()));
+
+        // cert is not TSA/QTST
+        List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> timestamps = simpleReport.getSignatureTimestamps(simpleReport.getFirstSignatureId());
+        assertEquals(2, timestamps.size());
+        for (eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp timestamp : timestamps) {
+            assertEquals(1, timestamp.getQualificationDetails().getError().size());
+            assertTrue(checkMessageValuePresence(convertMessages(timestamp.getQualificationDetails().getError()),
+                    i18nProvider.getMessage(MessageTag.QUAL_HAS_QTST_ANS)));
+        }
+
+        validateBestSigningTimes(reports);
+        checkReports(reports);
+    }
+
+    @Test
+    void expiredRevocAndNoCheckWithCustomCryptoSuite() throws Exception {
+        XmlDiagnosticData diagnosticData = DiagnosticDataFacade.newFacade().unmarshall(new File("src/test/resources/diag-data/expiredOcspWithNoCheckAndCRL.xml"));
+        assertNotNull(diagnosticData);
+
+        ValidationPolicy validationPolicy = ValidationPolicyLoader.fromValidationPolicy(loadDefaultPolicy())
+                .withCryptographicSuite(new File("src/test/resources/diag-data/crypto-suite/dss-crypto-suite.xml"))
+                .create();
+
+        DefaultSignatureProcessExecutor executor = new DefaultSignatureProcessExecutor();
+        executor.setDiagnosticData(diagnosticData);
+        executor.setValidationPolicy(validationPolicy);
+        executor.setCurrentTime(diagnosticData.getValidationDate());
+
+        Reports reports = executor.execute();
+        assertNotNull(reports);
+
+        // Expiration of the OCSP Responder should not change the validation result
+        SimpleReport simpleReport = reports.getSimpleReport();
+        assertEquals(Indication.INDETERMINATE, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, simpleReport.getSubIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SignatureQualification.INDETERMINATE_QESIG, simpleReport.getSignatureQualification(simpleReport.getFirstSignatureId()));
+
+        // cert is not TSA/QTST
+        List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> timestamps = simpleReport.getSignatureTimestamps(simpleReport.getFirstSignatureId());
+        assertEquals(2, timestamps.size());
+        for (eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp timestamp : timestamps) {
+            assertEquals(1, timestamp.getQualificationDetails().getError().size());
+            assertTrue(checkMessageValuePresence(convertMessages(timestamp.getQualificationDetails().getError()),
+                    i18nProvider.getMessage(MessageTag.QUAL_HAS_QTST_ANS)));
+        }
+
+        validateBestSigningTimes(reports);
+        checkReports(reports);
+    }
+
+    @Test
+    void expiredRevocAndNoCheckWithCustomCryptoSuiteXmlSha1() throws Exception {
+        XmlDiagnosticData diagnosticData = DiagnosticDataFacade.newFacade().unmarshall(new File("src/test/resources/diag-data/expiredOcspWithNoCheckAndCRL.xml"));
+        assertNotNull(diagnosticData);
+
+        ValidationPolicy validationPolicy = ValidationPolicyLoader.fromValidationPolicy(loadDefaultPolicy())
+                .withCryptographicSuite(new File("src/test/resources/diag-data/crypto-suite/dss-crypto-suite-revoc-sha1.xml"))
+                .create();
+
+        DefaultSignatureProcessExecutor executor = new DefaultSignatureProcessExecutor();
+        executor.setDiagnosticData(diagnosticData);
+        executor.setValidationPolicy(validationPolicy);
+        executor.setCurrentTime(diagnosticData.getValidationDate());
+
+        Reports reports = executor.execute();
+        assertNotNull(reports);
+
+        // Expiration of the OCSP Responder should not change the validation result
+        SimpleReport simpleReport = reports.getSimpleReport();
+        assertEquals(Indication.TOTAL_PASSED, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SignatureQualification.QESIG, simpleReport.getSignatureQualification(simpleReport.getFirstSignatureId()));
+
+        // cert is not TSA/QTST
+        List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> timestamps = simpleReport.getSignatureTimestamps(simpleReport.getFirstSignatureId());
+        assertEquals(2, timestamps.size());
+        for (eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp timestamp : timestamps) {
+            assertEquals(1, timestamp.getQualificationDetails().getError().size());
+            assertTrue(checkMessageValuePresence(convertMessages(timestamp.getQualificationDetails().getError()),
+                    i18nProvider.getMessage(MessageTag.QUAL_HAS_QTST_ANS)));
+        }
+
+        validateBestSigningTimes(reports);
+        checkReports(reports);
+    }
+
+    @Test
+    void expiredRevocAndNoCheckWithCustomCryptoSuiteJsonSha1() throws Exception {
+        XmlDiagnosticData diagnosticData = DiagnosticDataFacade.newFacade().unmarshall(new File("src/test/resources/diag-data/expiredOcspWithNoCheckAndCRL.xml"));
+        assertNotNull(diagnosticData);
+
+        ValidationPolicy validationPolicy = ValidationPolicyLoader.fromValidationPolicy(loadDefaultPolicy())
+                .withCryptographicSuite(new File("src/test/resources/diag-data/crypto-suite/dss-crypto-suite-revoc-sha1.json"))
+                .create();
+
+        DefaultSignatureProcessExecutor executor = new DefaultSignatureProcessExecutor();
+        executor.setDiagnosticData(diagnosticData);
+        executor.setValidationPolicy(validationPolicy);
+        executor.setCurrentTime(diagnosticData.getValidationDate());
+
+        Reports reports = executor.execute();
+        assertNotNull(reports);
+
+        // Expiration of the OCSP Responder should not change the validation result
+        SimpleReport simpleReport = reports.getSimpleReport();
+        assertEquals(Indication.TOTAL_PASSED, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SignatureQualification.QESIG, simpleReport.getSignatureQualification(simpleReport.getFirstSignatureId()));
+
+        // cert is not TSA/QTST
+        List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> timestamps = simpleReport.getSignatureTimestamps(simpleReport.getFirstSignatureId());
+        assertEquals(2, timestamps.size());
+        for (eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp timestamp : timestamps) {
+            assertEquals(1, timestamp.getQualificationDetails().getError().size());
+            assertTrue(checkMessageValuePresence(convertMessages(timestamp.getQualificationDetails().getError()),
+                    i18nProvider.getMessage(MessageTag.QUAL_HAS_QTST_ANS)));
+        }
+
+        validateBestSigningTimes(reports);
+        checkReports(reports);
+    }
+
+    @Test
+    void expiredRevocAndNoCheckWithCustomCryptoSuiteXmlSha1TstOnly() throws Exception {
+        XmlDiagnosticData diagnosticData = DiagnosticDataFacade.newFacade().unmarshall(new File("src/test/resources/diag-data/expiredOcspWithNoCheckAndCRL.xml"));
+        assertNotNull(diagnosticData);
+
+        File cryptoSuiteFile = new File("src/test/resources/diag-data/crypto-suite/dss-crypto-suite-revoc-sha1.xml");
+        byte[] tstOnlySha1Policy = new String(DSSUtils.toByteArray(cryptoSuiteFile)).replace(
+                CryptographicSuiteAlgorithmUsage.VALIDATE_OCSP.getUri(), CryptographicSuiteAlgorithmUsage.VALIDATE_TIMESTAMPS.getUri()).getBytes();
+
+        ValidationPolicy validationPolicy = ValidationPolicyLoader.fromValidationPolicy(loadDefaultPolicy())
+                .withCryptographicSuite(new InMemoryDocument(tstOnlySha1Policy))
+                .create();
+
+        DefaultSignatureProcessExecutor executor = new DefaultSignatureProcessExecutor();
+        executor.setDiagnosticData(diagnosticData);
+        executor.setValidationPolicy(validationPolicy);
+        executor.setCurrentTime(diagnosticData.getValidationDate());
+
+        Reports reports = executor.execute();
+        assertNotNull(reports);
+
+        // Expiration of the OCSP Responder should not change the validation result
+        SimpleReport simpleReport = reports.getSimpleReport();
+        assertEquals(Indication.INDETERMINATE, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, simpleReport.getSubIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SignatureQualification.INDETERMINATE_QESIG, simpleReport.getSignatureQualification(simpleReport.getFirstSignatureId()));
+
+        // cert is not TSA/QTST
+        List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> timestamps = simpleReport.getSignatureTimestamps(simpleReport.getFirstSignatureId());
+        assertEquals(2, timestamps.size());
+        for (eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp timestamp : timestamps) {
+            assertEquals(1, timestamp.getQualificationDetails().getError().size());
+            assertTrue(checkMessageValuePresence(convertMessages(timestamp.getQualificationDetails().getError()),
+                    i18nProvider.getMessage(MessageTag.QUAL_HAS_QTST_ANS)));
+        }
+
+        validateBestSigningTimes(reports);
+        checkReports(reports);
+    }
+
+    @Test
+    void expiredRevocAndNoCheckWithCustomCryptoSuiteJsonSha1TstOnly() throws Exception {
+        XmlDiagnosticData diagnosticData = DiagnosticDataFacade.newFacade().unmarshall(new File("src/test/resources/diag-data/expiredOcspWithNoCheckAndCRL.xml"));
+        assertNotNull(diagnosticData);
+
+        File cryptoSuiteFile = new File("src/test/resources/diag-data/crypto-suite/dss-crypto-suite-revoc-sha1.json");
+        byte[] tstOnlySha1Policy = new String(DSSUtils.toByteArray(cryptoSuiteFile)).replace(
+                CryptographicSuiteAlgorithmUsage.VALIDATE_OCSP.getUri(), CryptographicSuiteAlgorithmUsage.VALIDATE_TIMESTAMPS.getUri()).getBytes();
+
+        ValidationPolicy validationPolicy = ValidationPolicyLoader.fromValidationPolicy(loadDefaultPolicy())
+                .withCryptographicSuite(new InMemoryDocument(tstOnlySha1Policy))
+                .create();
+
+        DefaultSignatureProcessExecutor executor = new DefaultSignatureProcessExecutor();
+        executor.setDiagnosticData(diagnosticData);
+        executor.setValidationPolicy(validationPolicy);
+        executor.setCurrentTime(diagnosticData.getValidationDate());
+
+        Reports reports = executor.execute();
+        assertNotNull(reports);
+
+        // Expiration of the OCSP Responder should not change the validation result
+        SimpleReport simpleReport = reports.getSimpleReport();
+        assertEquals(Indication.INDETERMINATE, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, simpleReport.getSubIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SignatureQualification.INDETERMINATE_QESIG, simpleReport.getSignatureQualification(simpleReport.getFirstSignatureId()));
+
+        // cert is not TSA/QTST
+        List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> timestamps = simpleReport.getSignatureTimestamps(simpleReport.getFirstSignatureId());
+        assertEquals(2, timestamps.size());
+        for (eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp timestamp : timestamps) {
+            assertEquals(1, timestamp.getQualificationDetails().getError().size());
+            assertTrue(checkMessageValuePresence(convertMessages(timestamp.getQualificationDetails().getError()),
+                    i18nProvider.getMessage(MessageTag.QUAL_HAS_QTST_ANS)));
+        }
+
+        validateBestSigningTimes(reports);
+        checkReports(reports);
+    }
+
+    @Test
+    void expiredRevocAndNoCheckWithCustomCryptoSuiteXmlSha1RevocScope() throws Exception {
+        XmlDiagnosticData diagnosticData = DiagnosticDataFacade.newFacade().unmarshall(new File("src/test/resources/diag-data/expiredOcspWithNoCheckAndCRL.xml"));
+        assertNotNull(diagnosticData);
+
+        ValidationPolicy validationPolicy = ValidationPolicyLoader.fromValidationPolicy(loadDefaultPolicy())
+                .withCryptographicSuiteForContext(new File("src/test/resources/diag-data/crypto-suite/dss-crypto-suite-revoc-sha1.xml"), Context.REVOCATION)
+                .create();
+
+        DefaultSignatureProcessExecutor executor = new DefaultSignatureProcessExecutor();
+        executor.setDiagnosticData(diagnosticData);
+        executor.setValidationPolicy(validationPolicy);
+        executor.setCurrentTime(diagnosticData.getValidationDate());
+
+        Reports reports = executor.execute();
+        assertNotNull(reports);
+
+        // Expiration of the OCSP Responder should not change the validation result
+        SimpleReport simpleReport = reports.getSimpleReport();
+        assertEquals(Indication.TOTAL_PASSED, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SignatureQualification.QESIG, simpleReport.getSignatureQualification(simpleReport.getFirstSignatureId()));
+
+        // cert is not TSA/QTST
+        List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> timestamps = simpleReport.getSignatureTimestamps(simpleReport.getFirstSignatureId());
+        assertEquals(2, timestamps.size());
+        for (eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp timestamp : timestamps) {
+            assertEquals(1, timestamp.getQualificationDetails().getError().size());
+            assertTrue(checkMessageValuePresence(convertMessages(timestamp.getQualificationDetails().getError()),
+                    i18nProvider.getMessage(MessageTag.QUAL_HAS_QTST_ANS)));
+        }
+
+        validateBestSigningTimes(reports);
+        checkReports(reports);
+    }
+
+    @Test
+    void expiredRevocAndNoCheckWithCustomCryptoSuiteXmlSha1TstScope() throws Exception {
+        XmlDiagnosticData diagnosticData = DiagnosticDataFacade.newFacade().unmarshall(new File("src/test/resources/diag-data/expiredOcspWithNoCheckAndCRL.xml"));
+        assertNotNull(diagnosticData);
+
+        ValidationPolicy validationPolicy = ValidationPolicyLoader.fromValidationPolicy(loadDefaultPolicy())
+                .withCryptographicSuiteForContext(new File("src/test/resources/diag-data/crypto-suite/dss-crypto-suite-revoc-sha1.xml"), Context.TIMESTAMP)
+                .create();
+
+        DefaultSignatureProcessExecutor executor = new DefaultSignatureProcessExecutor();
+        executor.setDiagnosticData(diagnosticData);
+        executor.setValidationPolicy(validationPolicy);
+        executor.setCurrentTime(diagnosticData.getValidationDate());
+
+        Reports reports = executor.execute();
+        assertNotNull(reports);
+
+        // Expiration of the OCSP Responder should not change the validation result
+        SimpleReport simpleReport = reports.getSimpleReport();
+        assertEquals(Indication.INDETERMINATE, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, simpleReport.getSubIndication(simpleReport.getFirstSignatureId()));
+        assertEquals(SignatureQualification.INDETERMINATE_QESIG, simpleReport.getSignatureQualification(simpleReport.getFirstSignatureId()));
 
         // cert is not TSA/QTST
         List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> timestamps = simpleReport.getSignatureTimestamps(simpleReport.getFirstSignatureId());

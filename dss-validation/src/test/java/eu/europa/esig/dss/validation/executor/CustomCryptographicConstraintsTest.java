@@ -745,6 +745,7 @@ class CustomCryptographicConstraintsTest extends AbstractCryptographicConstraint
 		simpleReport = createSimpleReport();
 		assertEquals(Indication.INDETERMINATE, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
 
+		setAlgoExpDate(cryptographic, "RSA", 1536, "2020-1-1");
 		removeAlgo(cryptographic.getAlgoExpirationDate().getAlgos(), "RSA", 2048);
 		simpleReport = createSimpleReport();
 		assertEquals(Indication.TOTAL_PASSED, simpleReport.getIndication(simpleReport.getFirstSignatureId()));

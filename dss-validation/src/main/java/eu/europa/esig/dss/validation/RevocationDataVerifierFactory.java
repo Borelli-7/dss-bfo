@@ -37,12 +37,11 @@ import eu.europa.esig.dss.validation.policy.CryptographicSuiteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -107,8 +106,8 @@ public class RevocationDataVerifierFactory {
     }
 
     private void instantiateCryptographicSuite(final RevocationDataVerifier revocationDataVerifier) {
-        List<DigestAlgorithm> acceptableDigestAlgorithms;
-        List<SignatureAlgorithmWithMinKeySize> acceptableSignatureAlgorithms;
+        Set<DigestAlgorithm> acceptableDigestAlgorithms;
+        Set<SignatureAlgorithmWithMinKeySize> acceptableSignatureAlgorithms;
 
         final CryptographicSuite cryptographicSuite = getRevocationCryptographicSuite(validationPolicy);
         if (cryptographicSuite != null && Level.FAIL.equals(cryptographicSuite.getLevel())) {
@@ -117,8 +116,9 @@ public class RevocationDataVerifierFactory {
             acceptableSignatureAlgorithms = CryptographicSuiteUtils.getReliableSignatureAlgorithmsWithMinimalKeyLengthAtTime(cryptographicSuite, currentTime);
         } else {
             LOG.info("No enforced cryptographic constraints have been found in the provided validation policy. Accept all cryptographic algorithms.");
-            acceptableDigestAlgorithms = Arrays.asList(DigestAlgorithm.values());
-            acceptableSignatureAlgorithms = new ArrayList<>();
+            acceptableDigestAlgorithms = new HashSet<>();
+            Collections.addAll(acceptableDigestAlgorithms, DigestAlgorithm.values());
+            acceptableSignatureAlgorithms = new HashSet<>();
             for (SignatureAlgorithm signatureAlgorithm : SignatureAlgorithm.values()) {
                 acceptableSignatureAlgorithms.add(new SignatureAlgorithmWithMinKeySize(signatureAlgorithm, 0));
             }
@@ -131,7 +131,7 @@ public class RevocationDataVerifierFactory {
         return validationPolicy.getSignatureCryptographicConstraint(Context.REVOCATION);
     }
 
-    private Map<SignatureAlgorithm, Integer> toSignatureAlgorithmWithKeySizesMap(List<SignatureAlgorithmWithMinKeySize> signatureAlgorithms) {
+    private Map<SignatureAlgorithm, Integer> toSignatureAlgorithmWithKeySizesMap(Collection<SignatureAlgorithmWithMinKeySize> signatureAlgorithms) {
         final Map<SignatureAlgorithm, Integer> signatureAlgorithmsMap = new EnumMap<>(SignatureAlgorithm.class);
         for (SignatureAlgorithmWithMinKeySize encryptionAlgorithmWithMinKeySize : signatureAlgorithms) {
             SignatureAlgorithm signatureAlgorithm = encryptionAlgorithmWithMinKeySize.getSignatureAlgorithm();

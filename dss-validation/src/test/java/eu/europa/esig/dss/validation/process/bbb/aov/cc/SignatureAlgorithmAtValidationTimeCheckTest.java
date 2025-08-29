@@ -63,6 +63,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         rsa1900.setDate("2026");
         algoExpirationDate.getAlgos().add(rsa1900);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Algo sha256 = new Algo();
@@ -109,6 +111,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -150,6 +154,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2021");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -190,6 +196,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -225,6 +233,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -265,6 +275,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -305,6 +317,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2021");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -345,6 +359,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -387,6 +403,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -428,6 +446,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -468,6 +488,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -510,6 +532,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -552,6 +576,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();
@@ -594,6 +620,8 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
         sha256.setDate("2029");
         algoExpirationDate.getAlgos().add(sha256);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(algoExpirationDate);
+        cryptographicConstraint.setAcceptableDigestAlgo(algoExpirationDate);
         cryptographicConstraint.setAlgoExpirationDate(algoExpirationDate);
 
         Calendar calendar = Calendar.getInstance();

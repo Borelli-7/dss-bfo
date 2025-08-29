@@ -21,8 +21,8 @@
 package eu.europa.esig.dss.policy.crypto.json;
 
 import eu.europa.esig.dss.model.FileDocument;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
-import eu.europa.esig.dss.model.policy.CryptographicSuiteFactory;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteCatalogue;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
@@ -39,14 +39,14 @@ class CryptographicSuiteJsonFactoryTest {
         ServiceLoader<CryptographicSuiteFactory> loader = ServiceLoader.load(CryptographicSuiteFactory.class);
         Iterator<CryptographicSuiteFactory> factoryOptions = loader.iterator();
 
-        CryptographicSuite cryptographicSuite = null;
+        CryptographicSuiteCatalogue cryptographicSuiteCatalogue = null;
         while (factoryOptions.hasNext()) {
             CryptographicSuiteFactory factory = factoryOptions.next();
             if (factory.isSupported(cryptoSuite)) {
-                cryptographicSuite = factory.loadCryptographicSuite(cryptoSuite);
+                cryptographicSuiteCatalogue = factory.loadCryptographicSuite(cryptoSuite);
             }
         }
-        assertNotNull(cryptographicSuite);
+        assertNotNull(cryptographicSuiteCatalogue);
     }
 
     @Test
@@ -54,12 +54,12 @@ class CryptographicSuiteJsonFactoryTest {
         ServiceLoader<CryptographicSuiteFactory> loader = ServiceLoader.load(CryptographicSuiteFactory.class);
         Iterator<CryptographicSuiteFactory> factoryOptions = loader.iterator();
 
-        CryptographicSuite cryptographicSuite = null;
+        CryptographicSuiteCatalogue cryptographicSuiteCatalogue = null;
         if (factoryOptions.hasNext()) {
             CryptographicSuiteFactory factory = factoryOptions.next();
-            cryptographicSuite = factory.loadDefaultCryptographicSuite();
+            cryptographicSuiteCatalogue = factory.loadDefaultCryptographicSuite();
         }
-        assertNotNull(cryptographicSuite);
+        assertNotNull(cryptographicSuiteCatalogue);
     }
 
 }

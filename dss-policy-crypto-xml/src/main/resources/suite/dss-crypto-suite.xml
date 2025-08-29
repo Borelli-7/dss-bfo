@@ -26,7 +26,7 @@
         <dssc:End>2004-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -42,7 +42,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -58,7 +58,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+      	<etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -73,7 +73,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+      	<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -88,7 +88,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+      	<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -103,7 +103,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+      	<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Information>
@@ -121,7 +121,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+      	<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -136,7 +136,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+      	<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -151,7 +151,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+      	<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -167,7 +167,7 @@
         <dssc:End>2014-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -183,7 +183,7 @@
         <dssc:End>2020-12-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -208,7 +208,7 @@
         <dssc:End>2004-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -219,7 +219,7 @@
         <dssc:End>2004-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -230,7 +230,7 @@
         <dssc:End>2004-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -242,7 +242,7 @@
         <dssc:End>2004-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -254,7 +254,7 @@
         <dssc:End>2004-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -275,7 +275,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -286,7 +286,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -297,7 +297,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -309,7 +309,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -321,7 +321,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -342,7 +342,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -353,7 +353,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -364,7 +364,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -376,7 +376,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+      	<etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
 	<!-- legacy -->
@@ -388,7 +388,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+      	<etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -409,7 +409,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -420,7 +420,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -431,7 +431,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -443,7 +443,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+      	<etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
 	<!-- recommended -->
@@ -455,7 +455,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+      	<etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -476,7 +476,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -487,7 +487,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -498,7 +498,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -510,7 +510,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -522,7 +522,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -543,7 +543,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -554,7 +554,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -565,7 +565,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -577,7 +577,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -589,7 +589,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -610,7 +610,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -621,7 +621,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -632,7 +632,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -644,7 +644,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -656,7 +656,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -677,7 +677,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -688,7 +688,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -699,7 +699,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -711,7 +711,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -723,7 +723,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -744,7 +744,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -755,7 +755,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -766,7 +766,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -778,7 +778,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -790,7 +790,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -811,7 +811,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -822,7 +822,7 @@
         <dssc:End>2014-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -833,7 +833,7 @@
         <dssc:End>2014-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -845,7 +845,7 @@
         <dssc:End>2014-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -857,7 +857,7 @@
         <dssc:End>2014-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -878,7 +878,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -889,7 +889,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -900,7 +900,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -912,7 +912,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -922,7 +922,7 @@
       </dssc:Parameter>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -946,7 +946,7 @@
         <dssc:End>2015-12-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -961,7 +961,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+      	<etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
 	<!-- recommended -->
@@ -974,7 +974,7 @@
       </dssc:Parameter>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+      	<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -998,7 +998,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1012,7 +1012,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1027,7 +1027,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1042,7 +1042,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End> <!-- legacy suite -->
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1064,7 +1064,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1078,7 +1078,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1093,7 +1093,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1106,7 +1106,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1128,7 +1128,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1142,7 +1142,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1157,7 +1157,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1170,7 +1170,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1192,7 +1192,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1206,7 +1206,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1221,7 +1221,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1234,7 +1234,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1256,7 +1256,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1270,7 +1270,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1285,7 +1285,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1298,7 +1298,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1320,7 +1320,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1334,7 +1334,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1349,7 +1349,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1362,7 +1362,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1384,7 +1384,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1398,7 +1398,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1413,7 +1413,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1426,7 +1426,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1448,7 +1448,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1462,7 +1462,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1477,7 +1477,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1490,7 +1490,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1512,7 +1512,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1526,7 +1526,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1541,7 +1541,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1554,7 +1554,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1570,7 +1570,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+		<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1583,7 +1583,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+		<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1596,7 +1596,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+		<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1609,7 +1609,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+		<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1622,7 +1622,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+		<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1635,7 +1635,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+		<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1648,7 +1648,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+		<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1665,7 +1665,7 @@
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+		<etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>

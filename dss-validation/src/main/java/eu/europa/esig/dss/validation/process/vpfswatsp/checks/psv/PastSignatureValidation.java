@@ -48,6 +48,7 @@ import eu.europa.esig.dss.validation.process.Chain;
 import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
 import eu.europa.esig.dss.validation.process.bbb.aov.AlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.RevocationDataAlgorithmObsolescenceValidation;
 import eu.europa.esig.dss.validation.process.bbb.aov.SignatureAlgorithmObsolescenceValidation;
 import eu.europa.esig.dss.validation.process.bbb.aov.checks.AlgorithmObsolescenceValidationCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.rfc.RevocationFreshnessChecker;
@@ -64,6 +65,7 @@ import eu.europa.esig.dss.validation.process.vpfswatsp.checks.psv.checks.PastCer
 import eu.europa.esig.dss.validation.process.vpfswatsp.checks.psv.checks.PastRevocationDataValidationConclusiveCheck;
 import eu.europa.esig.dss.validation.process.vpfswatsp.checks.psv.checks.PastSignatureValidationCertificateRevocationSelectorResultCheck;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -320,6 +322,8 @@ public class PastSignatureValidation extends Chain<XmlPSV> {
 
 			item = item.setNextItem(algorithmsObsolescenceValidation());
 
+			item = revocationDataAlgorithmsObsolescenceValidation(item, signingCertificateRevocations);
+
 		}
 
 		/*
@@ -415,6 +419,51 @@ public class PastSignatureValidation extends Chain<XmlPSV> {
 		MessageTag position = ValidationProcessUtils.getCryptoPosition(context);
 
 		return new AlgorithmObsolescenceValidationCheck<>(i18nProvider, result, aovResult, lowestPoeTime, position, token.getId());
+	}
+
+	private ChainItem<XmlPSV> revocationDataAlgorithmsObsolescenceValidation(ChainItem<XmlPSV> item, List<CertificateRevocationWrapper> signingCertificateRevocations) {
+		return revocationDataAlgorithmsObsolescenceValidation(item, token.getCertificateChain(), signingCertificateRevocations, context, new ArrayList<>());
+	}
+
+	private ChainItem<XmlPSV> revocationDataAlgorithmsObsolescenceValidation(ChainItem<XmlPSV> item, List<CertificateWrapper> certificateChain,
+			List<CertificateRevocationWrapper> signingCertificateRevocations, Context context, List<String> checkedTokens) {
+		for (CertificateWrapper certificate : certificateChain) {
+			final SubContext subContext = token.getSigningCertificate().getId().equals(certificate.getId()) ?
+					SubContext.SIGNING_CERT : SubContext.CA_CERTIFICATE;
+			final Date certificatePoeTime = getLowestPoeTime(certificate);
+			if (isTrustAnchor(certificate, certificatePoeTime, context, subContext)) {
+				break;
+			}
+			if (checkedTokens.contains(certificate.getId())) {
+				continue;
+			}
+			checkedTokens.add(certificate.getId());
+
+			final List<CertificateRevocationWrapper> revocationData = SubContext.SIGNING_CERT.equals(subContext) ?
+					signingCertificateRevocations : certificate.getCertificateRevocationData();
+
+			CertificateRevocationWrapper latestAcceptableRevocation =
+					ValidationProcessUtils.getLatestAcceptableRevocationData(token, certificate, revocationData, currentTime, bbbs, poe);
+			if (latestAcceptableRevocation != null && !checkedTokens.contains(latestAcceptableRevocation.getId())) {
+				checkedTokens.add(latestAcceptableRevocation.getId());
+
+				Date revocationPoeTime = getLowestPoeTime(certificate);
+
+				AlgorithmObsolescenceValidation<?> algorithmObsolescenceValidation =
+						new RevocationDataAlgorithmObsolescenceValidation(i18nProvider, latestAcceptableRevocation, revocationPoeTime, policy);
+				XmlAOV aovResult = algorithmObsolescenceValidation.execute();
+
+				MessageTag position = ValidationProcessUtils.getCryptoPosition(Context.REVOCATION);
+
+				item = item.setNextItem(new AlgorithmObsolescenceValidationCheck<>(i18nProvider, result, aovResult, revocationPoeTime, position, token.getId()));
+
+				item = revocationDataAlgorithmsObsolescenceValidation(item, latestAcceptableRevocation.getCertificateChain(),
+						signingCertificateRevocations, Context.REVOCATION, checkedTokens);
+
+			}
+
+		}
+		return item;
 	}
 
 	private boolean isTrustAnchor(CertificateWrapper certificateWrapper, Date controlTime, Context context, SubContext subContext) {

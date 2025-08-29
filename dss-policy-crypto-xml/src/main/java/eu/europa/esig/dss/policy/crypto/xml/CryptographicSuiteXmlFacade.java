@@ -21,7 +21,7 @@
 package eu.europa.esig.dss.policy.crypto.xml;
 
 import eu.europa.esig.dss.jaxb.common.AbstractJaxbFacade;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteCatalogue;
 import eu.europa.esig.dss.policy.crypto.xml.jaxb.SecuritySuitabilityPolicyType;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
@@ -75,15 +75,15 @@ public class CryptographicSuiteXmlFacade extends AbstractJaxbFacade<SecuritySuit
      * Gets the cryptographic suite from the {@code InputStream}
      *
      * @param is {@link InputStream}
-     * @return {@link CryptographicSuite}
+     * @return {@link CryptographicSuiteCatalogue}
      * @throws JAXBException if {@link JAXBException} occurs
      * @throws XMLStreamException if {@link XMLStreamException} occurs
      * @throws IOException if {@link IOException} occurs
      * @throws SAXException if {@link SAXException} occurs
      */
-    public CryptographicSuite getCryptographicSuite(InputStream is) throws JAXBException, XMLStreamException, IOException, SAXException {
+    public CryptographicSuiteCatalogue getCryptographicSuite(InputStream is) throws JAXBException, XMLStreamException, IOException, SAXException {
         Objects.requireNonNull(is, "The provided cryptographic suite is null");
-        return new CryptographicSuiteXmlWrapper(unmarshall(is));
+        return new CryptographicSuiteXmlCatalogue(unmarshall(is));
     }
 
 }

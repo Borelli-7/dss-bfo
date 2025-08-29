@@ -18,7 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package eu.europa.esig.dss.model.policy;
+package eu.europa.esig.dss.model.policy.crypto;
 
 import eu.europa.esig.dss.model.DSSDocument;
 
@@ -41,24 +41,24 @@ public interface CryptographicSuiteFactory {
     /**
      * Loads a default cryptographic suite provided by the application
      *
-     * @return {@link CryptographicSuite}
+     * @return {@link CryptographicSuiteCatalogue}
      */
-    CryptographicSuite loadDefaultCryptographicSuite();
+    CryptographicSuiteCatalogue loadDefaultCryptographicSuite();
 
     /**
      * Loads a cryptographic suite from a {@code DSSDocument} provided to the method
      *
      * @param cryptographicSuiteDocument {@link DSSDocument}
-     * @return {@link CryptographicSuite}
+     * @return {@link CryptographicSuiteCatalogue}
      */
-    CryptographicSuite loadCryptographicSuite(DSSDocument cryptographicSuiteDocument);
+    CryptographicSuiteCatalogue loadCryptographicSuite(DSSDocument cryptographicSuiteDocument);
 
     /**
      * Loads a cryptographic suite from a {@code InputStream} provided to the method
      *
      * @param cryptographicSuiteInputStream {@link InputStream}
-     * @return {@link CryptographicSuite}
+     * @return {@link CryptographicSuiteCatalogue}
      */
-    CryptographicSuite loadCryptographicSuite(InputStream cryptographicSuiteInputStream);
+    CryptographicSuiteCatalogue loadCryptographicSuite(InputStream cryptographicSuiteInputStream);
 
 }

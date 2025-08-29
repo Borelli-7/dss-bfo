@@ -23,9 +23,10 @@ package eu.europa.esig.dss.model.policy;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.Level;
 import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteEvaluation;
 
+import java.util.Set;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,39 +43,20 @@ public interface CryptographicSuite extends LevelRule {
     String getPolicyName();
 
     /**
-     * Gets a list of digest algorithms accepted by the validation policy
+     * Gets a map of DigestAlgorithm's extracted from a cryptographic suite and
+     * their corresponding {@code CryptographicSuiteEvaluation} rules
      *
-     * @return a list of {@link DigestAlgorithm}s
+     * @return a link between {@code DigestAlgorithm}s and corresponding {@link CryptographicSuiteEvaluation}s
      */
-    List<DigestAlgorithm> getAcceptableDigestAlgorithms();
+    Map<DigestAlgorithm, Set<CryptographicSuiteEvaluation>> getAcceptableDigestAlgorithms();
 
     /**
-     * Gets a list of signature algorithms accepted by the validation policy
+     * Gets a map of SignatureAlgorithm's extracted from a cryptographic suite and
+     * their corresponding {@code CryptographicSuiteEvaluation} rules
      *
-     * @return a list of {@link SignatureAlgorithm}s
+     * @return a link between {@code SignatureAlgorithm}s and corresponding {@link CryptographicSuiteEvaluation}s
      */
-    List<SignatureAlgorithm> getAcceptableSignatureAlgorithms();
-
-    /**
-     * Gets a list of signature algorithms together with their minimum used key sizes accepted by the validation policy
-     *
-     * @return a list of {@link SignatureAlgorithmWithMinKeySize}s
-     */
-    List<SignatureAlgorithmWithMinKeySize> getAcceptableSignatureAlgorithmsWithMinKeySizes();
-
-    /**
-     * Gets a map of supported digest algorithms with the corresponding expiration dates
-     *
-     * @return a map between {@code DigestAlgorithm}s and expiration {@code Date}s
-     */
-    Map<DigestAlgorithm, Date> getAcceptableDigestAlgorithmsWithExpirationDates();
-
-    /**
-     * Gets a map of supported signature algorithms with the applicable key sizes with the corresponding expiration dates
-     *
-     * @return a map between {@code SignatureAlgorithmWithMinKeySize}s and expiration {@code Date}s
-     */
-    Map<SignatureAlgorithmWithMinKeySize, Date> getAcceptableSignatureAlgorithmsWithExpirationDates();
+    Map<SignatureAlgorithm, Set<CryptographicSuiteEvaluation>> getAcceptableSignatureAlgorithms();
 
     /**
      * Sets the global execution level for the cryptographic suite constraints

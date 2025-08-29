@@ -45,6 +45,15 @@
         <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
+    <dssc:Evaluation>
+      <dssc:Validity>
+        <dssc:End>2023-01-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:AlgorithmUsage>http://uri.etsi.org/19322/sign_data/validate_data/validate_ocsp</etsi19322:AlgorithmUsage>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
   </dssc:Algorithm>
 
   <dssc:Algorithm>
@@ -321,6 +330,32 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <!-- legacy -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>1900</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2023-01-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:AlgorithmUsage>http://uri.etsi.org/19322/sign_data/validate_data/validate_ocsp</etsi19322:AlgorithmUsage>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <!-- legacy -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>3000</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2023-01-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:AlgorithmUsage>http://uri.etsi.org/19322/sign_data/validate_data/validate_ocsp</etsi19322:AlgorithmUsage>
         <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>

@@ -53,6 +53,7 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
         rsa1000.setSize(1000);
         listAlgo.getAlgos().add(rsa1000);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
         listAlgo = new ListAlgo();
@@ -85,6 +86,7 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
         rsa1000.setSize(1000);
         listAlgo.getAlgos().add(rsa1000);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
         listAlgo = new ListAlgo();
@@ -117,6 +119,7 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
         rsa1000.setSize(1000);
         listAlgo.getAlgos().add(rsa1000);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
         XmlCC result = new XmlCC();
@@ -126,7 +129,7 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
 
         List<XmlConstraint> constraints = result.getConstraint();
         assertEquals(1, constraints.size());
-        assertEquals(XmlStatus.OK, constraints.get(0).getStatus());
+        assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
     }
 
     @Test
@@ -149,7 +152,7 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
 
         List<XmlConstraint> constraints = result.getConstraint();
         assertEquals(1, constraints.size());
-        assertEquals(XmlStatus.OK, constraints.get(0).getStatus());
+        assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
     }
 
     @Test
@@ -164,6 +167,7 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
         rsa1000.setSize(1000);
         listAlgo.getAlgos().add(rsa1000);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
         listAlgo = new ListAlgo();
@@ -197,6 +201,7 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
         rsa1000.setSize(1000);
         listAlgo.getAlgos().add(rsa1000);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
         listAlgo = new ListAlgo();
@@ -229,6 +234,7 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
         rsa1000.setSize(1000);
         listAlgo.getAlgos().add(rsa1000);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
         listAlgo = new ListAlgo();
@@ -260,6 +266,7 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
         rsa1000.setSize(1000);
         listAlgo.getAlgos().add(rsa1000);
 
+        cryptographicConstraint.setAcceptableEncryptionAlgo(listAlgo);
         cryptographicConstraint.setMiniPublicKeySize(listAlgo);
 
         listAlgo = new ListAlgo();
@@ -277,6 +284,38 @@ class PublicKeySizeAcceptableCheckTest extends AbstractTestCheck {
 
         List<XmlConstraint> constraints = result.getConstraint();
         assertEquals(0, constraints.size());
+    }
+
+    @Test
+    void keySizeButNotAcceptable() {
+        CryptographicConstraint cryptographicConstraint = new CryptographicConstraint();
+        cryptographicConstraint.setLevel(Level.FAIL);
+
+        ListAlgo listAlgo = new ListAlgo();
+
+        Algo rsa1000 = new Algo();
+        rsa1000.setValue("RSA");
+        rsa1000.setSize(1000);
+        listAlgo.getAlgos().add(rsa1000);
+
+        cryptographicConstraint.setMiniPublicKeySize(listAlgo);
+
+        listAlgo = new ListAlgo();
+
+        Algo sha256 = new Algo();
+        sha256.setValue("SHA256");
+        listAlgo.getAlgos().add(sha256);
+
+        cryptographicConstraint.setAcceptableDigestAlgo(listAlgo);
+
+        XmlCC result = new XmlCC();
+        PublicKeySizeAcceptableCheck pkskc = new PublicKeySizeAcceptableCheck(i18nProvider, SignatureAlgorithm.RSA_SHA256, "2048", result,
+                ValidationProcessUtils.getCryptoPosition(Context.SIGNATURE), new CryptographicConstraintWrapper(cryptographicConstraint));
+        pkskc.execute();
+
+        List<XmlConstraint> constraints = result.getConstraint();
+        assertEquals(1, constraints.size());
+        assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
     }
 
 }

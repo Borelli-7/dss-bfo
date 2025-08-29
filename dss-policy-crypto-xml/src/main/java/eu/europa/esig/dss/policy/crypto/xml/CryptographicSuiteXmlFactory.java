@@ -21,8 +21,8 @@
 package eu.europa.esig.dss.policy.crypto.xml;
 
 import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
-import eu.europa.esig.dss.model.policy.CryptographicSuiteFactory;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteCatalogue;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteFactory;
 import eu.europa.esig.dss.policy.crypto.xml.jaxb.SecuritySuitabilityPolicyType;
 import jakarta.xml.bind.JAXBException;
 import org.xml.sax.SAXException;
@@ -58,17 +58,17 @@ public class CryptographicSuiteXmlFactory implements CryptographicSuiteFactory {
     }
 
     @Override
-    public CryptographicSuite loadDefaultCryptographicSuite() {
+    public CryptographicSuiteCatalogue loadDefaultCryptographicSuite() {
         return loadCryptographicSuite(CryptographicSuiteXmlFactory.class.getResourceAsStream(DEFAULT_CRYPTOGRAPHIC_SUITES_LOCATION));
     }
 
     @Override
-    public CryptographicSuite loadCryptographicSuite(DSSDocument cryptographicSuiteDocument) {
+    public CryptographicSuiteCatalogue loadCryptographicSuite(DSSDocument cryptographicSuiteDocument) {
         return loadCryptographicSuite(cryptographicSuiteDocument.openStream());
     }
 
     @Override
-    public CryptographicSuite loadCryptographicSuite(InputStream cryptographicSuiteInputStream) {
+    public CryptographicSuiteCatalogue loadCryptographicSuite(InputStream cryptographicSuiteInputStream) {
         try (InputStream is = cryptographicSuiteInputStream) {
             return CryptographicSuiteXmlFacade.newFacade().getCryptographicSuite(is);
         } catch (Exception e) {

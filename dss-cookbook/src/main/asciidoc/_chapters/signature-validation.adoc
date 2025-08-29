@@ -3,6 +3,7 @@
 :sourcetestdir: ../../../test/java
 :samplesdir: ../_samples
 :imagesdir: ../images/
+:icons: font
 
 [[SignatureValidation]]
 == Signature Validation
@@ -335,8 +336,6 @@ NOTE: The cryptographic suite, when provided, overwrites all configuration for v
 
 When loaded from a file explicitly in the `DocumentValidator`, the cryptographic suite will be applied globally with a `FAIL` execution level of the cryptographic checks. In order to apply a cryptographic suite conditionally based on a content or execution level, please see <<ValidationPolicyLoader>> configuration.
 
-WARNING: The 4.2.9.2 "Algorithm-usage" element as defined in ETSI TS 119 322 (cf. <<R21>>) currently is not supported. For the applicability rules of the cryptographic suite based on the validation context, please refer to the information above.
-
 The validation of cryptographic algorithms is performed according to the section "6. Processing" of the RFC 5698 "Data Structure for the Security Suitability of Cryptographic Algorithms (DSSC)". The full validation algorithm is described below.
 
 Starting from DSS version 6.4, the following processing algorithm is applied when validating cryptographic algorithms against a defined cryptographic suite:
@@ -366,6 +365,29 @@ If that validation returns a successful status, the overall validation concludes
 Otherwise, validation returns a failed status.
 
 WARNING: The `Start` and `Max` elements are not supported by the implementation. Please use the `End` and `Min` elements for the constraints definition.
+
+===== Algorithm Usage
+
+Starting from version `6.4` DSS provides a support of an optional `AlgorithmUsage` element as defined within the ETSI TS 119 322 (cf. <<R21>>). Similarly to <<defaultXmlPolicy>>, the `AlgorithmUsage` element provides a possibility to define a scope for the applicability of the cryptographic rules. Below you may find a table of correspondence of different algorithm usage types to the supported contexts in the <<defaultXmlPolicy>>:
+
+.Algorithm usage applicability table
+[%header,cols="14*^.^", orientation=landscape]
+|=====
+|Algorithm usage              3+|Signature                                3+|Counter-signature                         3+|Revocation                               3+|Timestamp                                 |Evidence record
+|                               |Signature  |Signing certificate  |CA       |Signature  |Signing certificate  |CA        |Signature  |Signing certificate  |CA       |Signature  |Signing certificate  |CA      |Data Objects
+| sign data | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"]
+| sign certificates | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] |
+| sign OCSP | | | | | | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | | | |
+| sign timestamps | | | | | | | | | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] |
+| validate data | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"]
+| validate certificates | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] |
+| validate OCSP | | | | | | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | | | |
+| validate timestamps | | | | | | | | | | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] | icon:check-circle[role="lime"] |
+|=====
+
+NOTE: `sign OCSP` and `validate OCSP` algorithm usage types apply to both OCSP Responses and CRL revocation data types on validation with DSS.
+
+As the use of `algorithmUsage` element is optional, it also stays possible to define a particular context and sub context of a cryptographic suite programmatically. For more details about the implementation, please see the <<ValidationPolicyLoader>> chapter.
 
 [[ValidationPolicyLoader]]
 ==== Validation Policy Loader

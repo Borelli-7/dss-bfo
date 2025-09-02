@@ -73,7 +73,13 @@ public class PublicKeySizeAcceptableCheck extends AbstractCryptographicCheck {
 	
 	@Override
 	protected XmlMessage buildErrorMessage() {
-		return buildXmlMessage(MessageTag.ASCCM_APKSA_ANS, getName(signatureAlgorithm), keyLength, position);
+		MessageTag messageTag;
+		if (CryptographicSuiteUtils.isSignatureAlgorithmKeyLengthBigEnough(cryptographicSuite, signatureAlgorithm, keyLength)) {
+			messageTag = MessageTag.ASCCM_APKSA_ANS_2;
+		} else {
+			messageTag = MessageTag.ASCCM_APKSA_ANS;
+		}
+		return buildXmlMessage(messageTag, getName(signatureAlgorithm), keyLength, position);
 	}
 
 }

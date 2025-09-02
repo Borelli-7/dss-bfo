@@ -332,7 +332,7 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
 
         List<XmlConstraint> constraints = result.getConstraint();
         assertEquals(1, constraints.size());
-        assertEquals(XmlStatus.OK, constraints.get(0).getStatus());
+        assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
     }
 
     @Test
@@ -374,7 +374,7 @@ class SignatureAlgorithmAtValidationTimeCheckTest extends AbstractTestCheck {
 
         List<XmlConstraint> constraints = result.getConstraint();
         assertEquals(1, constraints.size());
-        assertEquals(XmlStatus.OK, constraints.get(0).getStatus());
+        assertEquals(XmlStatus.NOT_OK, constraints.get(0).getStatus());
     }
 
     @Test

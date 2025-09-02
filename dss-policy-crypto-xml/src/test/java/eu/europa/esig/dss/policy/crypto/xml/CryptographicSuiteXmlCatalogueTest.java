@@ -325,6 +325,35 @@ class CryptographicSuiteXmlCatalogueTest {
     }
 
     @Test
+    void getAcceptableDigestAlgorithmsWithStartDatesTest() {
+        SecuritySuitabilityPolicyType securitySuitabilityPolicyType = new SecuritySuitabilityPolicyType();
+
+        securitySuitabilityPolicyType.getAlgorithm().add(createDigestAlgorithmXmlDefinition(DigestAlgorithm.SHA224,
+                Collections.singletonList(new EvaluationDTO("2000-01-01+00:00", "2029-01-01+00:00", null))));
+
+        CryptographicSuiteXmlCatalogue cryptographicSuite = new CryptographicSuiteXmlCatalogue(securitySuitabilityPolicyType);
+
+        List<CryptographicSuiteAlgorithm> expectedList = new ArrayList<>();
+
+        expectedList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, Collections.singletonList(
+                new EvaluationDTO("2000-01-01", "2029-01-01", null)
+        )));
+
+        assertEquals(expectedList, cryptographicSuite.buildAlgorithmList());
+
+        securitySuitabilityPolicyType.getAlgorithm().add(createDigestAlgorithmXmlDefinition(DigestAlgorithm.SHA256,
+                Collections.singletonList(new EvaluationDTO("2000-01-01+00:00",  null, null))));
+
+        cryptographicSuite = new CryptographicSuiteXmlCatalogue(securitySuitabilityPolicyType);
+
+        expectedList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, Collections.singletonList(
+                new EvaluationDTO("2000-01-01", null, null)
+        )));
+
+        assertEquals(expectedList, cryptographicSuite.buildAlgorithmList());
+    }
+
+    @Test
     void getAcceptableSignatureAlgorithmsTest() {
         SecuritySuitabilityPolicyType policy = new SecuritySuitabilityPolicyType();
 
@@ -339,7 +368,7 @@ class CryptographicSuiteXmlCatalogueTest {
                 ))
         )));
 
-        policy.getAlgorithm().add(createSignatureAlgorithmXmlDefinition(SignatureAlgorithm.ECDSA_SHA224, Arrays.asList(
+        policy.getAlgorithm().add(createSignatureAlgorithmXmlDefinition(SignatureAlgorithm.ECDSA_SHA224, Collections.singletonList(
                 new EvaluationDTO("2029-01-01+00:00", Collections.emptyList())
         )));
 
@@ -392,7 +421,7 @@ class CryptographicSuiteXmlCatalogueTest {
         assertEquals(expected, cryptographicSuite.buildAlgorithmList());
 
         // Add DigestAlgorithm definition
-        policy.getAlgorithm().add(createDigestAlgorithmXmlDefinition(DigestAlgorithm.SHA512, Arrays.asList(
+        policy.getAlgorithm().add(createDigestAlgorithmXmlDefinition(DigestAlgorithm.SHA512, Collections.singletonList(
                 new EvaluationDTO("2029-01-01+00:00", Collections.emptyList())
         )));
 
@@ -567,6 +596,55 @@ class CryptographicSuiteXmlCatalogueTest {
 
         expected.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA512, Collections.singletonList(
                 new EvaluationDTO("2029-01-01", null)
+        )));
+
+        assertEquals(expected, cryptographicSuite.buildAlgorithmList());
+    }
+
+    @Test
+    void getAcceptableSignatureAlgorithmsWithStartDatesTest() {
+        SecuritySuitabilityPolicyType policy = new SecuritySuitabilityPolicyType();
+
+        policy.getAlgorithm().add(createEncryptionAlgorithmXmlDefinition(EncryptionAlgorithm.DSA, Arrays.asList(
+                new EvaluationDTO("2020-01-01+00:00", "2029-01-01+00:00", Arrays.asList(
+                        new ParameterDTO(1900, PLENGTH),
+                        new ParameterDTO(200, QLENGTH)
+                )),
+                new EvaluationDTO(null, Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)
+                ))
+        )));
+
+        policy.getAlgorithm().add(createSignatureAlgorithmXmlDefinition(SignatureAlgorithm.ECDSA_SHA224, Collections.singletonList(
+                new EvaluationDTO("2000-01-01+00:00", "2029-01-01+00:00", Collections.emptyList())
+        )));
+
+        // Add DigestAlgorithm definition
+        policy.getAlgorithm().add(createDigestAlgorithmXmlDefinition(DigestAlgorithm.SHA512, Collections.singletonList(
+                new EvaluationDTO("2010-01-01+00:00", "2029-01-01+00:00", Collections.emptyList())
+        )));
+
+        CryptographicSuiteXmlCatalogue cryptographicSuite = new CryptographicSuiteXmlCatalogue(policy);
+
+        List<CryptographicSuiteAlgorithm> expected = new ArrayList<>();
+        expected.add(createEncryptionAlgorithmDefinition(EncryptionAlgorithm.DSA, Arrays.asList(
+                new EvaluationDTO("2020-01-01", "2029-01-01", Arrays.asList(
+                        new ParameterDTO(1900, PLENGTH),
+                        new ParameterDTO(200, QLENGTH)
+                )),
+                new EvaluationDTO(null, Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)
+                )))
+        ));
+        expected.add(createSignatureAlgorithmDefinition(SignatureAlgorithm.ECDSA_SHA224, Collections.singletonList(
+                        new EvaluationDTO("2000-01-01", "2029-01-01", Collections.emptyList())
+                )
+        ));
+
+        expected.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA512, Collections.singletonList(
+                new EvaluationDTO("2010-01-01", "2029-01-01", Collections.emptyList())
         )));
 
         assertEquals(expected, cryptographicSuite.buildAlgorithmList());
@@ -949,6 +1027,9 @@ class CryptographicSuiteXmlCatalogueTest {
                 EvaluationType evaluationType = new EvaluationType();
 
                 ValidityType validityType = new ValidityType();
+                if (evaluationDTO.validityStart != null) {
+                    validityType.setStart(toGregorianCalendar(evaluationDTO.validityStart));
+                }
                 if (evaluationDTO.validityEnd != null) {
                     validityType.setEnd(toGregorianCalendar(evaluationDTO.validityEnd));
                 }
@@ -1040,6 +1121,7 @@ class CryptographicSuiteXmlCatalogueTest {
         if (evaluationList != null && !evaluationList.isEmpty()) {
             for (EvaluationDTO evaluationDTO : evaluationList) {
                 CryptographicSuiteEvaluation evaluation = new CryptographicSuiteEvaluation();
+                evaluation.setValidityStart(toDate(evaluationDTO.validityStart));
                 evaluation.setValidityEnd(toDate(evaluationDTO.validityEnd));
 
                 List<CryptographicSuiteParameter> parameters = new ArrayList<>();
@@ -1094,15 +1176,20 @@ class CryptographicSuiteXmlCatalogueTest {
 
     private static class EvaluationDTO {
 
+        private final String validityStart;
         private final String validityEnd;
         private final List<ParameterDTO> parameterList;
 
         public EvaluationDTO(final String validityEnd) {
-            this.validityEnd = validityEnd;
-            this.parameterList = null;
+            this(null, validityEnd, null);
         }
 
         public EvaluationDTO(final String validityEnd, final List<ParameterDTO> parameterList) {
+            this(null, validityEnd, parameterList);
+        }
+
+        public EvaluationDTO(final String validityStart, final String validityEnd, final List<ParameterDTO> parameterList) {
+            this.validityStart = validityStart;
             this.validityEnd = validityEnd;
             this.parameterList = parameterList;
         }

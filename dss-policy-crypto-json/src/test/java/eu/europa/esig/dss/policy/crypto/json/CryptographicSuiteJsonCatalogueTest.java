@@ -285,6 +285,38 @@ class CryptographicSuiteJsonCatalogueTest {
     }
 
     @Test
+    void getAcceptableDigestAlgorithmsWithStartDatesTest() {
+        Map<JsonString, JsonValue> securitySuitabilityPolicyMap = new HashMap<>();
+        JsonObject jsonObject = new JsonObject(securitySuitabilityPolicyMap);
+
+        List<JsonValue> algorithmsList = new ArrayList<>();
+        JsonArray algorithmsArray = new JsonArray(algorithmsList);
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), algorithmsArray);
+
+        algorithmsList.add(createDigestAlgorithmJsonDefinition(DigestAlgorithm.SHA224, "2000-01-01", "2029-01-01"));
+
+        CryptographicSuiteJsonCatalogue cryptographicSuite = new CryptographicSuiteJsonCatalogue(new JsonObjectWrapper(jsonObject));
+
+        List<CryptographicSuiteAlgorithm> expectedList = new ArrayList<>();
+
+        expectedList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, Collections.singletonList(
+                new EvaluationDTO("2000-01-01", "2029-01-01", null)
+        )));
+
+        assertEquals(expectedList, cryptographicSuite.buildAlgorithmList());
+
+        algorithmsList.add(createDigestAlgorithmJsonDefinition(DigestAlgorithm.SHA256, "2000-01-01", null));
+
+        cryptographicSuite = new CryptographicSuiteJsonCatalogue(new JsonObjectWrapper(jsonObject));
+
+        expectedList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, Collections.singletonList(
+                new EvaluationDTO("2000-01-01", null, null)
+        )));
+
+        assertEquals(expectedList, cryptographicSuite.buildAlgorithmList());
+    }
+
+    @Test
     void getAcceptableSignatureAlgorithmsEmptyList() {
         Map<JsonString, JsonValue> securitySuitabilityPolicyMap = new HashMap<>();
         securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), new JsonArray(Collections.emptyList()));
@@ -600,6 +632,57 @@ class CryptographicSuiteJsonCatalogueTest {
         );
 
         assertTrue(cryptographicSuite.buildAlgorithmList().isEmpty(), "Invalid date format shall result to a failure.");
+    }
+
+    @Test
+    void getAcceptableSignatureAlgorithmsWithStartDatesTest() {
+        Map<JsonString, JsonValue> securitySuitabilityPolicyMap = new HashMap<>();
+
+        List<JsonValue> algorithmsList = new ArrayList<>();
+        algorithmsList.add(createEncryptionAlgorithmJsonDefinition(EncryptionAlgorithm.DSA, Arrays.asList(
+                new EvaluationDTO("2020-01-01", "2029-01-01", Arrays.asList(
+                        new ParameterDTO(1900, PLENGTH),
+                        new ParameterDTO(200, QLENGTH)
+                )),
+                new EvaluationDTO(null, Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)
+                )))
+        ));
+        algorithmsList.add(createSignatureAlgorithmJsonDefinition(SignatureAlgorithm.ECDSA_SHA224, Collections.singletonList(
+                        new EvaluationDTO("2000-01-01", "2029-01-01", Collections.emptyList())
+                )
+        ));
+
+        // Add DigestAlgorithm definition
+        algorithmsList.add(createDigestAlgorithmJsonDefinition(DigestAlgorithm.SHA512, "2010-01-01", "2029-01-01"));
+
+        List<CryptographicSuiteAlgorithm> expected = new ArrayList<>();
+        expected.add(createEncryptionAlgorithmDefinition(EncryptionAlgorithm.DSA, Arrays.asList(
+                new EvaluationDTO("2020-01-01", "2029-01-01", Arrays.asList(
+                        new ParameterDTO(1900, PLENGTH),
+                        new ParameterDTO(200, QLENGTH)
+                )),
+                new EvaluationDTO(null, Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)
+                )))
+        ));
+        expected.add(createSignatureAlgorithmDefinition(SignatureAlgorithm.ECDSA_SHA224, Collections.singletonList(
+                        new EvaluationDTO("2000-01-01", "2029-01-01", Collections.emptyList())
+                )
+        ));
+        expected.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA512, Collections.singletonList(
+                new EvaluationDTO("2010-01-01", "2029-01-01", Collections.emptyList())
+        )));
+
+        JsonArray algorithmsArray = new JsonArray(algorithmsList);
+        securitySuitabilityPolicyMap.put(new JsonString("Algorithm"), algorithmsArray);
+        JsonObject jsonObject = new JsonObject(securitySuitabilityPolicyMap);
+
+        CryptographicSuiteJsonCatalogue cryptographicSuite = new CryptographicSuiteJsonCatalogue(new JsonObjectWrapper(jsonObject));
+
+        assertEquals(expected, cryptographicSuite.buildAlgorithmList());
     }
 
     @Test
@@ -921,6 +1004,11 @@ class CryptographicSuiteJsonCatalogueTest {
                 Collections.singletonList(new EvaluationDTO(expirationTime, null)));
     }
 
+    private JsonObject createDigestAlgorithmJsonDefinition(DigestAlgorithm digestAlgorithm, String startTime, String expirationTime) {
+        return createAlgorithmJsonDefinition(digestAlgorithm.getName(), digestAlgorithm.getOid(), digestAlgorithm.getUri(),
+                Collections.singletonList(new EvaluationDTO(startTime, expirationTime, null)));
+    }
+
     private JsonObject createEncryptionAlgorithmJsonDefinition(EncryptionAlgorithm encryptionAlgorithm, List<EvaluationDTO> evaluationDTOS) {
         return createAlgorithmJsonDefinition(encryptionAlgorithm.getName(), encryptionAlgorithm.getOid(), null, evaluationDTOS);
     }
@@ -954,6 +1042,9 @@ class CryptographicSuiteJsonCatalogueTest {
             for (EvaluationDTO evaluationDTO : evaluationDTOS) {
                 Map<JsonString, JsonValue> evaluationMap = new HashMap<>();
                 Map<JsonString, JsonValue> validityMap = new HashMap<>();
+                if (evaluationDTO.validityStart != null) {
+                    validityMap.put(new JsonString("Start"), new JsonString(evaluationDTO.validityStart));
+                }
                 if (evaluationDTO.validityEnd != null) {
                     validityMap.put(new JsonString("End"), new JsonString(evaluationDTO.validityEnd));
                 }
@@ -1039,6 +1130,7 @@ class CryptographicSuiteJsonCatalogueTest {
         if (evaluationList != null && !evaluationList.isEmpty()) {
             for (EvaluationDTO evaluationDTO : evaluationList) {
                 CryptographicSuiteEvaluation evaluation = new CryptographicSuiteEvaluation();
+                evaluation.setValidityStart(toDate(evaluationDTO.validityStart));
                 evaluation.setValidityEnd(toDate(evaluationDTO.validityEnd));
 
                 List<CryptographicSuiteParameter> parameters = new ArrayList<>();
@@ -1093,10 +1185,16 @@ class CryptographicSuiteJsonCatalogueTest {
 
     private static class EvaluationDTO {
 
+        private final String validityStart;
         private final String validityEnd;
         private final List<ParameterDTO> parameterList;
 
         public EvaluationDTO(final String validityEnd, final List<ParameterDTO> parameterList) {
+            this(null, validityEnd, parameterList);
+        }
+
+        public EvaluationDTO(final String validityStart, final String validityEnd, final List<ParameterDTO> parameterList) {
+            this.validityStart = validityStart;
             this.validityEnd = validityEnd;
             this.parameterList = parameterList;
         }

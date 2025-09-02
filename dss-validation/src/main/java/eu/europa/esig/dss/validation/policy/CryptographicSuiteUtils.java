@@ -31,6 +31,7 @@ import eu.europa.esig.dss.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -144,6 +145,50 @@ public final class CryptographicSuiteUtils {
     }
 
     /**
+     * This method verifies whether the given {@code keyLength} of the {@code signatureAlgorithm} is big enough.
+     * NOTE: This method only ensures that the key length is bigger than the minimal accepted key size.
+     *       It does not consider the maximum requirements.
+     *
+     * @param cryptographicSuite {@link CryptographicSuite} set of validation constraints
+     * @param signatureAlgorithm {@link SignatureAlgorithm} to be checked
+     * @param keyLength {@link String}
+     * @return TRUE if the signature algorithm key length is big enough, FALSE otherwise
+     */
+    public static boolean isSignatureAlgorithmKeyLengthBigEnough(CryptographicSuite cryptographicSuite,
+                                                                 SignatureAlgorithm signatureAlgorithm, String keyLength) {
+        if (cryptographicSuite == null) {
+            return false;
+        }
+
+        int keySize = parseKeySize(keyLength);
+        if (signatureAlgorithm != null) {
+            Map<SignatureAlgorithm, Set<CryptographicSuiteEvaluation>> acceptableSignatureAlgorithms = cryptographicSuite.getAcceptableSignatureAlgorithms();
+            if (!acceptableSignatureAlgorithms.containsKey(signatureAlgorithm)) {
+                return false;
+            }
+
+            Set<CryptographicSuiteEvaluation> evaluations = acceptableSignatureAlgorithms.get(signatureAlgorithm);
+            if (Utils.isCollectionNotEmpty(evaluations)) {
+                for (CryptographicSuiteEvaluation evaluation : evaluations) {
+                    List<CryptographicSuiteParameter> parameterList = evaluation.getParameterList();
+                    if (parameterList != null && Utils.isCollectionNotEmpty(parameterList)) {
+                        for (CryptographicSuiteParameter parameter : parameterList) {
+                            if (isSupported(signatureAlgorithm.getEncryptionAlgorithm(), parameter)) {
+                                Integer parameterMin = parameter.getMin();
+                                if (parameterMin == null || parameterMin < keySize) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        return false;
+    }
+
+    /**
      * Gets an expiration date for the encryption algorithm with name {@code signatureAlgorithm} and {@code keyLength}.
      * Returns null if the expiration date is not defined for the algorithm.
      *
@@ -229,6 +274,20 @@ public final class CryptographicSuiteUtils {
     }
 
     /**
+     * This method verifies whether the {@code digestAlgorithm} is reliable at the {@code validationTime}
+     *
+     * @param cryptographicSuite {@link CryptographicSuite} containing the algorithm validation rules
+     * @param digestAlgorithm {@link DigestAlgorithm} to be checked
+     * @param validationTime {@link Date} validation time to check at
+     * @return TRUE if the algorithm is reliable at the given time, FALSE otherwise
+     */
+    public static boolean isDigestAlgorithmReliableAtTime(CryptographicSuite cryptographicSuite, DigestAlgorithm digestAlgorithm,
+                                                          Date validationTime) {
+        Set<CryptographicSuiteEvaluation> evaluations = cryptographicSuite.getAcceptableDigestAlgorithms().get(digestAlgorithm);
+        return reliableEvaluationExistsAtTime(evaluations, validationTime);
+    }
+
+    /**
      * This method returns a list of reliable {@code DigestAlgorithm} according to the current validation policy
      * at the given validation time
      *
@@ -240,17 +299,32 @@ public final class CryptographicSuiteUtils {
         final Set<DigestAlgorithm> reliableDigestAlgorithms = new HashSet<>();
         for (Map.Entry<DigestAlgorithm, Set<CryptographicSuiteEvaluation>> entry : cryptographicSuite.getAcceptableDigestAlgorithms().entrySet()) {
             Set<CryptographicSuiteEvaluation> evaluations = entry.getValue();
-            if (Utils.isCollectionNotEmpty(evaluations)) {
-                for (CryptographicSuiteEvaluation evaluation : evaluations) {
+            if (reliableEvaluationExistsAtTime(evaluations, validationTime)) {
+                reliableDigestAlgorithms.add(entry.getKey());
+            }
+        }
+        return reliableDigestAlgorithms;
+    }
+
+    private static boolean reliableEvaluationExistsAtTime(Collection<CryptographicSuiteEvaluation> evaluations, Date validationTime) {
+        return reliableEvaluationExistsAtTime(null, null, evaluations, validationTime);
+    }
+
+    private static boolean reliableEvaluationExistsAtTime(EncryptionAlgorithm encryptionAlgorithm, Integer keySize,
+                                                          Collection<CryptographicSuiteEvaluation> evaluations, Date validationTime) {
+        if (Utils.isCollectionNotEmpty(evaluations)) {
+            for (CryptographicSuiteEvaluation evaluation : evaluations) {
+                if (encryptionAlgorithm == null || isEvaluationApplicable(encryptionAlgorithm, keySize, evaluation)) {
+                    Date validityStart = evaluation.getValidityStart();
                     Date validityEnd = evaluation.getValidityEnd();
-                    if (validityEnd == null || validityEnd.after(validationTime)) { // TODO : include validationStart date
-                        reliableDigestAlgorithms.add(entry.getKey());
-                        break;
+                    if ((validityStart == null || validityStart.before(validationTime))
+                            && (validityEnd == null || validityEnd.after(validationTime))) {
+                        return true;
                     }
                 }
             }
         }
-        return reliableDigestAlgorithms;
+        return false;
     }
 
     /**
@@ -272,8 +346,10 @@ public final class CryptographicSuiteUtils {
             if (Utils.isCollectionNotEmpty(evaluations)) {
                 for (CryptographicSuiteEvaluation evaluation : evaluations) {
                     if (isEvaluationApplicable(signatureAlgorithm.getEncryptionAlgorithm(), null, evaluation)) {
+                        Date validityStart = evaluation.getValidityStart();
                         Date validityEnd = evaluation.getValidityEnd();
-                        if (validityEnd == null || validityEnd.after(validationTime)) { // TODO : include validationStart date
+                        if ((validityStart == null || validityStart.before(validationTime))
+                                && (validityEnd == null || validityEnd.after(validationTime))) {
                             int keyLength = getMinKeyLength(signatureAlgorithm.getEncryptionAlgorithm(), evaluation);
                             if (minKeyLength == null || minKeyLength > keyLength) {
                                 minKeyLength = keyLength;
@@ -289,6 +365,21 @@ public final class CryptographicSuiteUtils {
         return result;
     }
 
+    /**
+     * This method verifies whether the {@code signatureAlgorithm} with the {@code keySize} is reliable at the {@code validationTime}
+     *
+     * @param cryptographicSuite {@link CryptographicSuite} containing the algorithm validation rules
+     * @param signatureAlgorithm {@link SignatureAlgorithm} to be checked
+     * @param keyLength {@link String} used to create the signature
+     * @param validationTime {@link Date} validation time to check at
+     * @return TRUE if the algorithm is reliable at the given time, FALSE otherwise
+     */
+    public static boolean isSignatureAlgorithmReliableAtTime(CryptographicSuite cryptographicSuite, SignatureAlgorithm signatureAlgorithm,
+                                                             String keyLength, Date validationTime) {
+        Set<CryptographicSuiteEvaluation> evaluations = cryptographicSuite.getAcceptableSignatureAlgorithms().get(signatureAlgorithm);
+        return reliableEvaluationExistsAtTime(signatureAlgorithm.getEncryptionAlgorithm(), parseKeySize(keyLength), evaluations, validationTime);
+    }
+
     private static boolean isEvaluationApplicable(EncryptionAlgorithm algorithm, Integer keySize, CryptographicSuiteEvaluation evaluation) {
         List<CryptographicSuiteParameter> parameterList = evaluation.getParameterList();
         if (parameterList == null || parameterList.isEmpty()) {
@@ -298,7 +389,8 @@ public final class CryptographicSuiteUtils {
             if (!isSupported(algorithm, parameter)) {
                 continue;
             }
-            if (keySize != null && parameter.getMin() != null && keySize < parameter.getMin()) {
+            if (keySize != null && ((parameter.getMin() != null && keySize < parameter.getMin())
+                    || (parameter.getMax() != null && keySize > parameter.getMax()))) {
                 continue;
             }
             return true;

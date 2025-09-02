@@ -208,6 +208,31 @@ class CryptographicSuite19322Test {
     }
 
     @Test
+    void getAcceptableDigestAlgorithmsWithStartDatesTest() {
+        List<CryptographicSuiteAlgorithm> algorithmList = new ArrayList<>();
+
+        algorithmList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA224,
+                Collections.singletonList(new EvaluationDTO("2000-01-01", "2029-01-01", null, null))));
+        algorithmList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA256,
+                Collections.singletonList(new EvaluationDTO("2000-01-01", null, null, null))));
+
+        CryptographicSuite19322 cryptographicSuite = new CryptographicSuite19322(new CryptographicSuiteMetadata(), algorithmList);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.clear();
+        calendar.set(2029, Calendar.JANUARY, 1);
+
+        Map<DigestAlgorithm, Set<CryptographicSuiteEvaluation>> expected = new HashMap<>();
+        expected.put(DigestAlgorithm.SHA224, createEvaluations(Collections.singletonList(
+                new EvaluationDTO("2000-01-01", "2029-01-01", null, null))));
+        expected.put(DigestAlgorithm.SHA256, createEvaluations(Collections.singletonList(
+                new EvaluationDTO("2000-01-01", null, null, null))));
+
+        assertEquals(expected, cryptographicSuite.getAcceptableDigestAlgorithms());
+    }
+
+    @Test
     void getAcceptableSignatureAlgorithmsEmptyList() {
         List<CryptographicSuiteAlgorithm> algorithmList = new ArrayList<>();
 
@@ -481,6 +506,97 @@ class CryptographicSuite19322Test {
         expected.put(SignatureAlgorithm.RSA_SSA_PSS_SHA512_MGF1, createEvaluations(Arrays.asList(
                 new EvaluationDTO("2029-01-01", Collections.singletonList(new ParameterDTO(1900, MODULES_LENGTH))),
                 new EvaluationDTO("2029-01-01", Collections.singletonList(new ParameterDTO(3000, MODULES_LENGTH)))
+        )));
+
+        assertEquals(expected, cryptographicSuite.getAcceptableSignatureAlgorithms());
+    }
+
+    @Test
+    void getAcceptableSignatureAlgorithmsWithStartDatesTest() {
+        List<CryptographicSuiteAlgorithm> algorithmList = new ArrayList<>();
+
+        algorithmList.add(createEncryptionAlgorithmDefinition(EncryptionAlgorithm.ECDSA, Arrays.asList(
+                new EvaluationDTO("2010-01-01", "2029-01-01", Arrays.asList(
+                        new ParameterDTO(1900, PLENGTH),
+                        new ParameterDTO(200, QLENGTH)), null),
+                new EvaluationDTO(null, Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)))
+        )));
+
+        algorithmList.add(createSignatureAlgorithmDefinition(SignatureAlgorithm.DSA_SHA224, Collections.singletonList(
+                new EvaluationDTO("2000-01-01", "2029-01-01", Collections.emptyList(), null)
+        )));
+        algorithmList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA1, Collections.singletonList(
+                new EvaluationDTO("2000-01-01", "2012-08-01", Collections.emptyList(), null)
+        )));
+        algorithmList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA224, Collections.singletonList(
+                new EvaluationDTO("2000-01-01", "2029-01-01", Collections.emptyList(), null)
+        )));
+        algorithmList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA256, Collections.singletonList(
+                new EvaluationDTO(null, null, Collections.emptyList(), null)
+        )));
+        algorithmList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA512, Collections.singletonList(
+                new EvaluationDTO("2000-01-01", null, Collections.emptyList(), null)
+        )));
+        algorithmList.add(createDigestAlgorithmDefinition(DigestAlgorithm.SHA3_256, Collections.singletonList(
+                new EvaluationDTO("2020-01-01", null, Collections.emptyList(), null)
+        )));
+        algorithmList.add(createDigestAlgorithmDefinition(DigestAlgorithm.RIPEMD160, Collections.singletonList(
+                new EvaluationDTO("2005-01-01", "2008-01-01", Collections.emptyList(), null)
+        )));
+
+        CryptographicSuite19322 cryptographicSuite = new CryptographicSuite19322(new CryptographicSuiteMetadata(), algorithmList);
+
+        Map<SignatureAlgorithm, Set<CryptographicSuiteEvaluation>> expected = new HashMap<>();
+
+        expected.put(SignatureAlgorithm.DSA_SHA224, createEvaluations(Collections.singletonList(
+                new EvaluationDTO("2000-01-01", "2029-01-01", Collections.emptyList(), null)
+        )));
+        expected.put(SignatureAlgorithm.ECDSA_SHA1, createEvaluations(Arrays.asList(
+                new EvaluationDTO("2010-01-01", "2012-08-01", Arrays.asList(
+                        new ParameterDTO(1900, PLENGTH),
+                        new ParameterDTO(200, QLENGTH)), null),
+                new EvaluationDTO("2000-01-01", "2012-08-01", Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)), null)
+        )));
+        expected.put(SignatureAlgorithm.ECDSA_SHA224, createEvaluations(Arrays.asList(
+                new EvaluationDTO("2010-01-01", "2029-01-01", Arrays.asList(
+                        new ParameterDTO(1900, PLENGTH),
+                        new ParameterDTO(200, QLENGTH)), null),
+                new EvaluationDTO("2000-01-01", "2029-01-01", Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)), null)
+        )));
+        expected.put(SignatureAlgorithm.ECDSA_SHA256, createEvaluations(Arrays.asList(
+                new EvaluationDTO("2010-01-01", "2029-01-01", Arrays.asList(
+                        new ParameterDTO(1900, PLENGTH),
+                        new ParameterDTO(200, QLENGTH)), null),
+                new EvaluationDTO(null, null, Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)), null)
+        )));
+        expected.put(SignatureAlgorithm.ECDSA_SHA512, createEvaluations(Arrays.asList(
+                new EvaluationDTO("2010-01-01", "2029-01-01", Arrays.asList(
+                        new ParameterDTO(1900, PLENGTH),
+                        new ParameterDTO(200, QLENGTH)), null),
+                new EvaluationDTO("2000-01-01", null, Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)), null)
+        )));
+        expected.put(SignatureAlgorithm.ECDSA_SHA3_256, createEvaluations(Arrays.asList(
+                new EvaluationDTO("2020-01-01", "2029-01-01", Arrays.asList(
+                        new ParameterDTO(1900, PLENGTH),
+                        new ParameterDTO(200, QLENGTH)), null),
+                new EvaluationDTO("2020-01-01", null, Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)), null)
+        )));
+        expected.put(SignatureAlgorithm.ECDSA_RIPEMD160, createEvaluations(Collections.singletonList(
+                new EvaluationDTO("2005-01-01", "2008-01-01", Arrays.asList(
+                        new ParameterDTO(3000, PLENGTH),
+                        new ParameterDTO(250, QLENGTH)), null)
         )));
 
         assertEquals(expected, cryptographicSuite.getAcceptableSignatureAlgorithms());
@@ -1012,6 +1128,7 @@ class CryptographicSuite19322Test {
         if (evaluationList != null && !evaluationList.isEmpty()) {
             for (EvaluationDTO evaluationDTO : evaluationList) {
                 CryptographicSuiteEvaluation evaluation = new CryptographicSuiteEvaluation();
+                evaluation.setValidityStart(toDate(evaluationDTO.validityStart));
                 evaluation.setValidityEnd(toDate(evaluationDTO.validityEnd));
 
                 if (evaluationDTO.parameterList != null && !evaluationDTO.parameterList.isEmpty()) {
@@ -1115,6 +1232,7 @@ class CryptographicSuite19322Test {
 
     private static class EvaluationDTO {
 
+        private final String validityStart;
         private final String validityEnd;
         private final List<ParameterDTO> parameterList;
         private final List<CryptographicSuiteAlgorithmUsage> usages;
@@ -1128,6 +1246,12 @@ class CryptographicSuite19322Test {
         }
 
         public EvaluationDTO(final String validityEnd, final List<ParameterDTO> parameterList, final List<CryptographicSuiteAlgorithmUsage> usages) {
+            this(null, validityEnd, parameterList, usages);
+        }
+
+        public EvaluationDTO(final String validityStart, final String validityEnd, final List<ParameterDTO> parameterList,
+                             final List<CryptographicSuiteAlgorithmUsage> usages) {
+            this.validityStart = validityStart;
             this.validityEnd = validityEnd;
             this.parameterList = parameterList;
             this.usages = usages;

@@ -72,8 +72,7 @@ public class SignatureAlgorithmAtValidationTimeCheck extends AbstractCryptograph
 
 	@Override
 	protected boolean process() {
-		Date expirationDate = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, signatureAlgorithm, keyLength);
-		return expirationDate == null || !expirationDate.before(validationDate);
+		return CryptographicSuiteUtils.isSignatureAlgorithmReliableAtTime(cryptographicSuite, signatureAlgorithm, keyLength, validationDate);
 	}
 
 	@Override
@@ -93,7 +92,14 @@ public class SignatureAlgorithmAtValidationTimeCheck extends AbstractCryptograph
 	
 	@Override
 	protected XmlMessage buildErrorMessage() {
-		return buildXmlMessage(MessageTag.ASCCM_AR_ANS_AKSNR, getName(signatureAlgorithm), keyLength, position);
+		MessageTag messageTag;
+		Date algoExpirationDate = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, signatureAlgorithm, keyLength);
+		if (algoExpirationDate != null && algoExpirationDate.before(validationDate)) {
+			messageTag = MessageTag.ASCCM_AR_ANS_AKSNR; // expired case
+		} else {
+			messageTag = MessageTag.ASCCM_AR_ANS_AKSNR_2; // other cases
+		}
+		return buildXmlMessage(messageTag, getName(signatureAlgorithm), keyLength, position);
 	}
 
 }

@@ -64,8 +64,10 @@ public class CryptographicSuite19322 implements CryptographicSuite {
     /** Defines execution level of the algorithms expiration check with expiration occurred after the update of the cryptographic suite */
     private Level algorithmsExpirationTimeAfterPolicyUpdateLevel = Level.WARN;
 
+    /** Cached map of acceptable digest algorithms and their corresponding validation requirements */
     private Map<DigestAlgorithm, Set<CryptographicSuiteEvaluation>> acceptableDigestAlgorithms;
 
+    /** Cached map of acceptable signature algorithms and their corresponding validation requirements */
     private Map<SignatureAlgorithm, Set<CryptographicSuiteEvaluation>> acceptableSignatureAlgorithms;
 
     /**
@@ -240,15 +242,24 @@ public class CryptographicSuite19322 implements CryptographicSuite {
 
                     // Apply stricter requirements, if applicable
                     final Set<CryptographicSuiteEvaluation> finalEvaluationList = new HashSet<>();
-                    Date digestAlgoValidityEnd = getLatestValidityEnd(entry.getValue());
-                    // TODO : include ValidityStart Date
-
                     for (CryptographicSuiteEvaluation evaluation : algorithm.getEvaluationList()) {
-                        if (digestAlgoValidityEnd != null && (evaluation.getValidityEnd() == null || digestAlgoValidityEnd.before(evaluation.getValidityEnd()))) {
+                        for (CryptographicSuiteEvaluation digestAlgoEvaluation : entry.getValue()) {
                             evaluation = CryptographicSuiteEvaluation.copy(evaluation);
-                            evaluation.setValidityEnd(digestAlgoValidityEnd);
+                            Date digestAlgoValidityStart = digestAlgoEvaluation.getValidityStart();
+                            if (digestAlgoValidityStart != null && (evaluation.getValidityStart() == null || digestAlgoValidityStart.after(evaluation.getValidityStart()))) {
+                                evaluation.setValidityStart(digestAlgoValidityStart);
+                            }
+                            Date digestAlgoValidityEnd = digestAlgoEvaluation.getValidityEnd();
+                            if (digestAlgoValidityEnd != null && (evaluation.getValidityEnd() == null || digestAlgoValidityEnd.before(evaluation.getValidityEnd()))) {
+                                evaluation.setValidityEnd(digestAlgoValidityEnd);
+                            }
+
+                            // avoid dates misconfiguration
+                            if (evaluation.getValidityStart() == null || evaluation.getValidityEnd() == null
+                                    || evaluation.getValidityStart().before(evaluation.getValidityEnd())) {
+                                finalEvaluationList.add(evaluation);
+                            }
                         }
-                        finalEvaluationList.add(evaluation);
                     }
 
                     tempMap.computeIfAbsent(signatureAlgorithm, v -> new HashSet<>())
@@ -328,18 +339,6 @@ public class CryptographicSuite19322 implements CryptographicSuite {
 
     private SignatureAlgorithm findSignatureAlgorithm(EncryptionAlgorithm encryptionAlgorithm, DigestAlgorithm digestAlgorithm) {
         return SignatureAlgorithm.getAlgorithm(encryptionAlgorithm, digestAlgorithm);
-    }
-
-    private Date getLatestValidityEnd(Set<CryptographicSuiteEvaluation> evaluations) {
-        Date validityEnd = null;
-        for (CryptographicSuiteEvaluation evaluation : evaluations) {
-            if (evaluation.getValidityEnd() == null) {
-                return null;
-            } else if (validityEnd == null || validityEnd.before(evaluation.getValidityEnd())) {
-                validityEnd = evaluation.getValidityEnd();
-            }
-        }
-        return validityEnd;
     }
 
 }

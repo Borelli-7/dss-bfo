@@ -67,8 +67,7 @@ public class DigestAlgorithmAtValidationTimeCheck extends AbstractCryptographicC
 
 	@Override
 	protected boolean process() {
-		Date expirationDate = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, digestAlgo);
-		return expirationDate == null || !expirationDate.before(validationDate);
+		return CryptographicSuiteUtils.isDigestAlgorithmReliableAtTime(cryptographicSuite, digestAlgo, validationDate);
 	}
 	
 	@Override
@@ -88,7 +87,14 @@ public class DigestAlgorithmAtValidationTimeCheck extends AbstractCryptographicC
 	
 	@Override
 	protected XmlMessage buildErrorMessage() {
-		return buildXmlMessage(MessageTag.ASCCM_AR_ANS_ANR, getName(digestAlgo), position);
+		MessageTag messageTag;
+		Date algoExpirationDate = CryptographicSuiteUtils.getExpirationDate(cryptographicSuite, digestAlgo);
+		if (algoExpirationDate != null && algoExpirationDate.before(validationDate)) {
+			messageTag = MessageTag.ASCCM_AR_ANS_ANR; // expired case
+		} else {
+			messageTag = MessageTag.ASCCM_AR_ANS_ANR_2; // other cases
+		}
+		return buildXmlMessage(messageTag, getName(digestAlgo), position);
 	}
 
 }

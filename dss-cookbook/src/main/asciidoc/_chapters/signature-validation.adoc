@@ -364,8 +364,6 @@ Otherwise, validation returns a failed status.
 If that validation returns a successful status, the overall validation concludes with a successful status.
 Otherwise, validation returns a failed status.
 
-WARNING: The `Start` and `Max` elements are not supported by the implementation. Please use the `End` and `Min` elements for the constraints definition.
-
 ===== Algorithm Usage
 
 Starting from version `6.4` DSS provides a support of an optional `AlgorithmUsage` element as defined within the ETSI TS 119 322 (cf. <<R21>>). Similarly to <<defaultXmlPolicy>>, the `AlgorithmUsage` element provides a possibility to define a scope for the applicability of the cryptographic rules. Below you may find a table of correspondence of different algorithm usage types to the supported contexts in the <<defaultXmlPolicy>>:

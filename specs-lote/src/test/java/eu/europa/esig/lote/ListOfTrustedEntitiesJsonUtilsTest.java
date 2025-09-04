@@ -86,4 +86,15 @@ class ListOfTrustedEntitiesJsonUtilsTest {
         assertFalse(errors.isEmpty(), errors.toString());
     }
 
+    @Test
+    void emptySchemeExtensionsTest() {
+        InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/empty-only-schema-extensions.json");
+        JsonObjectWrapper jsonObject = new JSONParser().parse(is);
+
+        assertNotNull(jsonObject);
+
+        List<String> errors = ListOfTrustedEntitiesJsonUtils.getInstance().validateAgainstSchema(jsonObject);
+        assertFalse(errors.isEmpty(), errors.toString());
+    }
+
 }

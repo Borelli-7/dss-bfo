@@ -20,10 +20,18 @@
  */
 package eu.europa.esig.lote;
 
+import com.github.erosb.jsonsKema.JsonObject;
+import com.github.erosb.jsonsKema.ValidationFailure;
+import com.github.erosb.jsonsKema.Validator;
 import eu.europa.esig.json.JSONSchemaAbstractUtils;
+import eu.europa.esig.json.ValidationMessage;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This class contains utils for parsing and validation of the list of Trusted Entities to
@@ -81,6 +89,31 @@ public final class ListOfTrustedEntitiesJsonUtils extends JSONSchemaAbstractUtil
         definitions.put(URI.create(SCHEMA_URI), SCHEMA_LOCATION);
         definitions.put(URI.create(EXTENSION_SCHEMA_URI), EXTENSION_SCHEMA_LOCATION);
         return definitions;
+    }
+
+    /**
+     * Validates a JSON against JWS Schema according to ETSI TS 119 602 JSON schema.
+     * TODO: This method is created temporary to fix an issue with returned errors without a cause issue, to be fixed in DSS code
+     *
+     * @param json {@link JsonObject} representing a JSON to validate
+     * @return a list of {@link String} messages containing errors occurred during
+     *         the validation process, empty list when validation succeeds
+     */
+    public List<String> validateAgainstSchema(JsonObject json) {
+        Validator validator = getValidator();
+        ValidationFailure validationFailure = validator.validate(json);
+        if (validationFailure != null) {
+            Set<ValidationFailure> causes = validationFailure.getCauses();
+            if (causes != null && !causes.isEmpty()) {
+                return causes.stream().map(v -> new ValidationMessage(v).getMessage()).collect(Collectors.toList());
+            }
+            // for single issues
+            String message = validationFailure.getMessage();
+            if (message != null) {
+                return Collections.singletonList(String.format("%s, location: %s", message, validationFailure.getInstance().getLocation()));
+            }
+        }
+        return Collections.emptyList();
     }
 
 }

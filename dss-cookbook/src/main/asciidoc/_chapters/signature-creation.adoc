@@ -781,7 +781,7 @@ Since version `5.13` DSS provides a possibility to identify signed data objects 
 include::{sourcetestdir}/eu/europa/esig/dss/cookbook/example/sign/SignXmlXadesBWithTransformsTest.java[tags=demoDataObjectFormat]
 ----
 
-WARNING: The parameter modifies default behavior the xades:DataObjectFormat elements are created. It is up to the implementor to ensure the validity of the defined configuration. The parameter is recommended to be used only by experienced users.
+WARNING: The parameter modifies default behavior the xades:DataObjectFormat elements are created. It is up to the implementer to ensure the validity of the defined configuration. The parameter is recommended to be used only by experienced users.
 
 ====== Objects
 

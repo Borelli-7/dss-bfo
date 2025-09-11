@@ -223,7 +223,7 @@ The `DocumentValidator` may also load the validation policy from a file, see bel
 include::{sourcetestdir}/eu/europa/esig/dss/cookbook/example/snippets/Snippets.java[tags=validationPolicyFile]
 ----
 
-This method will search for an available `ValidationPolicyFactory` implementation in the runtime by means of the <<ServiceLoaderAdvanced>>.
+This method will search for an available `ValidationPolicyFactory` implementation at runtime by means of the <<ServiceLoaderAdvanced>>.
 
 For more information about XML Validation Policy and its configuration, please see the section <<JaxbValidationPolicy>>.
 
@@ -330,7 +330,7 @@ A custom cryptographic suite can be provided to a `DocumentValidator` next to th
 include::{sourcetestdir}/eu/europa/esig/dss/cookbook/example/snippets/Snippets.java[tags=validationPolicyAndCryptoSuite]
 ----
 
-The `DocumentValidator` will search for an available implementation of a `CryptographicSuiteFactory`, supporting the given cryptographic suite file, in the runtime by means of the <<ServiceLoaderAdvanced>>.
+The `DocumentValidator` will search for an available implementation of a `CryptographicSuiteFactory`, supporting the given cryptographic suite file, at runtime by means of the <<ServiceLoaderAdvanced>>.
 
 NOTE: The cryptographic suite, when provided, overwrites all configuration for validation of cryptographic algorithms, defined in the main validation policy.
 
@@ -392,7 +392,7 @@ As the use of `algorithmUsage` element is optional, it also stays possible to de
 
 In order to create a customized Validation Policy, the class `ValidationPolicyLoader` can be used, incorporating the logic of loading a validation policy with applicable cryptographic suite(s).
 
-In a simple use-case scenario, a default validation policy can be loaded, provided the implementation is discoverable and available to the application in the runtime:
+In a simple use-case scenario, a default validation policy can be loaded, provided the implementation is discoverable and available to the application at runtime:
 
 [source,java,indent=0]
 .Default validation policy creation
@@ -408,7 +408,7 @@ Or, alternatively, the `Validation Policy` can be also loaded from a custom file
 include::{sourcetestdir}/eu/europa/esig/dss/cookbook/example/snippets/Snippets.java[tags=validationPolicyLoaderFromFile]
 ----
 
-With the `ValidationPolicyLoader` verifying whether a module supporting the provided validation policy is available in the runtime, and loading the policy using the first found implementation, supporting the given validation policy file.
+With the `ValidationPolicyLoader` verifying whether a module supporting the provided validation policy is available at runtime, and loading the policy using the first found implementation, supporting the given validation policy file.
 
 After that, the created `ValidationPolicy` object can be used to perform a validation of document, as demonstrated below:
 

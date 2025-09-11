@@ -7,7 +7,7 @@
 [[MigrationGuide]]
 === Migration guide
 
-This chapter covers the most significant changes in DSS code occurred between different versions, requiring review and possible changes from code implementors.
+This chapter covers the most significant changes in DSS code occurred between different versions, requiring review and possible changes from code implementers.
 
 For changes within Diagnostic Data XSD please refer <<DiagnosticDataChanges>>.
 

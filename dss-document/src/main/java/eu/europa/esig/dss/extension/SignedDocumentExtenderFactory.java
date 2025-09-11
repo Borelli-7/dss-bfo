@@ -1,4 +1,4 @@
-package eu.europa.esig.dss.spi.extension;
+package eu.europa.esig.dss.extension;
 
 import eu.europa.esig.dss.model.DSSDocument;
 
@@ -10,23 +10,23 @@ import eu.europa.esig.dss.model.DSSDocument;
 public interface SignedDocumentExtenderFactory {
 
     /**
-     * This method tests if the current implementation of {@link DocumentExtender}
+     * This method tests if the current implementation of {@link SignedDocumentExtender}
      * supports the given document
      *
      * @param document
      *                 the document to be tested
-     * @return true, if the {@link DocumentExtender} supports the given document
+     * @return true, if the {@link SignedDocumentExtender} supports the given document
      */
     boolean isSupported(DSSDocument document);
 
     /**
-     * This method instantiates a {@link DocumentExtender} with the given document
+     * This method instantiates a {@link SignedDocumentExtender} with the given document
      *
      * @param document
-     *                 the document to be used for the {@link DocumentExtender}
+     *                 the document to be used for the {@link SignedDocumentExtender}
      *                 creation
-     * @return an instance of {@link DocumentExtender} with the document
+     * @return an instance of {@link SignedDocumentExtender} with the document
      */
-    DocumentExtender create(DSSDocument document);
+    SignedDocumentExtender create(DSSDocument document);
 
 }

@@ -3,10 +3,12 @@ package eu.europa.esig.dss.test.extension;
 import eu.europa.esig.dss.enumerations.SignatureForm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignatureProfile;
+import eu.europa.esig.dss.extension.SignedDocumentExtender;
 import eu.europa.esig.dss.model.AbstractSerializableSignatureParameters;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.SerializableSignatureParameters;
+import eu.europa.esig.dss.signature.DocumentSignatureService;
 import eu.europa.esig.dss.simplereport.SimpleReport;
 import eu.europa.esig.dss.spi.exception.IllegalInputException;
 import eu.europa.esig.dss.spi.extension.DocumentExtender;
@@ -60,6 +62,15 @@ public abstract class AbstractTestDocumentExtender extends PKIFactoryAccess {
         AbstractSerializableSignatureParameters<?> extensionParameters = initExtensionParameters();
         extensionParameters.setSignatureLevel(getFinalSignatureLevel());
         extendAndValidate(extender, getTargetSignatureProfile(), extensionParameters);
+    }
+
+    @Test
+    public void extendSignaturesWithExtensionParametersDiffLevel() {
+        DSSDocument document = getSignatureDocument();
+        DocumentExtender extender = initExtender(document);
+        AbstractSerializableSignatureParameters<?> extensionParameters = initExtensionParameters();
+        extensionParameters.setSignatureLevel(getFinalSignatureLevel());
+        extendAndValidate(extender, SignatureProfile.BASELINE_T, extensionParameters);
     }
 
     @Test
@@ -188,8 +199,28 @@ public abstract class AbstractTestDocumentExtender extends PKIFactoryAccess {
 
     @Test
     public void nullFromDocument() {
-        Exception exception = assertThrows(NullPointerException.class, () ->  SignedDocumentValidator.fromDocument(null));
+        Exception exception = assertThrows(NullPointerException.class, () ->  SignedDocumentExtender.fromDocument(null));
         assertEquals("DSSDocument is null", exception.getMessage());
+    }
+
+    @Test
+    public void customServiceTest() {
+        DSSDocument signatureDocument = getSignatureDocument();
+        DocumentSignatureService<?, ?> service = initService();
+
+        SignedDocumentExtender extender = SignedDocumentExtender.fromDocument(signatureDocument);
+        Exception exception = assertThrows(NullPointerException.class, () ->  extender.extendDocument(getTargetSignatureProfile()));
+        assertEquals(String.format("Please provide CertificateVerifier or corresponding %s!", service.getClass().getSimpleName()), exception.getMessage());
+
+        extender.setServices(service);
+
+        exception = assertThrows(NullPointerException.class, () ->  extender.extendDocument(getTargetSignatureProfile()));
+        assertEquals("The TSPSource cannot be null", exception.getMessage());
+
+        service.setTspSource(getGoodTsa());
+
+        DSSDocument extendedDocument = extender.extendDocument(getTargetSignatureProfile());
+        validate(extendedDocument);
     }
 
     protected void extendAndValidate(DocumentExtender extender, SignatureProfile signatureProfile,
@@ -226,6 +257,8 @@ public abstract class AbstractTestDocumentExtender extends PKIFactoryAccess {
     }
 
     protected abstract AbstractSerializableSignatureParameters<?> initExtensionParameters();
+
+    protected abstract DocumentSignatureService<?,?> initService();
 
     @Override
     protected String getSigningAlias() {

@@ -36,8 +36,8 @@ public class ASiCWithCAdESDocumentExtender extends AbstractDocumentExtender<ASiC
     }
 
     @Override
-    protected DocumentSignatureService<ASiCWithCAdESSignatureParameters, ASiCWithCAdESTimestampParameters> initSignatureService() {
-        Objects.requireNonNull(certificateVerifier, "CertificateVerifier cannot be null!");
+    protected DocumentSignatureService<ASiCWithCAdESSignatureParameters, ASiCWithCAdESTimestampParameters> createSignatureService() {
+        Objects.requireNonNull(certificateVerifier, "Please provide CertificateVerifier or corresponding ASiCWithCAdESService!");
         final ASiCWithCAdESService service = new ASiCWithCAdESService(certificateVerifier);
         service.setTspSource(tspSource);
         return service;
@@ -59,8 +59,18 @@ public class ASiCWithCAdESDocumentExtender extends AbstractDocumentExtender<ASiC
     }
 
     @Override
-    protected SignatureForm getSignatureForm() {
+    protected boolean isSupportedService(DocumentSignatureService<?, ?> service) {
+        return service instanceof ASiCWithCAdESService;
+    }
+
+    @Override
+    public SignatureForm getSignatureForm() {
         return SignatureForm.CAdES;
+    }
+
+    @Override
+    public boolean isASiC() {
+        return false;
     }
 
 }

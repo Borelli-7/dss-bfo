@@ -36,8 +36,8 @@ public class CAdESDocumentExtender extends AbstractDocumentExtender<CAdESSignatu
     }
 
     @Override
-    protected DocumentSignatureService<CAdESSignatureParameters, CAdESTimestampParameters> initSignatureService() {
-        Objects.requireNonNull(certificateVerifier, "CertificateVerifier cannot be null!");
+    protected DocumentSignatureService<CAdESSignatureParameters, CAdESTimestampParameters> createSignatureService() {
+        Objects.requireNonNull(certificateVerifier, "Please provide CertificateVerifier or corresponding CAdESService!");
         final CAdESService service = new CAdESService(certificateVerifier);
         service.setTspSource(tspSource);
         return service;
@@ -59,7 +59,12 @@ public class CAdESDocumentExtender extends AbstractDocumentExtender<CAdESSignatu
     }
 
     @Override
-    protected SignatureForm getSignatureForm() {
+    protected boolean isSupportedService(DocumentSignatureService<?, ?> service) {
+        return service instanceof CAdESService;
+    }
+
+    @Override
+    public SignatureForm getSignatureForm() {
         return SignatureForm.CAdES;
     }
 

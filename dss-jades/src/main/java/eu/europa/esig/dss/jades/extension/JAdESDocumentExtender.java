@@ -41,8 +41,8 @@ public class JAdESDocumentExtender extends AbstractDocumentExtender<JAdESSignatu
     }
 
     @Override
-    protected DocumentSignatureService<JAdESSignatureParameters, JAdESTimestampParameters> initSignatureService() {
-        Objects.requireNonNull(certificateVerifier, "CertificateVerifier cannot be null!");
+    protected DocumentSignatureService<JAdESSignatureParameters, JAdESTimestampParameters> createSignatureService() {
+        Objects.requireNonNull(certificateVerifier, "Please provide CertificateVerifier or corresponding JAdESService!");
         final JAdESService service = new JAdESService(certificateVerifier);
         service.setTspSource(tspSource);
         return service;
@@ -68,7 +68,12 @@ public class JAdESDocumentExtender extends AbstractDocumentExtender<JAdESSignatu
     }
 
     @Override
-    protected SignatureForm getSignatureForm() {
+    protected boolean isSupportedService(DocumentSignatureService<?, ?> service) {
+        return service instanceof JAdESService;
+    }
+
+    @Override
+    public SignatureForm getSignatureForm() {
         return SignatureForm.JAdES;
     }
 

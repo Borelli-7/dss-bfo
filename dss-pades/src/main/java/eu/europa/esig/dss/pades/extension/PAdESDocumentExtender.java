@@ -36,8 +36,8 @@ public class PAdESDocumentExtender extends AbstractDocumentExtender<PAdESSignatu
     }
 
     @Override
-    protected DocumentSignatureService<PAdESSignatureParameters, PAdESTimestampParameters> initSignatureService() {
-        Objects.requireNonNull(certificateVerifier, "CertificateVerifier cannot be null!");
+    protected DocumentSignatureService<PAdESSignatureParameters, PAdESTimestampParameters> createSignatureService() {
+        Objects.requireNonNull(certificateVerifier, "Please provide CertificateVerifier or corresponding PAdESService!");
         final PAdESService service = new PAdESService(certificateVerifier);
         service.setTspSource(tspSource);
         return service;
@@ -59,7 +59,12 @@ public class PAdESDocumentExtender extends AbstractDocumentExtender<PAdESSignatu
     }
 
     @Override
-    protected SignatureForm getSignatureForm() {
+    protected boolean isSupportedService(DocumentSignatureService<?, ?> service) {
+        return service instanceof PAdESService;
+    }
+
+    @Override
+    public SignatureForm getSignatureForm() {
         return SignatureForm.PAdES;
     }
 

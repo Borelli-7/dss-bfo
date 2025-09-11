@@ -9,6 +9,8 @@ import eu.europa.esig.dss.model.TimestampParameters;
 import eu.europa.esig.dss.signature.AbstractSignatureParameters;
 import eu.europa.esig.dss.signature.DocumentSignatureService;
 import eu.europa.esig.dss.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +23,8 @@ import java.util.Objects;
  * @param <TP> {@code SerializableTimestampParameters} specifying the timestamp creation parameters, when applicable
  */
 public abstract class AbstractDocumentExtender<SP extends AbstractSignatureParameters<?>, TP extends TimestampParameters> extends SignedDocumentExtender {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDocumentExtender.class);
 
     /** Internal variable used to define empty format specific signature parameters */
     private static final SerializableSignatureParameters[] EMPTY_PARAMETERS = new SerializableSignatureParameters[]{};
@@ -55,9 +59,8 @@ public abstract class AbstractDocumentExtender<SP extends AbstractSignatureParam
     @Override
     public DSSDocument extendDocument(SignatureProfile signatureProfile, List<DSSDocument> detachedContents,
                                       SerializableSignatureParameters... extensionParameters) {
-        Objects.requireNonNull(signatureProfile, "SignatureProfile cannot be null!");
-        Objects.requireNonNull(certificateVerifier, "CertificateVerifier is not defined");
         Objects.requireNonNull(document, "Document is not provided to the extender");
+        Objects.requireNonNull(signatureProfile, "SignatureProfile cannot be null!");
 
         DocumentSignatureService<SP, TP> service = initSignatureService();
         SP parameters = initSignatureParameters(signatureProfile, detachedContents, extensionParameters);
@@ -69,7 +72,32 @@ public abstract class AbstractDocumentExtender<SP extends AbstractSignatureParam
      *
      * @return {@link DocumentSignatureService}
      */
-    protected abstract DocumentSignatureService<SP, TP> initSignatureService();
+    @SuppressWarnings("unchecked")
+    protected DocumentSignatureService<SP, TP> initSignatureService() {
+        if (Utils.isArrayNotEmpty(services)) {
+            for (DocumentSignatureService<?, ?> service : services) {
+                if (isSupportedService(service)) {
+                    return (DocumentSignatureService<SP, TP>) service;
+                }
+            }
+        }
+        return createSignatureService();
+    }
+
+    /**
+     * This method created a new instance of {@code DocumentSignatureService}
+     *
+     * @return {@link DocumentSignatureService}
+     */
+    protected abstract DocumentSignatureService<SP, TP> createSignatureService();
+
+    /**
+     * This method verifies whether the provided document signature service is supported by the current implementation
+     *
+     * @param service {@link DocumentSignatureService} to check
+     * @return TRUE if the service is supported by the current implementation, FALSE otherwise
+     */
+    protected abstract boolean isSupportedService(DocumentSignatureService<?, ?> service);
 
     /**
      * This method initializes signature parameters to be used on the signature augmentation
@@ -108,7 +136,7 @@ public abstract class AbstractDocumentExtender<SP extends AbstractSignatureParam
      * This method verifies whether the provided signature parameters are supported by the current implementation
      *
      * @param parameters {@link SerializableSignatureParameters} to check
-     * @return TRUE if the parameters are supported by the current implementation, FALSE otehrwise
+     * @return TRUE if the parameters are supported by the current implementation, FALSE otherwise
      */
     protected abstract boolean isSupportedParameters(SerializableSignatureParameters parameters);
 
@@ -123,6 +151,9 @@ public abstract class AbstractDocumentExtender<SP extends AbstractSignatureParam
     protected SP fillSignatureParameters(SP signatureParameters, SignatureProfile signatureProfile, List<DSSDocument> detachedContents) {
         if (signatureParameters.getSignatureLevel() == null) {
             signatureParameters.setSignatureLevel(getSignatureLevel(signatureProfile));
+        } else if (signatureProfile != signatureParameters.getSignatureLevel().getSignatureProfile()) {
+            LOG.info("Signature level '{}' defined within the applicable signature parameters does not match the target signature profile '{}'. " +
+                    "The signature level from signature parameters is used.", signatureParameters.getSignatureLevel(), signatureProfile);
         }
         if (Utils.isCollectionEmpty(signatureParameters.getDetachedContents())) {
             signatureParameters.setDetachedContents(detachedContents);
@@ -146,12 +177,5 @@ public abstract class AbstractDocumentExtender<SP extends AbstractSignatureParam
         }
         return signatureLevel;
     }
-
-    /**
-     * Gets the signature form for the current implementation
-     *
-     * @return {@link SignatureForm}
-     */
-    protected abstract SignatureForm getSignatureForm();
 
 }

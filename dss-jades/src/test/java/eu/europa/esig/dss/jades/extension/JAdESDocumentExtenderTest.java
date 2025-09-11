@@ -12,6 +12,7 @@ import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.SignatureValue;
 import eu.europa.esig.dss.model.ToBeSigned;
+import eu.europa.esig.dss.signature.DocumentSignatureService;
 import eu.europa.esig.dss.spi.extension.DocumentExtender;
 import eu.europa.esig.dss.test.extension.AbstractTestDocumentExtender;
 import org.junit.jupiter.api.Test;
@@ -144,6 +145,11 @@ class JAdESDocumentExtenderTest extends AbstractTestDocumentExtender {
         JAdESSignatureParameters extensionParameters = new JAdESSignatureParameters();
         extensionParameters.setJwsSerializationType(JWSSerializationType.FLATTENED_JSON_SERIALIZATION);
         return extensionParameters;
+    }
+
+    @Override
+    protected DocumentSignatureService<?, ?> initService() {
+        return new JAdESService(getCompleteCertificateVerifier());
     }
 
     @Override

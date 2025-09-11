@@ -1,8 +1,9 @@
 package eu.europa.esig.dss.extension;
 
+import eu.europa.esig.dss.enumerations.SignatureForm;
 import eu.europa.esig.dss.model.DSSDocument;
+import eu.europa.esig.dss.signature.DocumentSignatureService;
 import eu.europa.esig.dss.spi.extension.DocumentExtender;
-import eu.europa.esig.dss.spi.extension.SignedDocumentExtenderFactory;
 import eu.europa.esig.dss.spi.validation.CertificateVerifier;
 import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
 
@@ -29,6 +30,13 @@ public abstract class SignedDocumentExtender implements DocumentExtender {
     protected TSPSource tspSource;
 
     /**
+     * (Optional) Document signature services.
+     * When defined, the applicable instance of a corresponding service will be used.
+     * If no suitable service found, a new service instance will be created.
+     */
+    protected DocumentSignatureService<?, ?>[] services;
+
+    /**
      * Empty constructor
      */
     protected SignedDocumentExtender() {
@@ -44,7 +52,7 @@ public abstract class SignedDocumentExtender implements DocumentExtender {
      * @return returns the specific instance of {@code DocumentReader} in terms
      *         of the document type
      */
-    public static DocumentExtender fromDocument(final DSSDocument dssDocument) {
+    public static SignedDocumentExtender fromDocument(final DSSDocument dssDocument) {
         Objects.requireNonNull(dssDocument, "DSSDocument is null");
         ServiceLoader<SignedDocumentExtenderFactory> serviceLoaders = ServiceLoader.load(SignedDocumentExtenderFactory.class);
         for (SignedDocumentExtenderFactory factory : serviceLoaders) {
@@ -63,6 +71,33 @@ public abstract class SignedDocumentExtender implements DocumentExtender {
     @Override
     public void setTspSource(TSPSource tspSource) {
         this.tspSource = tspSource;
+    }
+
+    /**
+     * (Optional) Sets document signature services.
+     * When defined, the applicable instance of a corresponding service will be used.
+     * If no suitable service found, a new service instance will be created.
+     *
+     * @param services an array of {@link DocumentSignatureService}s
+     */
+    public void setServices(DocumentSignatureService<?, ?>... services) {
+        this.services = services;
+    }
+
+    /**
+     * Gets the signature form for the current implementation
+     *
+     * @return {@link SignatureForm}
+     */
+    public abstract SignatureForm getSignatureForm();
+
+    /**
+     * Gets whether the document to be extended represents an ASiC container
+     *
+     * @return TRUE if the document is an ASiC container, FALSE otherwise
+     */
+    public boolean isASiC() {
+        return false;
     }
 
 }

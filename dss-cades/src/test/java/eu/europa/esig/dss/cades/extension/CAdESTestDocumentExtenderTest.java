@@ -12,6 +12,7 @@ import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.SignatureValue;
 import eu.europa.esig.dss.model.ToBeSigned;
+import eu.europa.esig.dss.signature.DocumentSignatureService;
 import eu.europa.esig.dss.spi.extension.DocumentExtender;
 import eu.europa.esig.dss.test.extension.AbstractTestDocumentExtender;
 import eu.europa.esig.dss.utils.Utils;
@@ -118,6 +119,11 @@ class CAdESTestDocumentExtenderTest extends AbstractTestDocumentExtender {
     @Override
     protected AbstractSerializableSignatureParameters<?> initExtensionParameters() {
         return new CAdESSignatureParameters();
+    }
+
+    @Override
+    protected DocumentSignatureService<?, ?> initService() {
+        return new CAdESService(getCompleteCertificateVerifier());
     }
 
     @Override

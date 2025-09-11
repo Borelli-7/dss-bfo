@@ -1,8 +1,8 @@
 package eu.europa.esig.dss.pades.extension;
 
+import eu.europa.esig.dss.extension.SignedDocumentExtender;
+import eu.europa.esig.dss.extension.SignedDocumentExtenderFactory;
 import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.spi.extension.SignedDocumentExtenderFactory;
-import eu.europa.esig.dss.spi.extension.DocumentExtender;
 
 /**
  * This class is used to check and load a corresponding {@code DocumentExtender} implementation
@@ -24,7 +24,7 @@ public class PAdESDocumentExtenderFactory implements SignedDocumentExtenderFacto
     }
 
     @Override
-    public DocumentExtender create(DSSDocument document) {
+    public SignedDocumentExtender create(DSSDocument document) {
         return new PAdESDocumentExtender(document);
     }
 

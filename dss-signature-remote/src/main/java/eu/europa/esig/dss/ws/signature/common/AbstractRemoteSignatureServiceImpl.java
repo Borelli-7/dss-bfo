@@ -113,7 +113,6 @@ public abstract class AbstractRemoteSignatureServiceImpl {
 	 * @param remoteParameters {@link RemoteSignatureParameters}
 	 * @return {@link SerializableSignatureParameters}
 	 */
-	@SuppressWarnings("unchecked")
 	protected SerializableSignatureParameters createParameters(RemoteSignatureParameters remoteParameters) {
 		SerializableSignatureParameters parameters;
 		ASiCContainerType asicContainerType = remoteParameters.getAsicContainerType();
@@ -121,31 +120,25 @@ public abstract class AbstractRemoteSignatureServiceImpl {
 		if (asicContainerType != null) {
 			parameters = getASiCSignatureParameters(asicContainerType, signatureForm);
 		} else {
-			switch (signatureForm) {
+			parameters = getSignatureParameters(signatureForm, remoteParameters);
+		}
+		fillParameters(parameters, remoteParameters, signatureForm);
+		return parameters;
+	}
+
+	protected SerializableSignatureParameters getSignatureParameters(SignatureForm signatureForm, RemoteSignatureParameters remoteParameters) {
+		switch (signatureForm) {
 			case XAdES:
-				parameters = getXAdESSignatureParameters(remoteParameters);
-				break;
+				return getXAdESSignatureParameters(remoteParameters);
 			case CAdES:
-				parameters = new CAdESSignatureParameters();
-				break;
+				return new CAdESSignatureParameters();
 			case PAdES:
-				parameters = getPAdESSignatureParameters(remoteParameters);
-				break;
+				return getPAdESSignatureParameters(remoteParameters);
 			case JAdES:
-				parameters = getJAdESSignatureParameters(remoteParameters);
-				break;
+				return getJAdESSignatureParameters(remoteParameters);
 			default:
 				throw new UnsupportedOperationException("Unsupported signature form : " + signatureForm);
-			}
 		}
-
-		if (parameters instanceof AbstractSignatureParameters<?>) {
-			AbstractSignatureParameters<TimestampParameters> abstractSignatureParameters = (AbstractSignatureParameters<TimestampParameters>) parameters;
-			fillParameters(abstractSignatureParameters, remoteParameters);
-			return abstractSignatureParameters;
-		}
-
-		return parameters;
 	}
 
 	/**
@@ -196,11 +189,18 @@ public abstract class AbstractRemoteSignatureServiceImpl {
 	/**
 	 * Fills the parameters
 	 *
-	 * @param parameters {@link AbstractSignatureParameters} to fill
+	 * @param signatureParameters {@link SerializableSignatureParameters} to fill
 	 * @param remoteParameters {@link RemoteSignatureParameters} to get values from
 	 */
-	protected void fillParameters(AbstractSignatureParameters<TimestampParameters> parameters,
-								  RemoteSignatureParameters remoteParameters) {
+	@SuppressWarnings("unchecked")
+	protected void fillParameters(SerializableSignatureParameters signatureParameters,
+								  RemoteSignatureParameters remoteParameters, SignatureForm signatureForm) {
+		if (!(signatureParameters instanceof AbstractSignatureParameters<?>)) {
+			return;
+		}
+
+		AbstractSignatureParameters<TimestampParameters> parameters =
+				(AbstractSignatureParameters<TimestampParameters>) signatureParameters;
 		// certificate shall be provided first
 		RemoteCertificate signingCertificate = remoteParameters.getSigningCertificate();
 		if (signingCertificate != null) { // extends do not require signing certificate
@@ -226,17 +226,23 @@ public abstract class AbstractRemoteSignatureServiceImpl {
 			parameters.setReferenceDigestAlgorithm(remoteParameters.getReferenceDigestAlgorithm());
 		}
 
-		parameters.setSignatureLevel(remoteParameters.getSignatureLevel());
-		parameters.setSignaturePackaging(remoteParameters.getSignaturePackaging());
+		if (remoteParameters.getSignatureLevel() != null) {
+			parameters.setSignatureLevel(remoteParameters.getSignatureLevel());
+		}
+		if (remoteParameters.getSignaturePackaging() != null) {
+			parameters.setSignaturePackaging(remoteParameters.getSignaturePackaging());
+		}
 		if (remoteParameters.getContentTimestamps() != null) {
 			parameters.setContentTimestamps(TimestampTokenConverter.toTimestampTokens(remoteParameters.getContentTimestamps()));
 		}
-		parameters.setSignatureTimestampParameters(toTimestampParameters(remoteParameters.getSignatureTimestampParameters(), 
-				remoteParameters.getSignatureLevel().getSignatureForm(), remoteParameters.getAsicContainerType()));
-		parameters.setArchiveTimestampParameters(toTimestampParameters(remoteParameters.getArchiveTimestampParameters(), 
-				remoteParameters.getSignatureLevel().getSignatureForm(), remoteParameters.getAsicContainerType()));
-		parameters.setContentTimestampParameters(toTimestampParameters(remoteParameters.getContentTimestampParameters(), 
-				remoteParameters.getSignatureLevel().getSignatureForm(), remoteParameters.getAsicContainerType()));
+		if (signatureForm != null) {
+			parameters.setSignatureTimestampParameters(toTimestampParameters(remoteParameters.getSignatureTimestampParameters(),
+					signatureForm, remoteParameters.getAsicContainerType()));
+			parameters.setArchiveTimestampParameters(toTimestampParameters(remoteParameters.getArchiveTimestampParameters(),
+					signatureForm, remoteParameters.getAsicContainerType()));
+			parameters.setContentTimestampParameters(toTimestampParameters(remoteParameters.getContentTimestampParameters(),
+					signatureForm, remoteParameters.getAsicContainerType()));
+		}
 		parameters.setGenerateTBSWithoutCertificate(remoteParameters.isGenerateTBSWithoutCertificate());
 	}
 
@@ -253,7 +259,9 @@ public abstract class AbstractRemoteSignatureServiceImpl {
 		if (remoteBLevelParameters.getCommitmentTypeIndications() != null) {
 			bLevelParameters.setCommitmentTypeIndications(toCommitmentTypeList(remoteBLevelParameters.getCommitmentTypeIndications()));
 		}
-		bLevelParameters.setSigningDate(remoteBLevelParameters.getSigningDate());
+		if (remoteBLevelParameters.getSigningDate() != null) {
+			bLevelParameters.setSigningDate(remoteBLevelParameters.getSigningDate());
+		}
 		bLevelParameters.setTrustAnchorBPPolicy(remoteBLevelParameters.isTrustAnchorBPPolicy());
 		
 		Policy policy = new Policy();
@@ -529,7 +537,7 @@ public abstract class AbstractRemoteSignatureServiceImpl {
 		parameters.setSignatureIdToCounterSign(remoteParameters.getSignatureIdToCounterSign());
 		if (parameters instanceof AbstractSignatureParameters<?>) {
 			AbstractSignatureParameters<TimestampParameters> abstractSignatureParameters = (AbstractSignatureParameters<TimestampParameters>) parameters;
-			fillParameters(abstractSignatureParameters, remoteParameters);
+			fillParameters(abstractSignatureParameters, remoteParameters, remoteParameters.getSignatureLevel().getSignatureForm());
 		}
 	}
 

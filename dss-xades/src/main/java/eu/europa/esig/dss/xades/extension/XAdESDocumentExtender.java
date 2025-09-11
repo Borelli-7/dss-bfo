@@ -36,8 +36,8 @@ public class XAdESDocumentExtender extends AbstractDocumentExtender<XAdESSignatu
     }
 
     @Override
-    protected DocumentSignatureService<XAdESSignatureParameters, XAdESTimestampParameters> initSignatureService() {
-        Objects.requireNonNull(certificateVerifier, "CertificateVerifier cannot be null!");
+    protected DocumentSignatureService<XAdESSignatureParameters, XAdESTimestampParameters> createSignatureService() {
+        Objects.requireNonNull(certificateVerifier, "Please provide CertificateVerifier or corresponding XAdESService!");
         final XAdESService service = new XAdESService(certificateVerifier);
         service.setTspSource(tspSource);
         return service;
@@ -59,7 +59,12 @@ public class XAdESDocumentExtender extends AbstractDocumentExtender<XAdESSignatu
     }
 
     @Override
-    protected SignatureForm getSignatureForm() {
+    protected boolean isSupportedService(DocumentSignatureService<?, ?> service) {
+        return service instanceof XAdESService;
+    }
+
+    @Override
+    public SignatureForm getSignatureForm() {
         return SignatureForm.XAdES;
     }
 

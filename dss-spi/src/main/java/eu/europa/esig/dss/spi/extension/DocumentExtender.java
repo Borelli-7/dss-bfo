@@ -69,9 +69,11 @@ public interface DocumentExtender {
      * This can be useful when a signature augmentation process for a certain signature format should take
      * into account particular signature constraints (i.e. /Contents size for a PAdES document time-stamp, etc.).
      * <p>
-     * NOTE: If the matching implementation of extension parameters found, and it contains {@code signatureLevel}
-     *       and/or {@code detachedContents} definition, the existing values will be used.
-     *       Otherwise, the content of the extension parameters will be overwritten respectively.
+     * NOTE 1: If the matching implementation of extension parameters found, and it contains {@code signatureLevel}
+     *         and/or {@code detachedContents} definition, the existing values will be used.
+     *         Otherwise, the content of the extension parameters will be overwritten respectively.
+     * NOTE 2: The definition of extension parameters is order dependent.
+     *         The first parameters matching the signature format implementation will be used.
      *
      * @param signatureProfile {@link SignatureProfile} identifying the desired target augmentation level
      * @param extensionParameters (optional) {@link SerializableSignatureParameters} containing format specific requirements
@@ -88,9 +90,11 @@ public interface DocumentExtender {
      * This can be useful when a signature augmentation process for a certain signature format should take
      * into account particular signature constraints (i.e. /Contents size for a PAdES document time-stamp, etc.).
      * <p>
-     * NOTE: If the matching implementation of extension parameters found, and it contains {@code signatureLevel}
-     *       and/or {@code detachedContents} definition, the existing values will be used.
-     *       Otherwise, the content of the extension parameters will be overwritten respectively.
+     * NOTE 1: If the matching implementation of extension parameters found, and it contains {@code signatureLevel}
+     *         and/or {@code detachedContents} definition, the existing values will be used.
+     *         Otherwise, the content of the extension parameters will be overwritten respectively.
+     * NOTE 2: The definition of extension parameters is order dependent.
+     *         The first parameters matching the signature format implementation will be used.
      *
      * @param signatureProfile {@link SignatureProfile} identifying the desired target augmentation level
      * @param detachedContents list of {@link DSSDocument}s representing a signed content in case of a detached signature

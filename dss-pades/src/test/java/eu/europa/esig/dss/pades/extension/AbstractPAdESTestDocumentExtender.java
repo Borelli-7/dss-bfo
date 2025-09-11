@@ -10,6 +10,7 @@ import eu.europa.esig.dss.model.SignatureValue;
 import eu.europa.esig.dss.model.ToBeSigned;
 import eu.europa.esig.dss.pades.PAdESSignatureParameters;
 import eu.europa.esig.dss.pades.signature.PAdESService;
+import eu.europa.esig.dss.signature.DocumentSignatureService;
 import eu.europa.esig.dss.spi.extension.DocumentExtender;
 import eu.europa.esig.dss.test.extension.AbstractTestDocumentExtender;
 import org.junit.jupiter.api.Test;
@@ -98,6 +99,11 @@ public abstract class AbstractPAdESTestDocumentExtender extends AbstractTestDocu
     @Override
     protected AbstractSerializableSignatureParameters<?> initExtensionParameters() {
         return new PAdESSignatureParameters();
+    }
+
+    @Override
+    protected DocumentSignatureService<?, ?> initService() {
+        return new PAdESService(getCompleteCertificateVerifier());
     }
 
     @Override

@@ -256,7 +256,6 @@ public class RemoteSignatureParameters implements Serializable {
 	 *            the expected signature level
 	 */
 	public void setSignatureLevel(final SignatureLevel signatureLevel) {
-		Objects.requireNonNull(signatureLevel, "signatureLevel must be defined!");
 		this.signatureLevel = signatureLevel;
 	}
 

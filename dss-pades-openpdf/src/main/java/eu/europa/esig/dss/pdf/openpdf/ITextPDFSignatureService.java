@@ -316,18 +316,12 @@ public class ITextPDFSignatureService extends AbstractPDFSignatureService {
 
 			final SignatureFieldParameters fieldParameters = parameters.getImageParameters().getFieldParameters();
 			checkPdfPermissions(documentReader, fieldParameters);
+			assertContentSizeSufficient(cmsSignedData, parameters);
 
 			PdfStamper stp = prepareStamper(documentReader, os, parameters);
 			PdfSignatureAppearance sap = stp.getSignatureAppearance();
 
 			int csize = parameters.getContentSize();
-			if (csize < cmsSignedData.length) {
-				throw new IllegalArgumentException(
-						String.format("Unable to save a document. Reason : The signature size [%s] is too small " +
-								"for the signature value with a length [%s]. Use setContentSize(...) method " +
-								"to define a bigger length.", csize, cmsSignedData.length));
-			}
-
 			byte[] outc = new byte[csize];
 			System.arraycopy(cmsSignedData, 0, outc, 0, cmsSignedData.length);
 

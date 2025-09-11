@@ -23,14 +23,13 @@ package eu.europa.esig.dss.cades.validation.evidencerecord;
 import eu.europa.esig.dss.cades.evidencerecord.CAdESEvidenceRecordDigestBuilder;
 import eu.europa.esig.dss.cms.CMSSignedDocument;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
-import eu.europa.esig.dss.spi.exception.IllegalInputException;
 import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.Digest;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.spi.DSSASN1Utils;
 import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.OID;
+import eu.europa.esig.dss.spi.exception.IllegalInputException;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERSet;
@@ -49,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CAdESEvidenceRecordDigestBuilderTest {
 
@@ -303,7 +303,8 @@ class CAdESEvidenceRecordDigestBuilderTest {
     @Test
     void notCmsTest() {
         DSSDocument document = new InMemoryDocument("test 123".getBytes());
-        assertThrows(DSSException.class, () -> new CAdESEvidenceRecordDigestBuilder(document).build());
+        Exception exception = assertThrows(IllegalInputException.class, () -> new CAdESEvidenceRecordDigestBuilder(document).build());
+        assertTrue(exception.getMessage().contains("Not a valid CAdES file."));
     }
 
 }

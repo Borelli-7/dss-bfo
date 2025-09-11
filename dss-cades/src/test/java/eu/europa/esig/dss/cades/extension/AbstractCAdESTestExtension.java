@@ -85,16 +85,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public abstract class AbstractCAdESTestExtension extends AbstractTestExtension<CAdESSignatureParameters, CAdESTimestampParameters> {
 
 	@Override
-	protected TSPSource getUsedTSPSourceAtSignatureTime() {
-		return getGoodTsa();
-	}
-
-	@Override
-	protected TSPSource getUsedTSPSourceAtExtensionTime() {
-		return getAlternateGoodTsa();
-	}
-
-	@Override
 	protected FileDocument getOriginalDocument() {
 		File originalDoc = new File("target/original-" + UUID.randomUUID().toString() + ".bin");
 		if (getOriginalDocumentPath() != null) {
@@ -353,11 +343,6 @@ public abstract class AbstractCAdESTestExtension extends AbstractTestExtension<C
 		CAdESSignatureParameters extensionParameters = new CAdESSignatureParameters();
 		extensionParameters.setSignatureLevel(getFinalSignatureLevel());
 		return extensionParameters;
-	}
-
-	@Override
-	protected String getSigningAlias() {
-		return GOOD_USER;
 	}
 
 }

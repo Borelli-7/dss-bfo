@@ -167,6 +167,7 @@ public class PdfBoxSignatureService extends AbstractPDFSignatureService {
 
 			final SignatureFieldParameters fieldParameters = parameters.getImageParameters().getFieldParameters();
 			checkPdfPermissions(documentReader, fieldParameters);
+			assertContentSizeSufficient(cmsSignedData, parameters);
 
 			signDocumentAndReturnDigest(parameters, cmsSignedData, os, documentReader);
 

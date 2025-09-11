@@ -72,7 +72,7 @@ public abstract class JAdESExtensionBuilder {
 			throw new IllegalInputException("The provided document is not a valid JAdES signature! Unable to extend.");
 		}
 		if (Utils.isCollectionEmpty(jwsJsonSerializationObject.getSignatures())) {
-			throw new IllegalInputException("There is no signature to extend!");
+			throw new IllegalInputException("No signatures found to be extended!");
 		}
 		if (!jwsJsonSerializationObject.isValid()) {
 			throw new IllegalInputException(String.format("Signature extension is not supported for invalid RFC 7515 files "

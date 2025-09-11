@@ -1,0 +1,18 @@
+package eu.europa.esig.dss.xades.extension.extender;
+
+import eu.europa.esig.dss.enumerations.SignatureLevel;
+import eu.europa.esig.dss.enumerations.SignatureProfile;
+
+class XAdESExtenderBToXLTest extends AbstractTestExtensionWithXAdESDocumentExtender {
+
+    @Override
+    protected SignatureLevel getOriginalSignatureLevel() {
+        return SignatureLevel.XAdES_BASELINE_B;
+    }
+
+    @Override
+    protected SignatureProfile getTargetSignatureProfile() {
+        return SignatureProfile.EXTENDED_XL;
+    }
+
+}

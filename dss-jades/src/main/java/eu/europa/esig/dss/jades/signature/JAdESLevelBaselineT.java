@@ -115,7 +115,7 @@ public class JAdESLevelBaselineT extends JAdESExtensionBuilder implements JAdESL
 
 		List<AdvancedSignature> signatures = documentValidator.getSignatures();
 		if (Utils.isCollectionEmpty(signatures)) {
-			throw new IllegalInputException("There is no signature to extend!");
+			throw new IllegalInputException("No signatures found to be extended!");
 		}
 
 		List<AdvancedSignature> signaturesToExtend = signatures;

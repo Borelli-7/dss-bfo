@@ -126,7 +126,7 @@ public class XAdESLevelBaselineT extends ExtensionBuilder implements SignatureEx
 
 		List<AdvancedSignature> signatures = documentAnalyzer.getSignatures();
 		if (Utils.isCollectionEmpty(signatures)) {
-			throw new IllegalInputException("There is no signature to extend!");
+			throw new IllegalInputException("No signatures found to be extended!");
 		}
 
 		// In the case of the enveloped signature we have a specific treatment:<br>

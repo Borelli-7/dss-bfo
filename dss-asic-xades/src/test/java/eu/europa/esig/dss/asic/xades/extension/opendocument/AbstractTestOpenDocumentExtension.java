@@ -18,7 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package eu.europa.esig.dss.asic.xades.extension;
+package eu.europa.esig.dss.asic.xades.extension.opendocument;
 
 import eu.europa.esig.dss.asic.common.ZipUtils;
 import eu.europa.esig.dss.asic.xades.ASiCWithXAdESSignatureParameters;
@@ -30,7 +30,6 @@ import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.model.SignatureValue;
 import eu.europa.esig.dss.model.ToBeSigned;
-import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
 import eu.europa.esig.dss.test.extension.AbstractTestExtension;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
@@ -77,25 +76,9 @@ public abstract class AbstractTestOpenDocumentExtension extends AbstractTestExte
 	}
 
 	@Override
-	protected TSPSource getUsedTSPSourceAtSignatureTime() {
-		return getGoodTsa();
-	}
-
-	@Override
-	protected TSPSource getUsedTSPSourceAtExtensionTime() {
-		return getAlternateGoodTsa();
-	}
-
-	@Override
 	protected FileDocument getOriginalDocument() {
 		return fileToTest;
 	}
-
-	@Override
-	protected String getSigningAlias() {
-		return GOOD_USER;
-	}
-	
 
 	@Override
 	protected DSSDocument getSignedDocument(DSSDocument doc) {

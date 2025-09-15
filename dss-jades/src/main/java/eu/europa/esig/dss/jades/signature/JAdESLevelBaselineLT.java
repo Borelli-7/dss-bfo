@@ -94,7 +94,7 @@ public class JAdESLevelBaselineLT extends JAdESLevelBaselineT {
 				continue;
 			}
 
-			assertEtsiUComponentsConsistent(jadesSignature.getJws(), params.isBase64UrlEncodedEtsiUComponents());
+			assertEtsiUComponentsConsistent(jadesSignature.getJws(), params);
 
 			JAdESEtsiUHeader etsiUHeader = jadesSignature.getEtsiUHeader();
 

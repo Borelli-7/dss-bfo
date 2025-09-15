@@ -262,7 +262,7 @@ public class RemoteDocumentSignatureServiceImpl extends AbstractRemoteSignatureS
 		} else if (documentExtender.isASiC()) {
 			signatureParameters = getASiCSignatureParameters(null, signatureForm);
 		} else {
-			signatureParameters = getSignatureParameters(signatureForm, remoteParameters);
+			signatureParameters = getExtensionParameters(signatureForm, remoteParameters);
 		}
 
 		fillParameters(signatureParameters, remoteParameters, signatureForm);

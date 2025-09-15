@@ -98,7 +98,7 @@ public abstract class AbstractJAdESTestSignature
 		super.checkAdvancedSignatures(signatures);
 		
 		for (AdvancedSignature signature : signatures) {
-			assertTrue(signature instanceof JAdESSignature);
+            assertInstanceOf(JAdESSignature.class, signature);
 			JAdESSignature jadesSignature = (JAdESSignature) signature;
 
 			JWS jws = jadesSignature.getJws();
@@ -109,14 +109,15 @@ public abstract class AbstractJAdESTestSignature
 			} else {
 				assertTrue(Utils.isCollectionNotEmpty(etsiU));
 
-				if (getSignatureParameters().isBase64UrlEncodedEtsiUComponents()) {
+				Boolean isBase64UrlEncodedEtsiU = getSignatureParameters().isBase64UrlEncodedEtsiUComponents();
+				if (isBase64UrlEncodedEtsiU == null || isBase64UrlEncodedEtsiU) {
 					for (Object item : etsiU) {
-						assertTrue(item instanceof String);
+                        assertInstanceOf(String.class, item);
 						assertTrue(DSSJsonUtils.isBase64UrlEncoded((String) item));
 					}
 				} else {
 					for (Object item : etsiU) {
-						assertTrue(item instanceof Map);
+                        assertInstanceOf(Map.class, item);
 						assertEquals(1, ((Map<?, ?>) item).size());
 					}
 				}

@@ -20,7 +20,6 @@
  */
 package eu.europa.esig.dss.ws.signature.common;
 
-import eu.europa.esig.dss.signature.AbstractSignatureParameters;
 import eu.europa.esig.dss.asic.cades.ASiCWithCAdESSignatureParameters;
 import eu.europa.esig.dss.asic.cades.ASiCWithCAdESTimestampParameters;
 import eu.europa.esig.dss.asic.xades.ASiCWithXAdESSignatureParameters;
@@ -30,8 +29,10 @@ import eu.europa.esig.dss.cades.signature.CAdESTimestampParameters;
 import eu.europa.esig.dss.enumerations.ASiCContainerType;
 import eu.europa.esig.dss.enumerations.CommitmentType;
 import eu.europa.esig.dss.enumerations.CommitmentTypeEnum;
+import eu.europa.esig.dss.enumerations.JWSSerializationType;
 import eu.europa.esig.dss.enumerations.SignatureForm;
 import eu.europa.esig.dss.enumerations.TimestampContainerForm;
+import eu.europa.esig.dss.jades.JAdESSignatureParameters;
 import eu.europa.esig.dss.jades.JAdESTimestampParameters;
 import eu.europa.esig.dss.jades.signature.JAdESCounterSignatureParameters;
 import eu.europa.esig.dss.model.BLevelParameters;
@@ -50,6 +51,7 @@ import eu.europa.esig.dss.pades.PAdESTimestampParameters;
 import eu.europa.esig.dss.pades.SignatureFieldParameters;
 import eu.europa.esig.dss.pades.SignatureImageParameters;
 import eu.europa.esig.dss.pades.SignatureImageTextParameters;
+import eu.europa.esig.dss.signature.AbstractSignatureParameters;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.ws.converter.ColorConverter;
 import eu.europa.esig.dss.ws.converter.RemoteCertificateConverter;
@@ -65,6 +67,8 @@ import eu.europa.esig.dss.ws.signature.dto.parameters.RemoteTimestampParameters;
 import eu.europa.esig.dss.xades.XAdESSignatureParameters;
 import eu.europa.esig.dss.xades.XAdESTimestampParameters;
 import eu.europa.esig.dss.xades.signature.XAdESCounterSignatureParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
@@ -76,6 +80,8 @@ import java.util.stream.Collectors;
  * The abstract remote signature service
  */
 public abstract class AbstractRemoteSignatureServiceImpl {
+
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractRemoteSignatureServiceImpl.class);
 
 	/**
 	 * Default constructor
@@ -126,6 +132,13 @@ public abstract class AbstractRemoteSignatureServiceImpl {
 		return parameters;
 	}
 
+	/**
+	 * Creates parameters for a signature creation (not container)
+	 *
+	 * @param signatureForm {@link SignatureForm}
+	 * @param remoteParameters {@link RemoteSignatureParameters}
+	 * @return {@link SerializableSignatureParameters}
+	 */
 	protected SerializableSignatureParameters getSignatureParameters(SignatureForm signatureForm, RemoteSignatureParameters remoteParameters) {
 		switch (signatureForm) {
 			case XAdES:
@@ -139,6 +152,26 @@ public abstract class AbstractRemoteSignatureServiceImpl {
 			default:
 				throw new UnsupportedOperationException("Unsupported signature form : " + signatureForm);
 		}
+	}
+
+	/**
+	 * Creates parameters for a signature extension
+	 *
+	 * @param signatureForm {@link SignatureForm}
+	 * @param remoteParameters {@link RemoteSignatureParameters}
+	 * @return {@link SerializableSignatureParameters}
+	 */
+	protected SerializableSignatureParameters getExtensionParameters(SignatureForm signatureForm, RemoteSignatureParameters remoteParameters) {
+		SerializableSignatureParameters parameters = getSignatureParameters(signatureForm, remoteParameters);
+		if (SignatureForm.JAdES == signatureForm) {
+			JAdESSignatureParameters jadesParameters = (JAdESSignatureParameters) parameters;
+			if (remoteParameters.getJwsSerializationType() == null) {
+				LOG.info("No JAdES related signature parameters found within the configuration. " +
+						"Fallback to '{}' JwsSerializationType", JWSSerializationType.JSON_SERIALIZATION);
+				jadesParameters.setJwsSerializationType(JWSSerializationType.JSON_SERIALIZATION);
+			}
+		}
+		return parameters;
 	}
 
 	/**
@@ -180,9 +213,15 @@ public abstract class AbstractRemoteSignatureServiceImpl {
 		if (remoteParameters.getJwsSerializationType() != null) {
 			jadesParameters.setJwsSerializationType(remoteParameters.getJwsSerializationType());
 		}
-		jadesParameters.setSigDMechanism(remoteParameters.getSigDMechanism());
-		jadesParameters.setBase64UrlEncodedPayload(remoteParameters.isBase64UrlEncodedPayload());
-		jadesParameters.setBase64UrlEncodedEtsiUComponents(remoteParameters.isBase64UrlEncodedEtsiUComponents());
+		if (remoteParameters.getSigDMechanism() != null) {
+			jadesParameters.setSigDMechanism(remoteParameters.getSigDMechanism());
+		}
+		if (remoteParameters.isBase64UrlEncodedPayload() != null) {
+			jadesParameters.setBase64UrlEncodedPayload(remoteParameters.isBase64UrlEncodedPayload());
+		}
+		if (remoteParameters.isBase64UrlEncodedEtsiUComponents() != null) {
+			jadesParameters.setBase64UrlEncodedEtsiUComponents(remoteParameters.isBase64UrlEncodedEtsiUComponents());
+		}
 		return jadesParameters;
 	}
 

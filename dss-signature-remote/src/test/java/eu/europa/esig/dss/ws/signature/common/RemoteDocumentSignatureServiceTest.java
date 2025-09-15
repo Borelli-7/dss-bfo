@@ -504,6 +504,38 @@ class RemoteDocumentSignatureServiceTest extends AbstractRemoteSignatureServiceT
 	}
 
 	@Test
+	void testSignJAdESWithPlainEtsiUAndExtend() throws Exception {
+		RemoteSignatureParameters parameters = new RemoteSignatureParameters();
+		parameters.setSignatureLevel(SignatureLevel.JAdES_BASELINE_T);
+		parameters.setSigningCertificate(RemoteCertificateConverter.toRemoteCertificate(getSigningCert()));
+		parameters.setSignaturePackaging(SignaturePackaging.ENVELOPING);
+		parameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
+		parameters.setJwsSerializationType(JWSSerializationType.JSON_SERIALIZATION);
+		parameters.setBase64UrlEncodedEtsiUComponents(false);
+
+		DSSDocument fileToSign = new InMemoryDocument("HelloWorld".getBytes(), "helloWorld");
+		RemoteDocument toSignDocument = new RemoteDocument(Utils.toByteArray(fileToSign.openStream()), fileToSign.getName());
+		ToBeSignedDTO dataToSign = signatureService.getDataToSign(toSignDocument, parameters);
+		assertNotNull(dataToSign);
+
+		SignatureValue signatureValue = getToken().sign(DTOConverter.toToBeSigned(dataToSign), DigestAlgorithm.SHA256, getPrivateKeyEntry());
+		RemoteDocument signedDocument = signatureService.signDocument(toSignDocument, parameters,
+				new SignatureValueDTO(signatureValue.getAlgorithm(), signatureValue.getValue()));
+		assertNotNull(signedDocument);
+
+		InMemoryDocument iMD = new InMemoryDocument(signedDocument.getBytes());
+		validate(iMD, Collections.singletonList(fileToSign));
+
+		parameters = new RemoteSignatureParameters();
+
+		RemoteDocument extendedDocument = signatureService.extendDocument(signedDocument, SignatureProfile.BASELINE_LT, parameters);
+		assertNotNull(extendedDocument);
+
+		iMD = new InMemoryDocument(extendedDocument.getBytes());
+		validate(iMD, Collections.singletonList(fileToSign));
+	}
+
+	@Test
 	void testTimestamping() throws Exception {
 		RemoteTimestampParameters remoteTimestampParameters = new RemoteTimestampParameters();
 		remoteTimestampParameters.setDigestAlgorithm(DigestAlgorithm.SHA256);

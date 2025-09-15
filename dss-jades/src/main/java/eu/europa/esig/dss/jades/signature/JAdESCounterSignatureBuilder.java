@@ -97,7 +97,7 @@ public class JAdESCounterSignatureBuilder extends JAdESExtensionBuilder {
 		List<AdvancedSignature> signatures = documentValidator.getSignatures();
 
 		JAdESSignature jadesSignature = (JAdESSignature) extractSignatureById(signatures, parameters.getSignatureIdToCounterSign());
-		assertEtsiUComponentsConsistent(jadesSignature.getJws(), parameters.isBase64UrlEncodedEtsiUComponents());
+		assertEtsiUComponentsConsistent(jadesSignature.getJws(), parameters);
 
 		Object cSig = getCSig(counterSignature, parameters.getJwsSerializationType());
 		

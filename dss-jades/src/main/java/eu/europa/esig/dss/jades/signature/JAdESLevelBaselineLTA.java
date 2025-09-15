@@ -69,7 +69,7 @@ public class JAdESLevelBaselineLTA extends JAdESLevelBaselineLT {
 
 		for (AdvancedSignature signature : signatures) {
 			JAdESSignature jadesSignature = (JAdESSignature) signature;
-			assertEtsiUComponentsConsistent(jadesSignature.getJws(), params.isBase64UrlEncodedEtsiUComponents());
+			assertEtsiUComponentsConsistent(jadesSignature.getJws(), params);
 			assertExtendSignatureToLTAPossible(jadesSignature, params);
 
 			if (jadesSignature.hasLTAProfile()) {

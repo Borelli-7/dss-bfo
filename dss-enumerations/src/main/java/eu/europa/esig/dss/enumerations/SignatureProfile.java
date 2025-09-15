@@ -105,6 +105,22 @@ public enum SignatureProfile {
     /**
      * Represents an unknown or a not supported signature profile.
      */
-    NOT_ETSI
+    NOT_ETSI;
+
+    /**
+     * Returns the SignatureProfile based on the name (String)
+     *
+     * @param name
+     *            the signature profile's name to retrieve
+     * @return the SignatureProfile
+     */
+    public static SignatureProfile valueByName(String name) {
+        return valueOf(name.replace('-', '_'));
+    }
+
+    @Override
+    public String toString() {
+        return super.toString().replace('_', '-');
+    }
 
 }

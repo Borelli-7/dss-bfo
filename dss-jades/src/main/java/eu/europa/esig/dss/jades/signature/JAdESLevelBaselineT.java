@@ -152,7 +152,7 @@ public class JAdESLevelBaselineT extends JAdESExtensionBuilder implements JAdESL
 		for (AdvancedSignature signature : signaturesToExtend) {
 			JAdESSignature jadesSignature = (JAdESSignature) signature;
 
-			assertEtsiUComponentsConsistent(jadesSignature.getJws(), params.isBase64UrlEncodedEtsiUComponents());
+			assertEtsiUComponentsConsistent(jadesSignature.getJws(), params);
 
 			JAdESTimestampParameters signatureTimestampParameters = params.getSignatureTimestampParameters();
 			DigestAlgorithm timestampDigestAlgorithm = signatureTimestampParameters.getDigestAlgorithm();

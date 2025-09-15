@@ -253,7 +253,7 @@ As many as needed signature parameters may be provided:
 include::{sourcetestdir}/eu/europa/esig/dss/cookbook/example/sign/ExtendXAdESTest.java[tags=demoDocExtenderExtendManyParams]
 ----
 
-The `SignedDocumentValidator` will apply on augmentation only those parameters that match the type of the signature document. Other parameters will be ignored. If no signature parameters of suitable type are provided, the implementation will load the "empty" parameters internally.
+The `SignedDocumentExtender` will apply on augmentation only those parameters that match the type of the signature document. Other parameters will be ignored. If no signature parameters of suitable type are provided, the implementation will load the "empty" parameters internally.
 
 WARNING: The order of signature parameters definition is important, as the first service matching the signature type will be loaded, when available.
 

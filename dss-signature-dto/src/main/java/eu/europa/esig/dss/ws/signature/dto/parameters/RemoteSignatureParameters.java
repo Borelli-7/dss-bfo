@@ -102,12 +102,12 @@ public class RemoteSignatureParameters implements Serializable {
 	/**
 	 * JAdES base64url encoded payload
 	 */
-	private boolean base64UrlEncodedPayload = true;
+	private Boolean base64UrlEncodedPayload;
 
 	/**
 	 * JAdES base64url encoded etsiU components
 	 */
-	private boolean base64UrlEncodedEtsiUComponents = true;
+	private Boolean base64UrlEncodedEtsiUComponents;
 
 	/**
 	 * The digest algorithm used on signature creation.
@@ -342,7 +342,7 @@ public class RemoteSignatureParameters implements Serializable {
 	 *
 	 * @return whether a JAdES payload shall be base64url encoded
 	 */
-	public boolean isBase64UrlEncodedPayload() {
+	public Boolean isBase64UrlEncodedPayload() {
 		return base64UrlEncodedPayload;
 	}
 
@@ -352,7 +352,7 @@ public class RemoteSignatureParameters implements Serializable {
 	 *
 	 * @param base64UrlEncodedPayload  whether a JAdES payload shall be base64url encoded
 	 */
-	public void setBase64UrlEncodedPayload(boolean base64UrlEncodedPayload) {
+	public void setBase64UrlEncodedPayload(Boolean base64UrlEncodedPayload) {
 		this.base64UrlEncodedPayload = base64UrlEncodedPayload;
 	}
 
@@ -362,7 +362,7 @@ public class RemoteSignatureParameters implements Serializable {
 	 *
 	 * @return whether JAdES etsiU header components shall be base64url encoded
 	 */
-	public boolean isBase64UrlEncodedEtsiUComponents() {
+	public Boolean isBase64UrlEncodedEtsiUComponents() {
 		return base64UrlEncodedEtsiUComponents;
 	}
 
@@ -372,7 +372,7 @@ public class RemoteSignatureParameters implements Serializable {
 	 *
 	 * @param base64UrlEncodedEtsiUComponents whether JAdES etsiU header components shall be base64url encoded
 	 */
-	public void setBase64UrlEncodedEtsiUComponents(boolean base64UrlEncodedEtsiUComponents) {
+	public void setBase64UrlEncodedEtsiUComponents(Boolean base64UrlEncodedEtsiUComponents) {
 		this.base64UrlEncodedEtsiUComponents = base64UrlEncodedEtsiUComponents;
 	}
 

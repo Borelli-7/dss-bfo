@@ -57,8 +57,10 @@ import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -72,6 +74,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class DSSUtilsTest {
 
@@ -716,6 +720,71 @@ class DSSUtilsTest {
 
 		certificateToken = DSSUtils.loadCertificate(Files.newInputStream(certificateFile.toPath()));
 		assertNotNull(certificateToken);
+	}
+
+	@Test
+	void getKeyUsageBitsTest() {
+		X509Certificate x509Certificate = mock(X509Certificate.class);
+		when(x509Certificate.getSigAlgOID()).thenReturn(SignatureAlgorithm.RSA_SHA256.getOid());
+
+		CertificateToken certificateToken = new CertificateToken(x509Certificate);
+		assertNotNull(certificateToken);
+
+		when(x509Certificate.getKeyUsage()).thenReturn(null);
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.emptyList(), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[0]);
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.emptyList(), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[9]);
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.emptyList(), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[18]);
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.emptyList(), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.DIGITAL_SIGNATURE), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true, false });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.DIGITAL_SIGNATURE), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true, false, false, false, false, false, false, false, false });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.DIGITAL_SIGNATURE), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { false, false, false, false, false, false, false, false, false });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.emptyList(), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { false, false, false, false, false, false, false, false, true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.DECIPHER_ONLY), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { false, false, false, false, false, false, false, false, true, true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.DECIPHER_ONLY), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true, true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Arrays.asList(KeyUsageBit.DIGITAL_SIGNATURE, KeyUsageBit.NON_REPUDIATION), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { false, true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.NON_REPUDIATION), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true, true, false, false, false, false, false, false, false });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Arrays.asList(KeyUsageBit.DIGITAL_SIGNATURE, KeyUsageBit.NON_REPUDIATION), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true, true, true, true, true, true, true, true, true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Arrays.asList(KeyUsageBit.values()), certificateToken.getKeyUsageBits());
 	}
 
 }

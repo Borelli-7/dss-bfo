@@ -93,6 +93,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -870,6 +871,44 @@ public final class DSSASN1Utils {
 		}
 		Attributes attributes = new Attributes(encodableVector);
 		return attributes.getAttributes();
+	}
+
+	/**
+	 * Checks if the {@code attributeTable} is empty
+	 *
+	 * @param attributeTable {@link AttributeTable}
+	 * @return TRUE if the attribute table is empty, FALSE otherwise
+	 */
+	public static boolean isEmpty(AttributeTable attributeTable) {
+		return (attributeTable == null) || (attributeTable.size() == 0);
+	}
+
+	/**
+	 * Returns the current {@code originalAttributeTable} if instantiated, an empty {@code AttributeTable} if null
+	 *
+	 * @param originalAttributeTable {@link AttributeTable}
+	 * @return {@link AttributeTable}
+	 */
+	public static AttributeTable emptyIfNull(AttributeTable originalAttributeTable) {
+		if (originalAttributeTable != null) {
+			return originalAttributeTable;
+		}
+		return new AttributeTable(new Hashtable<ASN1ObjectIdentifier, Attribute>());
+	}
+
+	/**
+	 * Checks if the given attribute is an instance of the expected asn1ObjectIdentifier type
+	 *
+	 * @param attribute {@link Attribute} to check
+	 * @param asn1ObjectIdentifier {@link ASN1ObjectIdentifier} type to check against
+	 * @return TRUE if the attribute is of type asn1ObjectIdentifier, FALSE otherwise
+	 */
+	public static boolean isAttributeOfType(Attribute attribute, ASN1ObjectIdentifier asn1ObjectIdentifier) {
+		if (attribute == null) {
+			return false;
+		}
+		ASN1ObjectIdentifier objectIdentifier = attribute.getAttrType();
+		return asn1ObjectIdentifier.equals(objectIdentifier);
 	}
 	
 	/**

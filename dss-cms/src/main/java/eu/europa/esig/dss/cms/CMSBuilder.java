@@ -18,11 +18,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package eu.europa.esig.dss.cades.signature;
+package eu.europa.esig.dss.cms;
 
-import eu.europa.esig.dss.cms.CMS;
-import eu.europa.esig.dss.cms.CMSGenerator;
-import eu.europa.esig.dss.cms.CMSUtils;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.x509.CertificateToken;

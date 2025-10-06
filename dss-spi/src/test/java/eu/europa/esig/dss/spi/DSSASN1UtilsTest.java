@@ -37,6 +37,7 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.DERUniversalString;
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -54,6 +55,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Hashtable;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -342,6 +344,28 @@ class DSSASN1UtilsTest {
 		assertFalse(DSSASN1Utils.isAsn1Encoded(new Date().toString().getBytes()));
 		assertFalse(DSSASN1Utils.isAsn1Encoded(DSSUtils.EMPTY_BYTE_ARRAY));
 		assertFalse(DSSASN1Utils.isAsn1Encoded(null));
+	}
+
+	@Test
+	void isEmpty() {
+		assertTrue(DSSASN1Utils.isEmpty(null));
+		assertTrue(DSSASN1Utils.isEmpty(new AttributeTable(new Hashtable<>())));
+		Hashtable<ASN1ObjectIdentifier, Object> nonEmpty = new Hashtable<>();
+		nonEmpty.put(new ASN1ObjectIdentifier("1.2.3.4.5"), 4);
+		assertFalse(DSSASN1Utils.isEmpty(new AttributeTable(nonEmpty)));
+	}
+
+	@Test
+	void emptyIfNull() {
+		assertNotNull(DSSASN1Utils.emptyIfNull(null));
+
+		Hashtable<ASN1ObjectIdentifier, Object> nonEmpty = new Hashtable<>();
+		nonEmpty.put(new ASN1ObjectIdentifier("1.2.3.4.5"), 4);
+		AttributeTable attributeTable = new AttributeTable(nonEmpty);
+
+		AttributeTable emptyIfNull = DSSASN1Utils.emptyIfNull(attributeTable);
+		assertNotNull(emptyIfNull);
+		assertEquals(attributeTable, emptyIfNull);
 	}
 
 	@Test

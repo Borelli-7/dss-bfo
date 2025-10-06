@@ -21,13 +21,14 @@
 package eu.europa.esig.dss.cades.validation;
 
 import eu.europa.esig.dss.cades.CAdESUtils;
-import eu.europa.esig.dss.cades.SignedAssertion;
-import eu.europa.esig.dss.cades.SignedAssertions;
-import eu.europa.esig.dss.cades.SignerAttributeV2;
+import eu.europa.esig.dss.cms.asn1.SignedAssertion;
+import eu.europa.esig.dss.cms.asn1.SignedAssertions;
+import eu.europa.esig.dss.cms.asn1.SignerAttributeV2;
 import eu.europa.esig.dss.cades.validation.scope.CAdESSignatureScopeFinder;
 import eu.europa.esig.dss.cades.validation.timestamp.CAdESTimestampSource;
 import eu.europa.esig.dss.cms.CMS;
 import eu.europa.esig.dss.cms.CMSUtils;
+import eu.europa.esig.dss.cms.operator.PrecomputedDigestCalculatorProvider;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.DigestMatcherType;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;

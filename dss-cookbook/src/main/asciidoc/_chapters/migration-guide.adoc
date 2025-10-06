@@ -57,6 +57,90 @@ ValidationPolicy validationPolicy = ValidationPolicyLoader
     .create();
 ----
 
+a|CMS classes moved from `dss-cades` to `dss-cms`          a|
+[source,java]
+----
+import eu.europa.esig.dss.cades.CertifiedAttributesV2;
+import eu.europa.esig.dss.cades.SignedAssertion;
+import eu.europa.esig.dss.cades.SignedAssertions;
+import eu.europa.esig.dss.cades.SignerAttributeV2;
+import eu.europa.esig.dss.cades.signature.CMSBuilder;
+import eu.europa.esig.dss.cades.signature.CustomContentSigner;
+import eu.europa.esig.dss.cades.signature.CustomMessageDigestCalculatorProvider;
+import eu.europa.esig.dss.cades.validation.PrecomputedDigestCalculatorProvider;
+----
+                                                                     a|
+
+[source,java]
+----
+import eu.europa.esig.dss.cms.asn1.CertifiedAttributesV2;
+import eu.europa.esig.dss.cms.asn1.SignedAssertion;
+import eu.europa.esig.dss.cms.asn1.SignedAssertions;
+import eu.europa.esig.dss.cms.asn1.SignerAttributeV2;
+import eu.europa.esig.dss.cms.CMSBuilder;
+import eu.europa.esig.dss.cms.operator.CustomContentSigner;
+import eu.europa.esig.dss.cms.operator.CustomMessageDigestCalculatorProvider;
+import eu.europa.esig.dss.cms.operator.PrecomputedDigestCalculatorProvider;
+----
+
+a|`CAdESUtils` methods deprecation          a|
+[source,java]
+----
+import eu.europa.esig.dss.cades.CAdESUtils;
+import org.bouncycastle.asn1.cms.AttributeTable;
+
+AttributeTable attributeTable = ...
+
+boolean isEmpty = CAdESUtils.isEmpty(attributeTable);
+AttributeTable notNullAttributeTable = CAdESUtils.emptyIfNull(attributeTable);
+boolean isAttributeOfType = CAdESUtils.isAttributeOfType(attributeTable, asn1ObjectIdentifier);
+----
+                                                                     a|
+
+[source,java]
+----
+import eu.europa.esig.dss.spi.DSSASN1Utils;
+import org.bouncycastle.asn1.cms.AttributeTable;
+
+AttributeTable attributeTable = ...
+
+boolean isEmpty = DSSASN1Utils.isEmpty(attributeTable);
+AttributeTable notNullAttributeTable = DSSASN1Utils.emptyIfNull(attributeTable);
+boolean isAttributeOfType = DSSASN1Utils.isAttributeOfType(attributeTable, asn1ObjectIdentifier);
+----
+
+a|Simplified CMS generation          a|
+[source,java]
+----
+import eu.europa.esig.dss.cms.CMS;
+import eu.europa.esig.dss.cms.operator.CustomContentSigner;
+import eu.europa.esig.dss.cades.signature.CMSBuilder;
+import eu.europa.esig.dss.cades.signature.CMSSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.SignerInfoGenerator;
+
+CustomContentSigner customContentSigner = new CustomContentSigner(signatureAlgorithm.getJCEId(), signatureValue.getValue());
+SignerInfoGenerator signerInfoGenerator = new CMSSignerInfoGeneratorBuilder().build(contentToSign, parameters, customContentSigner);
+CMSBuilder cmsBuilder = new CMSBuilder();
+// configure CMSBuilder
+cmsBuilder.setOriginalCMS(originalCms);
+CMS cms = cmsBuilder.createCMS(signerInfoGenerator, contentToSign);
+----
+                                                                     a|
+
+[source,java]
+----
+import eu.europa.esig.dss.cms.CMS;
+import eu.europa.esig.dss.cms.operator.CustomContentSigner;
+import eu.europa.esig.dss.cms.operator.CustomContentSignerBuilder;
+import eu.europa.esig.dss.cades.signature.CMSForCAdESBuilderHelper;
+
+CustomContentSigner contentSigner = new CustomContentSignerBuilder().build(parameters.getSignatureAlgorithm(), signatureValue);
+CMSForCAdESBuilderHelper cmsBuilderHelper = new CMSForCAdESBuilderHelper(contentToSign, signatureParameters, contentSigner);
+// configure CMSForCAdESBuilderHelper
+cmsBuilderHelper.setOriginalCMS(originalCms);
+CMS cms = cmsBuilderHelper.createCMS();
+----
+
 |===
 
 [cols="2,5,5"]

@@ -141,6 +141,22 @@ cmsBuilderHelper.setOriginalCMS(originalCms);
 CMS cms = cmsBuilderHelper.createCMS();
 ----
 
+a|`AIACertificateSource` instantiation          a|
+[source,java]
+----
+import eu.europa.esig.dss.spi.x509.aia.AIACertificateSource;
+
+AIACertificateSource aiaCertificateSource = new AIACertificateSource(certificateToken, aiaSource);
+----
+                                                                     a|
+
+[source,java]
+----
+import eu.europa.esig.dss.spi.x509.aia.AIACertificateSource;
+
+AIACertificateSource aiaCertificateSource = AIACertificateSource.forCertificateToken(certificateToken, aiaSource);
+----
+
 |===
 
 [cols="2,5,5"]

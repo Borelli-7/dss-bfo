@@ -614,7 +614,7 @@ public class SignatureValidationContext implements ValidationContext {
 		// Request AIA only when no issuer has been found yet
 		if (issuerCertificateToken == null && aiaSource != null
 				&& token instanceof CertificateToken && !tokenIssuerMap.containsKey(token)) {
-			final AIACertificateSource aiaCertificateSource = new AIACertificateSource((CertificateToken) token, aiaSource);
+			final AIACertificateSource aiaCertificateSource = AIACertificateSource.forCertificateToken((CertificateToken) token, aiaSource);
 			issuerCertificateToken = aiaCertificateSource.getIssuerFromAIA();
 			addCertificateSource(aiaCertificateSources, aiaCertificateSource);
 		}

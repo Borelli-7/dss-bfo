@@ -51,7 +51,6 @@ import eu.europa.esig.dss.spi.x509.tsp.TimestampInclude;
 import eu.europa.esig.dss.spi.x509.tsp.TimestampToken;
 import eu.europa.esig.dss.spi.x509.tsp.TimestampedReference;
 import eu.europa.esig.dss.utils.Utils;
-import eu.europa.esig.dss.xades.DSSXMLUtils;
 import eu.europa.esig.dss.xades.XAdESSignatureUtils;
 import eu.europa.esig.dss.xades.definition.XAdESNamespace;
 import eu.europa.esig.dss.xades.definition.XAdESPath;
@@ -67,7 +66,9 @@ import eu.europa.esig.dss.xades.validation.XAdESSignature;
 import eu.europa.esig.dss.xades.validation.XAdESSignedDataObjectProperties;
 import eu.europa.esig.dss.xades.validation.XAdESUnsignedSigProperties;
 import eu.europa.esig.dss.xades.validation.scope.XAdESTimestampScopeFinder;
+import eu.europa.esig.dss.xml.common.definition.xmldsig.XMLDSigPath;
 import eu.europa.esig.dss.xml.utils.DOMDocument;
+import eu.europa.esig.dss.xml.utils.DomUtils;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -647,9 +648,15 @@ public class XAdESTimestampSource extends SignatureTimestampSource<XAdESSignatur
 
 	@Override
 	protected List<AdvancedSignature> getCounterSignatures(XAdESAttribute unsignedAttribute) {
-		XAdESSignature counterSignature = DSSXMLUtils.createCounterSignature(unsignedAttribute.getElement(), signature);
-		if (counterSignature != null) {
-			return Collections.singletonList(counterSignature);
+		final Node counterSignatureNode = DomUtils.getNode(unsignedAttribute.getElement(), XMLDSigPath.SIGNATURE_PATH);
+		if (counterSignatureNode != null) {
+			List<AdvancedSignature> counterSignatures = signature.getCounterSignatures();
+			for (AdvancedSignature counterSignature : counterSignatures) {
+				if (counterSignatureNode == ((XAdESSignature) counterSignature).getSignatureElement()) {
+					// NOTE: only one counter signature is allowed within the CounterSignature qualifying property
+					return Collections.singletonList(counterSignature);
+				}
+			}
 		}
 		return Collections.emptyList();
 	}

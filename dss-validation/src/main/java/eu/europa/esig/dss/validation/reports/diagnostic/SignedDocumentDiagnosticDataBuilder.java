@@ -1147,7 +1147,9 @@ public class SignedDocumentDiagnosticDataBuilder extends DiagnosticDataBuilder {
 				digestMatcher.setDataFound(entry.isFound());
 				digestMatcher.setDataIntact(entry.isIntact());
 				digestMatcher.setUri(entry.getUri());
-				digestMatcher.setDocumentName(entry.getDocumentName());
+				if (entry.getDocument() != null) {
+					digestMatcher.setDocumentName(entry.getDocument().getName());
+				}
 
 				digestMatchers.add(digestMatcher);
 			}

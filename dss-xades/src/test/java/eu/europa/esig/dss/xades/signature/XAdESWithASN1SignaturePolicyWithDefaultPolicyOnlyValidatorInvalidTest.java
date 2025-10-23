@@ -1,23 +1,3 @@
-/**
- * DSS - Digital Signature Services
- * Copyright (C) 2015 European Commission, provided under the CEF programme
- * <p>
- * This file is part of the "DSS - Digital Signature Services" project.
- * <p>
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * <p>
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
 package eu.europa.esig.dss.xades.signature;
 
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
@@ -28,8 +8,11 @@ import eu.europa.esig.dss.enumerations.SignaturePackaging;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.signature.DocumentSignatureService;
-import eu.europa.esig.dss.utils.Utils;
+import eu.europa.esig.dss.spi.policy.BasicASN1SignaturePolicyValidator;
+import eu.europa.esig.dss.spi.policy.DefaultSignaturePolicyValidatorLoader;
 import eu.europa.esig.dss.spi.policy.SignaturePolicyProvider;
+import eu.europa.esig.dss.utils.Utils;
+import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.xades.XAdESSignatureParameters;
 import eu.europa.esig.dss.xades.XAdESTimestampParameters;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class XAdESWithASN1SignaturePolicyTest extends AbstractXAdESTestSignature {
+class XAdESWithASN1SignaturePolicyWithDefaultPolicyOnlyValidatorInvalidTest extends AbstractXAdESTestSignature {
 
     private static final String HTTP_SPURI_TEST = "http://spuri.test";
     private static final String SIGNATURE_POLICY_ID = "1.2.3.4.5.6";
@@ -67,7 +50,7 @@ class XAdESWithASN1SignaturePolicyTest extends AbstractXAdESTestSignature {
         signaturePolicy.setDocumentationReferences(SIGNATURE_POLICY_DOCUMENTATION);
         signaturePolicy.setSpuri(HTTP_SPURI_TEST);
 
-        byte[] digest = POLICY_CONTENT.getDigestValue(DigestAlgorithm.SHA256);
+        byte[] digest = POLICY_CONTENT.getDigest(DigestAlgorithm.SHA256).getValue();
         signaturePolicy.setDigestAlgorithm(DigestAlgorithm.SHA256);
         signaturePolicy.setDigestValue(digest);
 
@@ -80,6 +63,14 @@ class XAdESWithASN1SignaturePolicyTest extends AbstractXAdESTestSignature {
         signatureParameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_B);
 
         service = new XAdESService(getOfflineCertificateVerifier());
+    }
+
+    @Override
+    protected SignedDocumentValidator getValidator(DSSDocument signedDocument) {
+        SignedDocumentValidator validator = super.getValidator(signedDocument);
+        validator.setSignaturePolicyValidatorLoader(DefaultSignaturePolicyValidatorLoader
+                .defaultOnlySignaturePolicyValidatorLoader(new BasicASN1SignaturePolicyValidator()));
+        return validator;
     }
 
     @Override
@@ -99,11 +90,11 @@ class XAdESWithASN1SignaturePolicyTest extends AbstractXAdESTestSignature {
         assertTrue(signature.isPolicyPresent());
         assertTrue(signature.isPolicyIdentified());
         assertTrue(signature.isPolicyDigestAlgorithmsEqual());
-        assertFalse(signature.isPolicyAsn1Processable()); // processed as binaries
-        assertTrue(signature.isPolicyDigestValid());
+        assertTrue(signature.isPolicyAsn1Processable());
+        assertFalse(signature.isPolicyDigestValid());
         assertEquals(DigestAlgorithm.SHA256, signature.getPolicyDigestAlgoAndValue().getDigestMethod());
         assertEquals("c5qCSaJLaB5LIoDhYFXSVLJraEp6x7wOWsojTMBQa70=", Utils.toBase64(signature.getPolicyDigestAlgoAndValue().getDigestValue()));
-        assertTrue(Utils.isStringEmpty(signature.getPolicyProcessingError()));
+        assertFalse(Utils.isStringEmpty(signature.getPolicyProcessingError()));
 
         List<String> policyTransforms = signature.getPolicyTransforms();
         assertEquals(0, policyTransforms.size());

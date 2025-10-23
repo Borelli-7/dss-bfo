@@ -926,6 +926,7 @@ The following implementation of a validator factory is present in DSS:
 * `XMLEvidenceRecordValidatorFactory`: loads `XMLEvidenceRecordValidator`, used for an RFC 6283 XMLERS Evidence Record (cf. <<R23>>) validation (delivered in `dss-evidence-record-xml` module);
 * `ANS1EvidenceRecordValidatorFactory`: loads `ASN1EvidenceRecordValidator`, used for an RFC 4998 Evidence Record Syntax (ERS) (cf. <<R24>>) validation (delivered in `dss-evidence-record-asn1` module).
 
+[[SignaturePolicyValidator]]
 ==== Signature Policy Validator
 
 During the signature validation process, the signature policy shall be validated to verify that the retrieved policy is the one that was used for the signature creation. This can be achieved by verifying whether the digest within the `SignaturePolicyIdentifier` signed attribute of the signature matches the computed digest of the retrieved signature policy document.
@@ -939,6 +940,29 @@ The interface `SignaturePolicyValidator` is used to validate a signature policy 
 * `NonASN1SignaturePolicyValidator`: validates a policy by digest computed on an original file's content;
 * `ZeroHashSignaturePolicyValidator`: validates a policy if "zero hash" value is defined in a signature (see <<R02>>);
 * `EmptySignaturePolicyValidator`: is proceeded if a policy file is not found or not accessible.
+
+==== Signature Policy Validator Loader
+
+Signature Policy Validator Loader is used to define a behavior of loading a relevant <<SignaturePolicyValidator>>, e.g. based on the signature and/or signature policy technical specifications.
+
+NOTE: This chapter represents advanced configurations of the validation process. Modifications within the parameter may result to a different validation result.
+
+The chosen `SignaturePolicyValidatorLoader` can be provided directly within a `DocumentValidator` used for the signature validation, as shown below:
+
+[source,java,indent=0]
+.Signature Policy Validator Loader definition
+----
+include::{sourcetestdir}/eu/europa/esig/dss/cookbook/example/snippets/SignedDocumentValidatorTest.java[tags=demo-sig-policy-loader]
+----
+
+Within the framework code, DSS delivers a `DefaultSignaturePolicyValidatorLoader` implementation, providing following options:
+
+* *Signature based* signature policy validator loader : the default configuration, that will process the signature policy according to the rules defined in the corresponded AdES signature specification. E.g. when used in XAdES signatures, hash of the signature policy will be computed based on the de-referenced content of the signature policy obtained after processing `SigPolicyId` and `ds:Transforms`, with the exception to the signature policy identifiers definitions explicitly stating the "SPDocDigestAsInSpecification" transform (then the hash computation will be signature policy specific). No configuration should be changed to achieve this behavior.
+* *Chosen validator first* signature policy validator loader : similar to the default configuration from above, but instead of applying the rules based on the signature format specification, it will use the provided "default" `SignaturePolicyValidator` to be loaded for a signature policy hash computation, unless a signature policy technical specification is explicitly specified by a "SPDocDigestAsInSpecification" transform or alternative parameter. The loader can be created by using the `DefaultSignaturePolicyValidatorLoader#defaultUnlessSpecifiedSignaturePolicyValidatorLoader` method.
+* *Chosen validator only* signature policy validator loader : this loader will always use the provided "default" `SignaturePolicyValidator`, in all signature configurations, if set. The loader can be created by using the `DefaultSignaturePolicyValidatorLoader#defaultOnlySignaturePolicyValidatorLoader` method.
+* *Signature Policy based* signature policy validator loader : will load the `SignaturePolicyValidator` implementation solely based on the technical specification of the signature policy, ignoring the signature specific requirements. The loader can be created by using the `DefaultSignaturePolicyValidatorLoader#policyBasedSignaturePolicyValidatorLoader` method.
+
+If a more advanced configuration of the `SignaturePolicyValidator` loading process is required, a custom implementation of the `SignaturePolicyValidatorLoader` can be created.
 
 === Format specificities
 

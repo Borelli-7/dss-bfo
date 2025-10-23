@@ -253,9 +253,12 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 		if (!zeroHash) {
 			final AlgorithmIdentifier digestAlgorithmIdentifier = hashAlgAndValue.getHashAlgorithm();
 			final String digestAlgorithmOID = digestAlgorithmIdentifier.getAlgorithm().getId();
-			final DigestAlgorithm digestAlgorithm = DigestAlgorithm.forOID(digestAlgorithmOID);
-
-			signaturePolicy.setDigest(new Digest(digestAlgorithm, digestValueBytes));
+			final DigestAlgorithm digestAlgorithm = getDigestAlgorithmForOID(digestAlgorithmOID);
+			if (digestAlgorithm != null) {
+				signaturePolicy.setDigest(new Digest(digestAlgorithm, digestValueBytes));
+			} else {
+				LOG.warn("Signature policy identifier hash is not found or wrongly encoded!");
+			}
 		}
 
 		final SigPolicyQualifiers sigPolicyQualifiers = sigPolicy.getSigPolicyQualifiers();
@@ -677,12 +680,7 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 
 		} else {
 			final String digestAlgOID = signerInformation.getDigestAlgOID();
-			try {
-				return DigestAlgorithm.forOID(digestAlgOID);
-			} catch (IllegalArgumentException e) {
-				LOG.warn("Unable to identify DigestAlgorithm for OID '{}'. Reason : {}", digestAlgOID, e.getMessage());
-				return null;
-			}
+			return getDigestAlgorithmForOID(digestAlgOID);
 		}
 	}
 
@@ -703,7 +701,7 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 			if (Utils.isArrayNotEmpty(encryptionAlgParams) && !Arrays.equals(DERNull.INSTANCE.getEncoded(), encryptionAlgParams)) {
 				RSASSAPSSparams param = RSASSAPSSparams.getInstance(encryptionAlgParams);
 				AlgorithmIdentifier pssHashAlgo = param.getHashAlgorithm();
-				return DigestAlgorithm.forOID(pssHashAlgo.getAlgorithm().getId());
+				return getDigestAlgorithmForOID(pssHashAlgo.getAlgorithm().getId());
 			}
 		} catch (IOException e) {
 			LOG.warn("Unable to analyze EncryptionAlgParams", e);
@@ -988,10 +986,14 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 	}
 	
 	private DigestAlgorithm getDigestAlgorithmForOID(String oid) {
+		if (Utils.isStringEmpty(oid)) {
+			LOG.warn("DigestAlgorithm cannot be defined with an empty OID! Skip processing.");
+			return null;
+		}
 		try {
 			return DigestAlgorithm.forOID(oid);
 		} catch (IllegalArgumentException e) {
-			LOG.warn("Not a digest algorithm {} : {}", oid, e.getMessage());
+			LOG.warn("Unable to identify DigestAlgorithm for OID '{}'. Reason : {}", oid, e.getMessage());
 			return null;
 		}
 	}

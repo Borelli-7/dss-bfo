@@ -633,7 +633,7 @@ public final class DSSXMLUtils {
 		final byte[] digestValue = getDigestValue(digestValueBase64);
 
 		if (digestAlgorithm == null || Utils.isArrayEmpty(digestValue)) {
-			LOG.warn("Unable to read object DigestAlgAndValueType (XMLDSig or XAdES 1.1.1)");
+			LOG.warn("Unable to read object DigestAlgAndValueType. An error occurred during processing.");
 			return null;
 
 		} else {
@@ -1149,10 +1149,9 @@ public final class DSSXMLUtils {
 		try {
 			final Digest digest = new Digest();
 			digest.setValue(reference.getDigestValue());
-			digest.setAlgorithm(
-					DigestAlgorithm.forXML(reference.getMessageDigestAlgorithm().getAlgorithmURI()));
+			digest.setAlgorithm(DigestAlgorithm.forXML(reference.getMessageDigestAlgorithm().getAlgorithmURI()));
 			return digest;
-		} catch (XMLSecurityException e) {
+		} catch (Exception e) {
 			LOG.warn("Unable to extract Digest from a reference with Id [{}] : {}",
 					reference.getId(), e.getMessage(), e);
 			return null;

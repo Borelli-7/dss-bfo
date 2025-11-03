@@ -1328,6 +1328,45 @@ public class DiagnosticData {
 	}
 
 	/**
+	 * Gets the remote website URL used to establish a TLS/SSL secure connection.
+	 * NOTE: This method is used on QWAC validation.
+	 *
+	 * @return {@link String}
+	 */
+	public String getWebsiteUrl() {
+		if (wrapped.getConnectionInfo() != null) {
+			return wrapped.getConnectionInfo().getUrl();
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the TLS Certificate Binding URL, when present (i.e. URL under the 'Link' response header)
+	 * NOTE: This method is used on QWAC validation.
+	 *
+	 * @return {@link String}
+	 */
+	public String getTLSCertificateBindingUrl() {
+		if (wrapped.getConnectionInfo() != null) {
+			return wrapped.getConnectionInfo().getTLSCertificateBindingUrl();
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the TLS Certificate Binding signature, when present (i.e. accessed from the URL under the 'Link' response header)
+	 * NOTE: This method is used on QWAC validation.
+	 *
+	 * @return {@link SignatureWrapper}
+	 */
+	public SignatureWrapper getTLSCertificateBindingSignature() {
+		if (wrapped.getConnectionInfo() != null && wrapped.getConnectionInfo().getTLSCertificateBindingSignature() != null) {
+			return new SignatureWrapper(wrapped.getConnectionInfo().getTLSCertificateBindingSignature());
+		}
+		return null;
+	}
+
+	/**
 	 * This method returns the JAXB model of the used trusted lists
 	 * 
 	 * @return the JAXB model of the used trusted lists

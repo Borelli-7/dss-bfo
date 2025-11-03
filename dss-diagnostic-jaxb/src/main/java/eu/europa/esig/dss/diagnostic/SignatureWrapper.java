@@ -45,6 +45,7 @@ import eu.europa.esig.dss.enumerations.CertificateOrigin;
 import eu.europa.esig.dss.enumerations.CertificateRefOrigin;
 import eu.europa.esig.dss.enumerations.DigestMatcherType;
 import eu.europa.esig.dss.enumerations.EndorsementType;
+import eu.europa.esig.dss.enumerations.JWSSerializationType;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.TimestampType;
 
@@ -182,6 +183,18 @@ public class SignatureWrapper extends AbstractSignatureWrapper {
 	 */
 	public Date getClaimedSigningTime() {
 		return signature.getClaimedSigningTime();
+	}
+
+	/**
+	 * Gets the expiration time of the signature.
+	 * NOTE: The value is currently used only for the ETSI TS 119 411-5 TLS Certificate Binding signature.
+	 * The maximum effective expiry time is whichever is soonest of this field, the longest-lived TLS certificate
+	 * identified in the sigD member payload (below), or the notAfter time of the signing certificate.
+	 *
+	 * @return {@link Date}
+	 */
+	public Date getExpirationTime() {
+		return signature.getExpirationTime();
 	}
 
 	/**
@@ -452,6 +465,16 @@ public class SignatureWrapper extends AbstractSignatureWrapper {
 	 */
 	public String getSignatureType() {
 		return signature.getSignatureType();
+	}
+
+	/**
+	 * Gets the JWS Serialization type
+	 * NOTE: JAdES only
+	 *
+	 * @return {@link JWSSerializationType}
+	 */
+	public JWSSerializationType getJWSSerializationType() {
+		return signature.getJWSSerializationType();
 	}
 
 	/**

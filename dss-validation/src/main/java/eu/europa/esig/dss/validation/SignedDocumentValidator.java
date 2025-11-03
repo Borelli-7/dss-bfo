@@ -465,7 +465,7 @@ public abstract class SignedDocumentValidator implements DocumentValidator {
 	 *
 	 * @return {@link SignedDocumentDiagnosticDataBuilder}
 	 */
-	protected SignedDocumentDiagnosticDataBuilder initializeDiagnosticDataBuilder() {
+	public SignedDocumentDiagnosticDataBuilder initializeDiagnosticDataBuilder() {
 		// default implementation
 		return new SignedDocumentDiagnosticDataBuilder();
 	}

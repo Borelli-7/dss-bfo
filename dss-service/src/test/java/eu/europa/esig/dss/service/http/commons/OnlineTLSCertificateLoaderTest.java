@@ -31,14 +31,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class SSLCertificateLoaderTest {
+class OnlineTLSCertificateLoaderTest {
 	
 	@Test
 	void test() throws Exception {
 		String url = "https://wikipedia.org";
 
-		SSLCertificateLoader sslCertificateDataLoader = new SSLCertificateLoader();
-		List<CertificateToken> certificateTokens = sslCertificateDataLoader.getCertificates(url);
+		OnlineTLSCertificateLoader sslCertificateDataLoader = new OnlineTLSCertificateLoader();
+		List<CertificateToken> certificateTokens = sslCertificateDataLoader.getTLSCertificates(url);
 		assertTrue(Utils.isCollectionNotEmpty(certificateTokens));
 	}
 	
@@ -46,8 +46,8 @@ class SSLCertificateLoaderTest {
 	void wrongUrl() throws Exception {
 		String url = "https://wrong.url";
 
-		SSLCertificateLoader sslCertificateDataLoader = new SSLCertificateLoader();
-		Exception exception = assertThrows(DSSExternalResourceException.class, () -> sslCertificateDataLoader.getCertificates(url));
+		OnlineTLSCertificateLoader sslCertificateDataLoader = new OnlineTLSCertificateLoader();
+		Exception exception = assertThrows(DSSExternalResourceException.class, () -> sslCertificateDataLoader.getTLSCertificates(url));
 		assertTrue(exception.getMessage().contains("Unable to process GET call for url [https://wrong.url]"));
 	}
 	
@@ -55,8 +55,8 @@ class SSLCertificateLoaderTest {
 	void urlWithSpaces() throws Exception {
 		String url = " https://wikipedia.org  ";
 
-		SSLCertificateLoader sslCertificateDataLoader = new SSLCertificateLoader();
-		List<CertificateToken> certificateTokens = sslCertificateDataLoader.getCertificates(url);
+		OnlineTLSCertificateLoader sslCertificateDataLoader = new OnlineTLSCertificateLoader();
+		List<CertificateToken> certificateTokens = sslCertificateDataLoader.getTLSCertificates(url);
 		assertTrue(Utils.isCollectionNotEmpty(certificateTokens));
 	}
 	
@@ -64,8 +64,8 @@ class SSLCertificateLoaderTest {
 	void ldapUrl() throws Exception {
 		String url = "ldap://crl-source.hn/o=Hello";
 
-		SSLCertificateLoader sslCertificateDataLoader = new SSLCertificateLoader();
-		Exception exception = assertThrows(UnsupportedOperationException.class, () -> sslCertificateDataLoader.getCertificates(url));
+		OnlineTLSCertificateLoader sslCertificateDataLoader = new OnlineTLSCertificateLoader();
+		Exception exception = assertThrows(UnsupportedOperationException.class, () -> sslCertificateDataLoader.getTLSCertificates(url));
 		assertEquals("DSS framework supports only HTTP(S) certificate extraction. Obtained URL : 'ldap://crl-source.hn/o=Hello'", exception.getMessage());
 	}
 	
@@ -73,8 +73,8 @@ class SSLCertificateLoaderTest {
 	void emptyUrl() throws Exception {
 		String url = " ";
 
-		SSLCertificateLoader sslCertificateDataLoader = new SSLCertificateLoader();
-		Exception exception = assertThrows(UnsupportedOperationException.class, () -> sslCertificateDataLoader.getCertificates(url));
+		OnlineTLSCertificateLoader sslCertificateDataLoader = new OnlineTLSCertificateLoader();
+		Exception exception = assertThrows(UnsupportedOperationException.class, () -> sslCertificateDataLoader.getTLSCertificates(url));
 		assertEquals("DSS framework supports only HTTP(S) certificate extraction. Obtained URL : ' '", exception.getMessage());
 	}
 

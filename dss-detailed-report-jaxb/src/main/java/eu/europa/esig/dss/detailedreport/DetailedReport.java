@@ -22,6 +22,7 @@ package eu.europa.esig.dss.detailedreport;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificate;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificateQualificationProcess;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlChainItem;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraintsConclusion;
@@ -863,11 +864,14 @@ public class DetailedReport {
 	private CertificateQualification getCertificateQualificationAtTime(ValidationTime validationTime, String certificateId) {
 		XmlCertificate certificate = getXmlCertificateById(certificateId);
 		if (certificate != null) {
-			List<XmlValidationCertificateQualification> validationCertificateQualifications = certificate.getValidationCertificateQualification();
-			if (validationCertificateQualifications != null) {
-				for (XmlValidationCertificateQualification validationCertificateQualification : validationCertificateQualifications) {
-					if (validationTime == validationCertificateQualification.getValidationTime()) {
-						return validationCertificateQualification.getCertificateQualification();
+			XmlCertificateQualificationProcess certificateQualificationProcess = certificate.getCertificateQualificationProcess();
+			if (certificateQualificationProcess != null) {
+				List<XmlValidationCertificateQualification> validationCertificateQualifications = certificateQualificationProcess.getValidationCertificateQualification();
+				if (validationCertificateQualifications != null) {
+					for (XmlValidationCertificateQualification validationCertificateQualification : validationCertificateQualifications) {
+						if (validationTime == validationCertificateQualification.getValidationTime()) {
+							return validationCertificateQualification.getCertificateQualification();
+						}
 					}
 				}
 			}

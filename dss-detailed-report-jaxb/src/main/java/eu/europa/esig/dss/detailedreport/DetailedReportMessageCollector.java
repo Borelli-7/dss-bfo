@@ -22,6 +22,7 @@ package eu.europa.esig.dss.detailedreport;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificate;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificateQualificationProcess;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraintsConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlEvidenceRecord;
@@ -346,13 +347,18 @@ public class DetailedReportMessageCollector {
 	}
 
 	private List<Message> collectCertificateQualificationAtTime(MessageType type, XmlCertificate xmlCertificate, ValidationTime validationTime) {
-		for (XmlValidationCertificateQualification certificateQualification : xmlCertificate.getValidationCertificateQualification()) {
-			if (validationTime.equals(certificateQualification.getValidationTime())) {
-				return getMessages(type,certificateQualification);
+		if (xmlCertificate != null) {
+			XmlCertificateQualificationProcess certificateQualificationProcess = xmlCertificate.getCertificateQualificationProcess();
+			if (certificateQualificationProcess != null) {
+				for (XmlValidationCertificateQualification certificateQualification : certificateQualificationProcess.getValidationCertificateQualification()) {
+					if (validationTime.equals(certificateQualification.getValidationTime())) {
+						return getMessages(type,certificateQualification);
+					}
+				}
 			}
 		}
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("The validation at time '{}' is not found or not performed!", validationTime);
+			LOG.debug("The certificate qualification validation at time '{}' is not found or not performed!", validationTime);
 		}
 		return Collections.emptyList();
 	}

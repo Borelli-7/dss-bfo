@@ -579,6 +579,7 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 		checkTrustServices(diagnosticData);
 		checkContainerInfo(diagnosticData);
 		checkPDFAInfo(diagnosticData);
+		checkJWSSerializationType(diagnosticData);
 
 		checkNoDuplicateSignatures(diagnosticData);
 		checkNoDuplicateCompleteCertificates(diagnosticData);
@@ -1631,6 +1632,12 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 	protected void checkPDFAInfo(DiagnosticData diagnosticData) {
 		if (diagnosticData.isPDFAValidationPerformed()) {
 			assertNotNull(diagnosticData.getPDFAProfileId());
+		}
+	}
+
+	protected void checkJWSSerializationType(DiagnosticData diagnosticData) {
+		for (SignatureWrapper signatureWrapper : diagnosticData.getSignatures()) {
+			assertNull(signatureWrapper.getJWSSerializationType());
 		}
 	}
 

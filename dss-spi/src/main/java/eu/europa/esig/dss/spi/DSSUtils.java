@@ -1284,4 +1284,32 @@ public final class DSSUtils {
 		return false;
 	}
 
+	/**
+	 * Gets host name based on the given URL string.
+	 * E.g. for "ldap://ldap.infonotary.com/dc=identity-ca,dc=infonotary,dc=com" returns -> "ldap.infonotary.com"
+	 *
+	 * @param urlString {@link String}
+	 * @return {@link String} corresponding to a host name
+	 */
+	public static String getHost(String urlString) {
+		if (Utils.isStringEmpty(urlString)) {
+			return "";
+		}
+
+		int doubleslash = urlString.indexOf("//");
+		if (doubleslash == -1) {
+			doubleslash = 0;
+		} else {
+			doubleslash += 2;
+		}
+
+		int end = urlString.indexOf('/', doubleslash);
+		end = end >= 0 ? end : urlString.length();
+
+		int port = urlString.indexOf(':', doubleslash);
+		end = (port > 0 && port < end) ? port : end;
+
+		return urlString.substring(doubleslash, end);
+	}
+
 }

@@ -12,6 +12,7 @@
 			<xs:element name="ValidationDate" type="xs:dateTime" />
 			<xs:element name="ContainerInfo" type="ContainerInfo" minOccurs="0" />
 			<xs:element name="PDFAInfo" type="PDFAInfo" minOccurs="0" />
+			<xs:element name="ConnectionInfo" type="ConnectionInfo" minOccurs="0" />
 			<xs:element name="Signatures" minOccurs="0">
 				<xs:complexType>
 					<xs:sequence>
@@ -133,6 +134,15 @@
 		</xs:sequence>
 		<xs:attribute name="compliant" type="xs:boolean" use="required" />
 	</xs:complexType>
+
+	<xs:complexType name="ConnectionInfo">
+		<xs:sequence>
+			<xs:element name="TLSCertificate" type="xs:IDREF" minOccurs="0" />
+			<xs:element name="TLSCertificateBindingUrl" type="xs:string" minOccurs="0" />
+			<xs:element name="TLSCertificateBindingSignature" type="xs:IDREF" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute name="url" type="xs:string" use="required" />
+	</xs:complexType>
 	
 	<xs:complexType name="AbstractToken" abstract="true">
 		<xs:attribute name="Id" type="xs:ID" use="required" />
@@ -147,7 +157,9 @@
 					<xs:element name="SignatureFilename" type="xs:string" />
 					<xs:element name="ErrorMessage" type="xs:string" minOccurs="0" />
 					<xs:element name="ClaimedSigningTime" type="xs:dateTime" minOccurs="0" />
+					<xs:element name="ExpirationTime" type="xs:dateTime" minOccurs="0" />
 					<xs:element name="SignatureFormat" type="SignatureFormat" />
+					<xs:element name="JWSSerializationType" type="JWSSerializationType" minOccurs="0" /> <!-- JAdES only -->
 					<xs:element name="SignatureType" type="xs:string" minOccurs="0" /> <!-- JAdES only -->
 		
 					<xs:element name="StructuralValidation"	type="StructuralValidation" minOccurs="0" />
@@ -882,6 +894,14 @@
 			<xs:enumeration value="JAdES-BASELINE-LT" />
 			<xs:enumeration value="JAdES-BASELINE-LTA" />
 			<xs:enumeration value="UNKNOWN" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="JWSSerializationType" final="restriction">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="COMPACT_SERIALIZATION" />
+			<xs:enumeration value="JSON_SERIALIZATION" />
+			<xs:enumeration value="FLATTENED_JSON_SERIALIZATION" />
 		</xs:restriction>
 	</xs:simpleType>
 	

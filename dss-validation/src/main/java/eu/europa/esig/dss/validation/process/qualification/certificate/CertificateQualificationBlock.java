@@ -20,7 +20,7 @@
  */
 package eu.europa.esig.dss.validation.process.qualification.certificate;
 
-import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificate;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificateQualificationProcess;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlTLAnalysis;
 import eu.europa.esig.dss.diagnostic.CertificateWrapper;
@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
  * processing its validation at issuance and validation time
  *
  */
-public class CertificateQualificationBlock extends Chain<XmlCertificate> {
+public class CertificateQualificationBlock extends Chain<XmlCertificateQualificationProcess> {
 
 	/** Certificate's BasicBuildingBlock's conclusion */
 	private final XmlConclusion buildingBlocksConclusion;
@@ -76,7 +76,7 @@ public class CertificateQualificationBlock extends Chain<XmlCertificate> {
 	public CertificateQualificationBlock(I18nProvider i18nProvider, XmlConclusion buildingBlocksConclusion,
 										 Date validationTime, CertificateWrapper signingCertificate,
 										 List<XmlTLAnalysis> tlAnalysis) {
-		super(i18nProvider, new XmlCertificate());
+		super(i18nProvider, new XmlCertificateQualificationProcess());
 		Objects.requireNonNull(validationTime, "The validationTime shall be provided!");
 		Objects.requireNonNull(signingCertificate, "The signingCertificate shall be provided!");
 		
@@ -96,7 +96,7 @@ public class CertificateQualificationBlock extends Chain<XmlCertificate> {
 	@Override
 	protected void initChain() {
 		// cover incomplete cert chain / expired/ revoked certs
-		ChainItem<XmlCertificate> item = firstItem = isAcceptableBuildingBlockConclusion(buildingBlocksConclusion);
+		ChainItem<XmlCertificateQualificationProcess> item = firstItem = isAcceptableBuildingBlockConclusion(buildingBlocksConclusion);
 
 		if (signingCertificate.isTrustedListReached()) {
 
@@ -109,7 +109,7 @@ public class CertificateQualificationBlock extends Chain<XmlCertificate> {
 			for (String lotlURL : listOfTrustedListUrls) {
 				XmlTLAnalysis lotlAnalysis = getTlAnalysis(lotlURL);
 				if (lotlAnalysis != null) {
-					AcceptableListOfTrustedListsCheck<XmlCertificate> acceptableLOTL = isAcceptableLOTL(lotlAnalysis);
+					AcceptableListOfTrustedListsCheck<XmlCertificateQualificationProcess> acceptableLOTL = isAcceptableLOTL(lotlAnalysis);
 					item = item.setNextItem(acceptableLOTL);
 					if (acceptableLOTL.process()) {
 						acceptableLOTLUrls.add(lotlURL);
@@ -127,7 +127,7 @@ public class CertificateQualificationBlock extends Chain<XmlCertificate> {
 				for (String tlURL : trustedListUrls) {
 					XmlTLAnalysis currentTL = getTlAnalysis(tlURL);
 					if (currentTL != null) {
-						AcceptableTrustedListCheck<XmlCertificate> acceptableTL = isAcceptableTL(currentTL);
+						AcceptableTrustedListCheck<XmlCertificateQualificationProcess> acceptableTL = isAcceptableTL(currentTL);
 						item = item.setNextItem(acceptableTL);
 						if (acceptableTL.process()) {
 							acceptableTLUrls.add(tlURL);
@@ -185,20 +185,20 @@ public class CertificateQualificationBlock extends Chain<XmlCertificate> {
 		}
 	}
 
-	private AcceptableListOfTrustedListsCheck<XmlCertificate> isAcceptableLOTL(XmlTLAnalysis xmlLOTLAnalysis) {
+	private AcceptableListOfTrustedListsCheck<XmlCertificateQualificationProcess> isAcceptableLOTL(XmlTLAnalysis xmlLOTLAnalysis) {
 		return new AcceptableListOfTrustedListsCheck<>(i18nProvider, result, xmlLOTLAnalysis, getWarnLevelRule());
 	}
 
-	private AcceptableTrustedListCheck<XmlCertificate> isAcceptableTL(XmlTLAnalysis xmlTLAnalysis) {
+	private AcceptableTrustedListCheck<XmlCertificateQualificationProcess> isAcceptableTL(XmlTLAnalysis xmlTLAnalysis) {
 		return new AcceptableTrustedListCheck<>(i18nProvider, result, xmlTLAnalysis, getWarnLevelRule());
 	}
 
-	private ChainItem<XmlCertificate> isAcceptableTLPresent(Set<String> acceptableUrls) {
+	private ChainItem<XmlCertificateQualificationProcess> isAcceptableTLPresent(Set<String> acceptableUrls) {
 		return new AcceptableTrustedListPresenceCheck<>(i18nProvider, result, acceptableUrls, getFailLevelRule());
 	}
 
-	private ChainItem<XmlCertificate> isAcceptableBuildingBlockConclusion(XmlConclusion buildingBlocksConclusion) {
-		return new AcceptableBuildingBlockConclusionCheck(i18nProvider, result, buildingBlocksConclusion, getWarnLevelRule());
+	private ChainItem<XmlCertificateQualificationProcess> isAcceptableBuildingBlockConclusion(XmlConclusion buildingBlocksConclusion) {
+		return new AcceptableBuildingBlockConclusionCheck<>(i18nProvider, result, buildingBlocksConclusion, getWarnLevelRule());
 	}
 
 }

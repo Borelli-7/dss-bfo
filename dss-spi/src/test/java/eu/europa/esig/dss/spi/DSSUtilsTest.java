@@ -787,4 +787,22 @@ class DSSUtilsTest {
 		assertEquals(Arrays.asList(KeyUsageBit.values()), certificateToken.getKeyUsageBits());
 	}
 
+	@Test
+	void getHostTest() {
+		assertEquals("", DSSUtils.getHost(null));
+		assertEquals("", DSSUtils.getHost(""));
+		assertEquals("127.0.0.1", DSSUtils.getHost("127.0.0.1"));
+		assertEquals("127.0.0.1", DSSUtils.getHost("http://127.0.0.1"));
+		assertEquals("127.0.0.1", DSSUtils.getHost("http://127.0.0.1/hello"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("crl-source.hn"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("crl-source.hn/o=Hello"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("http://crl-source.hn/hello/"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("https://crl-source.hn/o=Hello"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("ldap://crl-source.hn/o=Hello"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("ldap://crl-source.hn:8080/o=Hello"));
+		assertEquals("www.crl-source.hn", DSSUtils.getHost("ldap://www.crl-source.hn/o=Hello"));
+		assertEquals("ep.nbusr.sk", DSSUtils.getHost("ldap://ep.nbusr.sk/cn%3dKCA%20NBU%20SR%203,ou%3dSIBEP,o%3dNarodny%20bezpecnostny%20urad,l%3dBratislava,c%3dSK?certificateRevocationList"));
+		assertEquals("", DSSUtils.getHost("ldap:///cn%3dKCA%20NBU%20SR%203,ou%3dSIBEP,o%3dNarodny%20bezpecnostny%20urad,l%3dBratislava,c%3dSK?certificateRevocationList"));
+	}
+
 }

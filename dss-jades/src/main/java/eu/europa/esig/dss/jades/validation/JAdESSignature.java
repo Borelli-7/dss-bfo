@@ -171,6 +171,24 @@ public class JAdESSignature extends DefaultAdvancedSignature {
 	}
 
 	/**
+	 * This method returns a value of 'exp' protected header, when defined.
+	 * The field is used within ETSI TS 119 411-5 TLS Certificate Binding signatures and
+	 * contains the expiry date of the binding. The maximum effective expiry time is whichever
+	 * is soonest of this field, the longest-lived TLS certificate identified in the sigD member payload,
+	 * or the notAfter time of the signing certificate. The value shall be encoded as specified in IETF RFC 7519.
+	 *
+	 * @return {@link Date}
+	 */
+	public Date getExpirationTime() {
+		Number exp = jws.getProtectedHeaderValueAsNumber(JAdESHeaderParameterNames.EXP);
+		if (exp != null) {
+			long timeValueInMilliseconds = DSSJsonUtils.getTimeValueInMilliseconds(exp.longValue());
+			return DSSJsonUtils.getDate(timeValueInMilliseconds);
+		}
+		return null;
+	}
+
+	/**
 	 * Checks if the JAdES Signature is a detached (contains 'sigD' dictionary)
 	 * 
 	 * @return TRUE if the signature is detached, FALSE otherwise

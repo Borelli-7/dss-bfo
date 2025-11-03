@@ -28,6 +28,7 @@ import eu.europa.esig.dss.detailedreport.DetailedReport;
 import eu.europa.esig.dss.detailedreport.DetailedReportFacade;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificate;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificateQualificationProcess;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraint;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlDetailedReport;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlStatus;
@@ -365,7 +366,8 @@ class CertificateProcessExecutorTest extends AbstractTestValidationExecutor {
 
 		DetailedReport detailedReport = reports.getDetailedReport();
 		XmlCertificate certificate = detailedReport.getXmlCertificateById(certificateId);
-		List<XmlValidationCertificateQualification> validationCertQual = certificate.getValidationCertificateQualification();
+		XmlCertificateQualificationProcess certificateQualificationProcess = certificate.getCertificateQualificationProcess();
+		List<XmlValidationCertificateQualification> validationCertQual = certificateQualificationProcess.getValidationCertificateQualification();
 		assertEquals(2, validationCertQual.size());
 
 		for (XmlValidationCertificateQualification certQual : validationCertQual) {
@@ -558,8 +560,9 @@ class CertificateProcessExecutorTest extends AbstractTestValidationExecutor {
 
 		DetailedReport detailedReport = reports.getDetailedReport();
 		XmlCertificate certificate = detailedReport.getCertificates().get(0);
-		List<XmlValidationCertificateQualification> validationCertificateQualification = certificate.getValidationCertificateQualification();
-		for (XmlValidationCertificateQualification xmlValidationCertificateQualification : validationCertificateQualification) {
+		XmlCertificateQualificationProcess certificateQualificationProcess = certificate.getCertificateQualificationProcess();
+		List<XmlValidationCertificateQualification> validationCertQual = certificateQualificationProcess.getValidationCertificateQualification();
+		for (XmlValidationCertificateQualification xmlValidationCertificateQualification : validationCertQual) {
 			assertEquals(Indication.FAILED, xmlValidationCertificateQualification.getConclusion().getIndication());
 		}
 	}
@@ -926,11 +929,12 @@ class CertificateProcessExecutorTest extends AbstractTestValidationExecutor {
 
 		DetailedReport detailedReport = reports.getDetailedReport();
 		XmlCertificate xmlCertificate = detailedReport.getXmlCertificateById(certId);
-		List<XmlValidationCertificateQualification> validationCertificateQualification = xmlCertificate.getValidationCertificateQualification();
-		assertEquals(2, validationCertificateQualification.size());
+		XmlCertificateQualificationProcess certificateQualificationProcess = xmlCertificate.getCertificateQualificationProcess();
+		List<XmlValidationCertificateQualification> validationCertQual = certificateQualificationProcess.getValidationCertificateQualification();
+		assertEquals(2, validationCertQual.size());
 
 		XmlValidationCertificateQualification validationCertificateQualificationAtIssuanceTime = null;
-		for (XmlValidationCertificateQualification validationCertificate : validationCertificateQualification) {
+		for (XmlValidationCertificateQualification validationCertificate : validationCertQual) {
 			if (ValidationTime.CERTIFICATE_ISSUANCE_TIME.equals(validationCertificate.getValidationTime())) {
 				validationCertificateQualificationAtIssuanceTime = validationCertificate;
 				break;

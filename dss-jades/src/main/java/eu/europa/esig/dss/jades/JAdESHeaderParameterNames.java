@@ -483,4 +483,13 @@ public final class JAdESHeaderParameterNames {
 	 */
 	public static final String IAT = "iat";
 
+	/**
+	 * ETSI TS 119 411-5, Annex B (normative): TLS Certificate Binding Profile.
+	 * This field contains the expiry date of the binding. The maximum effective expiry time is whichever
+	 * is soonest of this field, the longest-lived TLS certificate identified in the sigD member payload
+	 * (below), or the notAfter time of the signing certificate. The value shall be encoded as specified in
+	 * IETF RFC 7519.
+	 */
+	public static final String EXP = "exp";
+
 }

@@ -168,6 +168,7 @@
             <IssuerSerialMatch Level="WARN" />
             <KeyIdentifierMatch Level="WARN" />
             <SigningTime Level="FAIL" />
+            <SigningTimeInCertRange Level="FAIL" />
             <MessageDigestOrSignedPropertiesPresent Level="FAIL" />
             <EllipticCurveKeySize Level="WARN" />
             <!--		<ContentType Level="FAIL" value="1.2.840.113549.1.7.1" />
@@ -307,6 +308,7 @@
             <IssuerSerialMatch Level="WARN" />
             <KeyIdentifierMatch Level="WARN" />
             <SigningTime Level="FAIL" />
+            <SigningTimeInCertRange Level="FAIL" />
             <MessageDigestOrSignedPropertiesPresent Level="FAIL" />
             <EllipticCurveKeySize Level="WARN" />
             <!--		<ContentType Level="FAIL" value="1.2.840.113549.1.7.1" />

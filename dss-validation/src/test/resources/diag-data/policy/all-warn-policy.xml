@@ -175,6 +175,7 @@
 			<IssuerSerialMatch Level="WARN" />
 			<KeyIdentifierMatch Level="WARN" />
 			<SigningTime Level="WARN" />
+			<SigningTimeInCertRange Level="WARN" />
 			<ContentType Level="WARN" value="1.2.840.113549.1.7.1" />
 			<ContentHints Level="WARN" value="*" />
 			<MessageDigestOrSignedPropertiesPresent Level="WARN" />
@@ -312,6 +313,7 @@
 			<IssuerSerialMatch Level="WARN" />
 			<KeyIdentifierMatch Level="WARN" />
 			<SigningTime Level="WARN" />
+			<SigningTimeInCertRange Level="WARN" />
 			<ContentType Level="WARN" value="1.2.840.113549.1.7.1" />
 			<ContentHints Level="WARN" value="*" />
 			<MessageDigestOrSignedPropertiesPresent Level="WARN" />

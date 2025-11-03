@@ -286,11 +286,26 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 		return null;
 	}
 
+	@Deprecated
 	@Override
 	public LevelRule getSigningDurationRule(Context context) {
+		return getSigningTimeConstraint(context);
+	}
+
+	@Override
+	public LevelRule getSigningTimeConstraint(Context context) {
 		SignedAttributesConstraints signedAttributeConstraints = getSignedAttributeConstraints(context);
 		if (signedAttributeConstraints != null) {
 			return toLevelRule(signedAttributeConstraints.getSigningTime());
+		}
+		return null;
+	}
+
+	@Override
+	public LevelRule getSigningTimeInCertRangeConstraint(Context context) {
+		SignedAttributesConstraints signedAttributeConstraints = getSignedAttributeConstraints(context);
+		if (signedAttributeConstraints != null) {
+			return toLevelRule(signedAttributeConstraints.getSigningTimeInCertRange());
 		}
 		return null;
 	}
@@ -1319,8 +1334,14 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 		return null;
 	}
 
+	@Deprecated
 	@Override
 	public LevelRule getRevocationTimeAgainstBestSignatureDurationRule() {
+		return getRevocationTimeAgainstBestSignatureTimeConstraint();
+	}
+
+	@Override
+	public LevelRule getRevocationTimeAgainstBestSignatureTimeConstraint() {
 		TimestampConstraints timestampConstraints = getTimestampConstraints();
 		if (timestampConstraints != null) {
 			return toLevelRule(timestampConstraints.getRevocationTimeAgainstBestSignatureTime());

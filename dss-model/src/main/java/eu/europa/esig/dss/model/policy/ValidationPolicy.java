@@ -127,8 +127,28 @@ public interface ValidationPolicy {
 	 *
 	 * @param context {@link Context}
 	 * @return {@code LevelRule} if SigningTime element is present in the constraint file, null otherwise.
+	 * @deprecated since DSS 6.4. Please use {@code #getSigningTimeConstraint} method instead.
 	 */
+	@Deprecated
 	LevelRule getSigningDurationRule(Context context);
+
+	/**
+	 * Indicates if the signed property: signing-time should be checked. If SigningTime element is absent within the
+	 * constraint file then null is returned.
+	 *
+	 * @param context {@link Context}
+	 * @return {@code LevelRule} if SigningTime element is present in the constraint file, null otherwise.
+	 */
+	LevelRule getSigningTimeConstraint(Context context);
+
+	/**
+	 * Indicates if the signed property: signing-time should be checked against the signing-certificate's
+	 * validity period. If SigningTimeInCertRange element is absent within the constraint file then null is returned.
+	 *
+	 * @param context {@link Context}
+	 * @return {@code LevelRule} if SigningTimeInCertRange element is present in the constraint file, null otherwise.
+	 */
+	LevelRule getSigningTimeInCertRangeConstraint(Context context);
 
 	/**
 	 * Indicates if the signed property: content-type should be checked. If ContentType element is absent within the
@@ -1144,8 +1164,18 @@ public interface ValidationPolicy {
 	 *
 	 * @return {@code LevelRule} if RevocationTimeAgainstBestSignatureTime element is present
 	 *                                 in the constraint file, null otherwise.
+	 * @deprecated since DSS 6.4. Please use {@code #getRevocationTimeAgainstBestSignatureTimeConstraint} method instead.
 	 */
+	@Deprecated
 	LevelRule getRevocationTimeAgainstBestSignatureDurationRule();
+
+	/**
+	 * Returns RevocationTimeAgainstBestSignatureTime constraint if present in the policy, null otherwise
+	 *
+	 * @return {@code LevelRule} if RevocationTimeAgainstBestSignatureTime element is present
+	 *                                 in the constraint file, null otherwise.
+	 */
+	LevelRule getRevocationTimeAgainstBestSignatureTimeConstraint();
 
 	/**
 	 * Returns whether the evidence record is valid (passed a complete evidence record validation process).

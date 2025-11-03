@@ -150,9 +150,20 @@ public class ValidationPolicyWithCryptographicSuite implements ValidationPolicy 
         return validationPolicy.getSigningCertificateDigestAlgorithmConstraint(context);
     }
 
+    @Deprecated
     @Override
     public LevelRule getSigningDurationRule(Context context) {
-        return validationPolicy.getSigningDurationRule(context);
+        return getSigningTimeConstraint(context);
+    }
+
+    @Override
+    public LevelRule getSigningTimeConstraint(Context context) {
+        return validationPolicy.getSigningTimeConstraint(context);
+    }
+
+    @Override
+    public LevelRule getSigningTimeInCertRangeConstraint(Context context) {
+        return validationPolicy.getSigningTimeInCertRangeConstraint(context);
     }
 
     @Override
@@ -734,9 +745,15 @@ public class ValidationPolicyWithCryptographicSuite implements ValidationPolicy 
         return validationPolicy.getTimestampContainerSignedAndTimestampedFilesCoveredConstraint();
     }
 
+    @Deprecated
     @Override
     public LevelRule getRevocationTimeAgainstBestSignatureDurationRule() {
-        return validationPolicy.getRevocationTimeAgainstBestSignatureDurationRule();
+        return getRevocationTimeAgainstBestSignatureTimeConstraint();
+    }
+
+    @Override
+    public LevelRule getRevocationTimeAgainstBestSignatureTimeConstraint() {
+        return validationPolicy.getRevocationTimeAgainstBestSignatureTimeConstraint();
     }
 
     @Override

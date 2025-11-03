@@ -93,6 +93,7 @@
 			<CertDigestMatch Level="FAIL"/>
 			<IssuerSerialMatch Level="WARN"/>
 			<SigningTime Level="INFORM"/>
+			<SigningTimeInCertRange Level="FAIL" />
 			<MessageDigestOrSignedPropertiesPresent Level="FAIL"/>
 		</SignedAttributes>
 		<UnsignedAttributes/>
@@ -160,6 +161,7 @@
 			<CertDigestMatch Level="FAIL"/>
 			<IssuerSerialMatch Level="WARN"/>
 			<SigningTime Level="INFORM"/>
+			<SigningTimeInCertRange Level="FAIL" />
 			<MessageDigestOrSignedPropertiesPresent Level="FAIL"/>
 		</SignedAttributes>
 	</CounterSignatureConstraints>

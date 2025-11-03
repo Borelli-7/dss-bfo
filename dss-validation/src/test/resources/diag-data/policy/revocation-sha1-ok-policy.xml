@@ -118,6 +118,7 @@
 			<CertDigestMatch Level="FAIL" />
 			<IssuerSerialMatch Level="WARN" />
 			<SigningTime Level="FAIL" />
+			<SigningTimeInCertRange Level="FAIL" />
 			<MessageDigestOrSignedPropertiesPresent Level="FAIL" />
 <!--		<ContentType Level="FAIL" value="1.2.840.113549.1.7.1" />
 			<ContentHints Level="FAIL" value="*" />
@@ -214,6 +215,7 @@
 			<CertDigestMatch Level="FAIL" />
 			<IssuerSerialMatch Level="WARN" />
 			<SigningTime Level="FAIL" />
+			<SigningTimeInCertRange Level="FAIL" />
 			<MessageDigestOrSignedPropertiesPresent Level="FAIL" />
 <!--		<ContentType Level="FAIL" value="1.2.840.113549.1.7.1" />
 			<ContentHints Level="FAIL" value="*" />

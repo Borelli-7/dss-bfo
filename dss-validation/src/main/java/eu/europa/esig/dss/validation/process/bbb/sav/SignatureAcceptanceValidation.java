@@ -56,6 +56,7 @@ import eu.europa.esig.dss.validation.process.bbb.sav.checks.MessageDigestOrSigne
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.SignatureTimeStampCheck;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.SignerLocationCheck;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.SigningTimeCheck;
+import eu.europa.esig.dss.validation.process.bbb.sav.checks.SigningTimeInCertificateValidityRangeCheck;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.StructuralValidationCheck;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.ValidationDataRefsOnlyTimeStampCheck;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.ValidationDataTimeStampCheck;
@@ -148,6 +149,10 @@ public class SignatureAcceptanceValidation extends AbstractAcceptanceValidation<
 		// signing-time
 		item = item.setNextItem(signingTime());
 
+		if (token.getClaimedSigningTime() != null && token.getSigningCertificate() != null) {
+			item = item.setNextItem(signingTimeInCertificateValidityRange());
+		}
+
 		// content-type
 		item = item.setNextItem(contentType());
 
@@ -234,8 +239,13 @@ public class SignatureAcceptanceValidation extends AbstractAcceptanceValidation<
 	}
 
 	private ChainItem<XmlSAV> signingTime() {
-		LevelRule constraint = validationPolicy.getSigningDurationRule(context);
+		LevelRule constraint = validationPolicy.getSigningTimeConstraint(context);
 		return new SigningTimeCheck(i18nProvider, result, token, constraint);
+	}
+
+	private ChainItem<XmlSAV> signingTimeInCertificateValidityRange() {
+		LevelRule constraint = validationPolicy.getSigningTimeInCertRangeConstraint(context);
+		return new SigningTimeInCertificateValidityRangeCheck<>(i18nProvider, result, token, constraint);
 	}
 
 	private ChainItem<XmlSAV> contentType() {

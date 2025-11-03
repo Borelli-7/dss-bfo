@@ -175,6 +175,7 @@
 			<IssuerSerialMatch Level="IGNORE" />
 			<KeyIdentifierMatch Level="IGNORE" />
 			<SigningTime Level="IGNORE" />
+			<SigningTimeInCertRange Level="IGNORE" />
 			<ContentType Level="IGNORE" value="1.2.840.113549.1.7.1" />
 			<ContentHints Level="IGNORE" value="*" />
 			<MessageDigestOrSignedPropertiesPresent Level="IGNORE" />
@@ -312,6 +313,7 @@
 			<IssuerSerialMatch Level="IGNORE" />
 			<KeyIdentifierMatch Level="IGNORE" />
 			<SigningTime Level="IGNORE" />
+			<SigningTimeInCertRange Level="IGNORE" />
 			<ContentType Level="IGNORE" value="1.2.840.113549.1.7.1" />
 			<ContentHints Level="IGNORE" value="*" />
 			<MessageDigestOrSignedPropertiesPresent Level="IGNORE" />

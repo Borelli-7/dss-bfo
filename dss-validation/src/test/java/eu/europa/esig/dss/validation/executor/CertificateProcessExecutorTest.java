@@ -138,16 +138,16 @@ class CertificateProcessExecutorTest extends AbstractTestValidationExecutor {
 
 		XmlSimpleCertificateReport simpleReportJaxb = reports.getSimpleReportJaxb();
 		assertNotNull(simpleReportJaxb);
-		assertNotNull(simpleReportJaxb.getChain());
-		assertEquals(2, simpleReportJaxb.getChain().size());
+		assertNotNull(simpleReportJaxb.getCertificate());
+		assertEquals(1, simpleReportJaxb.getCertificate().getChain().size());
 
-		XmlChainItem cert = simpleReportJaxb.getChain().get(0);
+		XmlChainItem cert = simpleReportJaxb.getCertificate();
 		assertEquals(certificateId, cert.getId());
 		assertNotNull(cert.getQualificationAtIssuance());
 		assertNotNull(cert.getQualificationAtValidation());
 		assertTrue(Utils.isCollectionEmpty(cert.getTrustAnchors()));
 
-		XmlChainItem ca = simpleReportJaxb.getChain().get(1);
+		XmlChainItem ca = simpleReportJaxb.getCertificate().getChain().get(0);
 		assertNull(ca.getQualificationAtIssuance());
 		assertNull(ca.getQualificationAtValidation());
 		assertNotNull(ca.getTrustAnchors());
@@ -179,16 +179,16 @@ class CertificateProcessExecutorTest extends AbstractTestValidationExecutor {
 
 		XmlSimpleCertificateReport simpleReportJaxb = reports.getSimpleReportJaxb();
 		assertNotNull(simpleReportJaxb);
-		assertNotNull(simpleReportJaxb.getChain());
-		assertEquals(2, simpleReportJaxb.getChain().size());
+		assertNotNull(simpleReportJaxb.getCertificate());
+		assertEquals(1, simpleReportJaxb.getCertificate().getChain().size());
 
-		XmlChainItem cert = simpleReportJaxb.getChain().get(0);
+		XmlChainItem cert = simpleReportJaxb.getCertificate();
 		assertEquals(certificateId, cert.getId());
 		assertNotNull(cert.getQualificationAtIssuance());
 		assertNotNull(cert.getQualificationAtValidation());
 		assertTrue(Utils.isCollectionEmpty(cert.getTrustAnchors()));
 
-		XmlChainItem ca = simpleReportJaxb.getChain().get(1);
+		XmlChainItem ca = simpleReportJaxb.getCertificate().getChain().get(0);
 		assertNull(ca.getQualificationAtIssuance());
 		assertNull(ca.getQualificationAtValidation());
 		assertNotNull(ca.getTrustAnchors());
@@ -220,10 +220,10 @@ class CertificateProcessExecutorTest extends AbstractTestValidationExecutor {
 
 		XmlSimpleCertificateReport simpleReportJaxb = reports.getSimpleReportJaxb();
 		assertNotNull(simpleReportJaxb);
-		assertNotNull(simpleReportJaxb.getChain());
-		assertEquals(1, simpleReportJaxb.getChain().size());
+		assertNotNull(simpleReportJaxb.getCertificate());
+		assertEquals(0, simpleReportJaxb.getCertificate().getChain().size());
 
-		XmlChainItem cert = simpleReportJaxb.getChain().get(0);
+		XmlChainItem cert = simpleReportJaxb.getCertificate();
 		assertEquals(certificateId, cert.getId());
 		assertNotNull(cert.getQualificationAtIssuance());
 		assertNotNull(cert.getQualificationAtValidation());

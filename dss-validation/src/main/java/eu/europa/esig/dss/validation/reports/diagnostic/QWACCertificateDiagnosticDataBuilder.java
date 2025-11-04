@@ -21,6 +21,9 @@ public class QWACCertificateDiagnosticDataBuilder extends SignedDocumentDiagnost
     /** URL used to establish a remote connection to verify a TLS/SSL certificate for */
     private String websiteUrl;
 
+    /** TLS/SSL certificate returned by a remote server during the TLS/SSL handshake */
+    private CertificateToken tlsCertificate;
+
     /** TLS Certificate Binding URL, when present (under the 'Link' response header) */
     private String tlsCertificateBindingUrl;
 
@@ -45,6 +48,17 @@ public class QWACCertificateDiagnosticDataBuilder extends SignedDocumentDiagnost
      */
     public QWACCertificateDiagnosticDataBuilder websiteUrl(String websiteUrl) {
         this.websiteUrl = websiteUrl;
+        return this;
+    }
+
+    /**
+     * Sets the TLS/SSL certificate obtained during the handshake
+     *
+     * @param tlsCertificate {@link CertificateToken}
+     * @return {@link QWACCertificateDiagnosticDataBuilder}
+     */
+    public QWACCertificateDiagnosticDataBuilder tlsCertificate(CertificateToken tlsCertificate) {
+        this.tlsCertificate = tlsCertificate;
         return this;
     }
 
@@ -92,6 +106,9 @@ public class QWACCertificateDiagnosticDataBuilder extends SignedDocumentDiagnost
         XmlConnectionInfo xmlConnectionInfo = new XmlConnectionInfo();
         if (websiteUrl != null) {
             xmlConnectionInfo.setUrl(websiteUrl);
+        }
+        if (tlsCertificate != null) {
+            xmlConnectionInfo.setTLSCertificate(xmlCertsMap.get(tlsCertificate.getDSSIdAsString()));
         }
         if (tlsCertificateBindingUrl != null) {
             xmlConnectionInfo.setTLSCertificateBindingUrl(tlsCertificateBindingUrl);

@@ -29,6 +29,7 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraintsConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlDetailedReport;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlEvidenceRecord;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlProofOfExistence;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlQWACProcess;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlSignature;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlSubXCV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlTLAnalysis;
@@ -43,6 +44,7 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlXCV;
 import eu.europa.esig.dss.enumerations.CertificateQualification;
 import eu.europa.esig.dss.enumerations.Context;
 import eu.europa.esig.dss.enumerations.Indication;
+import eu.europa.esig.dss.enumerations.QWACProfile;
 import eu.europa.esig.dss.enumerations.SignatureQualification;
 import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.enumerations.TimestampQualification;
@@ -880,6 +882,24 @@ public class DetailedReport {
 	}
 
 	/**
+	 * Gets the QWAC Profile of the given certificate, if the validation has been performed.
+	 * NOTE: applicable only on QWAC validation (see {@code eu.europa.esig.dss.validation.qwac.QWACValidator})
+	 *
+	 * @param certificateId {@link String}
+	 * @return {@link QWACProfile}
+	 */
+	public QWACProfile getCertificateQWACProfile(String certificateId) {
+		XmlCertificate certificate = getXmlCertificateById(certificateId);
+		if (certificate != null) {
+			XmlQWACProcess qwacProcess = certificate.getQWACProcess();
+			if (qwacProcess != null) {
+				return qwacProcess.getQWACType();
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Gets XCV building block conclusion for a certificate with id
 	 *
 	 * @param certificateId {@link String}
@@ -1147,6 +1167,39 @@ public class DetailedReport {
 	 */
 	public List<Message> getCertificateQualificationInfosAtValidationTime(String certificateId) {
 		return getMessageCollector().getCertificateQualificationInfosAtValidationTime(certificateId);
+	}
+
+	/**
+	 * Returns a list of QWAC validation errors for a certificate with the given id at certificate issuance time
+	 * NOTE: applicable only on QWAC validation (see {@code eu.europa.esig.dss.validation.qwac.QWACValidator})
+	 *
+	 * @param certificateId {@link String} id of a certificate to get QWAC validation errors for
+	 * @return a list of {@link Message}s
+	 */
+	public List<Message> getQWACValidationErrors(String certificateId) {
+		return getMessageCollector().getQWACValidationErrors(certificateId);
+	}
+
+	/**
+	 * Returns a list of QWAC validation warnings for a certificate with the given id at certificate issuance time
+	 * NOTE: applicable only on QWAC validation (see {@code eu.europa.esig.dss.validation.qwac.QWACValidator})
+	 *
+	 * @param certificateId {@link String} id of a certificate to get QWAC validation warnings for
+	 * @return a list of {@link Message}s
+	 */
+	public List<Message> getQWACValidationWarnings(String certificateId) {
+		return getMessageCollector().getQWACValidationWarnings(certificateId);
+	}
+
+	/**
+	 * Returns a list of QWAC validation information messages for a certificate with the given id at certificate issuance time
+	 * NOTE: applicable only on QWAC validation (see {@code eu.europa.esig.dss.validation.qwac.QWACValidator})
+	 *
+	 * @param certificateId {@link String} id of a certificate to get QWAC validation information messages for
+	 * @return a list of {@link Message}s
+	 */
+	public List<Message> getQWACValidationInfos(String certificateId) {
+		return getMessageCollector().getQWACValidationInfos(certificateId);
 	}
 
 }

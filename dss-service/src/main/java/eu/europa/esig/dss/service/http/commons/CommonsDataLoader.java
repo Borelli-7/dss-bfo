@@ -938,7 +938,7 @@ public class CommonsDataLoader implements DataLoader, AdvancedDataLoader {
 	 * @return {@code byte} array of obtained data or null
 	 */
 	protected byte[] httpGet(final String url) {
-		ResponseEnvelope responseEnvelope = requestGet(url, false);
+		ResponseEnvelope responseEnvelope = requestGet(url);
 		return responseEnvelope.getResponseBody();
 	}
 
@@ -982,7 +982,7 @@ public class CommonsDataLoader implements DataLoader, AdvancedDataLoader {
 
 	@Override
 	public byte[] post(final String url, final byte[] content) {
-		ResponseEnvelope responseEnvelope = requestPost(url, content, false);
+		ResponseEnvelope responseEnvelope = requestPost(url, content);
 		return responseEnvelope.getResponseBody();
 	}
 

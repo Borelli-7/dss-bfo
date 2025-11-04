@@ -72,9 +72,13 @@ public class SimpleCertificateReport {
 	 */
 	public List<String> getCertificateIds() {
 		List<String> ids = new ArrayList<>();
-		List<XmlChainItem> chain = simpleReport.getChain();
-		for (XmlChainItem xmlChainItem : chain) {
-			ids.add(xmlChainItem.getId());
+		XmlChainItem certificate = simpleReport.getCertificate();
+		if (certificate != null) {
+			ids.add(certificate.getId());
+			List<XmlChainItem> chain = certificate.getChain();
+			for (XmlChainItem xmlChainItem : chain) {
+				ids.add(xmlChainItem.getId());
+			}
 		}
 		return ids;
 	}
@@ -589,24 +593,44 @@ public class SimpleCertificateReport {
 	}
 
 	private XmlChainItem getTrustAnchorCertificate() {
-		List<XmlChainItem> chain = simpleReport.getChain();
-		for (XmlChainItem xmlChainItem : chain) {
-			if (xmlChainItem.getTrustAnchors() != null && !xmlChainItem.getTrustAnchors().isEmpty()) {
-				return xmlChainItem;
+		XmlChainItem certificate = simpleReport.getCertificate();
+		if (certificate != null) {
+			if (isTrustAnchor(certificate)) {
+				return certificate;
+			}
+			List<XmlChainItem> chain = certificate.getChain();
+			for (XmlChainItem xmlChainItem : chain) {
+				if (isTrustAnchor(xmlChainItem)) {
+					return xmlChainItem;
+				}
 			}
 		}
 		return null;
 	}
 
+	private boolean isTrustAnchor(XmlChainItem xmlChainItem) {
+		return xmlChainItem.getTrustAnchors() != null && !xmlChainItem.getTrustAnchors().isEmpty();
+	}
+
 	private XmlChainItem getFirstCertificate() {
-		return simpleReport.getChain().get(0);
+		return simpleReport.getCertificate();
 	}
 
 	private XmlChainItem getCertificate(String certificateId) {
-		List<XmlChainItem> chain = simpleReport.getChain();
-		for (XmlChainItem xmlChainItem : chain) {
-			if (certificateId.equals(xmlChainItem.getId())) {
-				return xmlChainItem;
+		if (certificateId == null) {
+			return null;
+		}
+
+		XmlChainItem certificate = simpleReport.getCertificate();
+		if (certificate != null) {
+			if (certificateId.equals(certificate.getId())) {
+				return certificate;
+			}
+			List<XmlChainItem> chain = certificate.getChain();
+			for (XmlChainItem xmlChainItem : chain) {
+				if (certificateId.equals(xmlChainItem.getId())) {
+					return xmlChainItem;
+				}
 			}
 		}
 		return null;

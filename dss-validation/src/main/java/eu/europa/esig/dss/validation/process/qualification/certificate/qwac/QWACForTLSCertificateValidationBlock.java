@@ -12,8 +12,10 @@ import eu.europa.esig.dss.enumerations.QWACProfile;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.validation.process.Chain;
+import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.QWAC1ValidationProcessBlock;
 import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.TLSCertificateSupportedByQWAC2ValidationProcessBlock;
+import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.checks.QWACValidationResultCheck;
 
 import java.util.Map;
 
@@ -94,6 +96,8 @@ public class QWACForTLSCertificateValidationBlock extends Chain<XmlQWACProcess> 
         XmlValidationQWACProcess tlsCertificateValidationResult = tlsCertificateProcess.execute();
         result.getValidationQWACProcess().add(tlsCertificateValidationResult);
 
+        ChainItem<XmlQWACProcess> item = firstItem = qwacValidation(qwac1ValidationResult, tlsCertificateValidationResult);
+
         if (isValid(qwac1ValidationResult)) {
             result.setQWACType(qwac1Process.getQWACProfile());
         } else if (isValid(tlsCertificateValidationResult)) {
@@ -102,6 +106,10 @@ public class QWACForTLSCertificateValidationBlock extends Chain<XmlQWACProcess> 
             result.setQWACType(QWACProfile.NOT_QWAC);
         }
 
+    }
+
+    private ChainItem<XmlQWACProcess> qwacValidation(XmlValidationQWACProcess... qwacValidationProcesses) {
+        return new QWACValidationResultCheck(i18nProvider, result, qwacValidationProcesses, getFailLevelRule());
     }
 
     private XmlConclusion getTokenValidationConclusion(TokenProxy token) {

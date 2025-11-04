@@ -1341,7 +1341,7 @@ public class DiagnosticData {
 	}
 
 	/**
-	 * Gets the TLS Certificate Binding URL, when present (i.e. URL under the 'Link' response header)
+	 * Gets the TLS Certificate Binding URL, when present (i.e. URL under the 'Link' response header).
 	 * NOTE: This method is used on QWAC validation.
 	 *
 	 * @return {@link String}
@@ -1354,7 +1354,20 @@ public class DiagnosticData {
 	}
 
 	/**
-	 * Gets the TLS Certificate Binding signature, when present (i.e. accessed from the URL under the 'Link' response header)
+	 * Gets a TLS certificate used to establish a secure connection during the TLS/SSL handshake.
+	 * NOTE: This method is used on QWAC validation.
+	 *
+	 * @return {@link CertificateWrapper}
+	 */
+	public CertificateWrapper getTLSCertificate() {
+		if (wrapped.getConnectionInfo() != null && wrapped.getConnectionInfo().getTLSCertificate() != null) {
+			return new CertificateWrapper(wrapped.getConnectionInfo().getTLSCertificate());
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the TLS Certificate Binding signature, when present (i.e. accessed from the URL under the 'Link' response header).
 	 * NOTE: This method is used on QWAC validation.
 	 *
 	 * @return {@link SignatureWrapper}

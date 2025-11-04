@@ -27,6 +27,7 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraintsConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlEvidenceRecord;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlMessage;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlQWACProcess;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlSignature;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlTLAnalysis;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlTimestamp;
@@ -197,6 +198,39 @@ public class DetailedReportMessageCollector {
 		return collectCertificateQualificationAtValidationTime(MessageType.INFO, certificateId);
 	}
 
+	/**
+	 * Returns a list of QWAC validation errors for a certificate with the given id at certificate issuance time
+	 * NOTE: applicable only on QWAC validation (see {@code eu.europa.esig.dss.validation.qwac.QWACValidator})
+	 *
+	 * @param certificateId {@link String} id of a certificate to get QWAC validation errors for
+	 * @return a list of {@link Message}s
+	 */
+	List<Message> getQWACValidationErrors(String certificateId) {
+		return collectQWACValidationDetails(MessageType.ERROR, certificateId);
+	}
+
+	/**
+	 * Returns a list of QWAC validation warnings for a certificate with the given id at certificate issuance time
+	 * NOTE: applicable only on QWAC validation (see {@code eu.europa.esig.dss.validation.qwac.QWACValidator})
+	 *
+	 * @param certificateId {@link String} id of a certificate to get QWAC validation warnings for
+	 * @return a list of {@link Message}s
+	 */
+	List<Message> getQWACValidationWarnings(String certificateId) {
+		return collectQWACValidationDetails(MessageType.WARN, certificateId);
+	}
+
+	/**
+	 * Returns a list of QWAC validation information messages for a certificate with the given id at certificate issuance time
+	 * NOTE: applicable only on QWAC validation (see {@code eu.europa.esig.dss.validation.qwac.QWACValidator})
+	 *
+	 * @param certificateId {@link String} id of a certificate to get QWAC validation information messages for
+	 * @return a list of {@link Message}s
+	 */
+	List<Message> getQWACValidationInfos(String certificateId) {
+		return collectQWACValidationDetails(MessageType.INFO, certificateId);
+	}
+
 	private List<Message> collectAdESValidationMessages(MessageType type, String tokenId) {
 		XmlSignature signatureById = detailedReport.getXmlSignatureById(tokenId);
 		if (signatureById != null) {
@@ -359,6 +393,18 @@ public class DetailedReportMessageCollector {
 		}
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("The certificate qualification validation at time '{}' is not found or not performed!", validationTime);
+		}
+		return Collections.emptyList();
+	}
+
+	private List<Message> collectQWACValidationDetails(MessageType type, String certificateId) {
+		XmlCertificate xmlCertificate = detailedReport.getXmlCertificateById(certificateId);
+		if (xmlCertificate != null) {
+			XmlQWACProcess qwacProcess = xmlCertificate.getQWACProcess();
+			return getMessages(type, qwacProcess);
+		}
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("The QWAC validation is not performed!");
 		}
 		return Collections.emptyList();
 	}

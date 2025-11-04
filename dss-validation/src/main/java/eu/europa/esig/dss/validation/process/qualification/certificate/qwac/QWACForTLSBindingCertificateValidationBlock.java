@@ -9,7 +9,9 @@ import eu.europa.esig.dss.enumerations.QWACProfile;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.validation.process.Chain;
+import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.QWAC2ValidationProcessBlock;
+import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.checks.QWACValidationResultCheck;
 
 import java.util.Date;
 import java.util.Map;
@@ -79,12 +81,18 @@ public class QWACForTLSBindingCertificateValidationBlock extends Chain<XmlQWACPr
         XmlValidationQWACProcess qwac2ValidationResult = qwac2Process.execute();
         result.getValidationQWACProcess().add(qwac2ValidationResult);
 
+        ChainItem<XmlQWACProcess> item = firstItem = qwacValidation(qwac2ValidationResult);
+
         if (isValid(qwac2ValidationResult)) {
             result.setQWACType(qwac2Process.getQWACProfile());
         } else {
             result.setQWACType(QWACProfile.NOT_QWAC);
         }
 
+    }
+
+    private ChainItem<XmlQWACProcess> qwacValidation(XmlValidationQWACProcess... qwacValidationProcesses) {
+        return new QWACValidationResultCheck(i18nProvider, result, qwacValidationProcesses, getFailLevelRule());
     }
 
 }

@@ -142,9 +142,10 @@ public class QWACValidator extends AbstractCertificateValidator<CertificateRepor
         SignedDocumentValidator signedDocumentValidator = initSignedDocumentValidator(tlsCertificateBindingUrl, tlsCertificates);
         AdvancedSignature signature = getTLSCertificateBindingSignature(signedDocumentValidator);
 
-        final ValidationContext validationContext = prepareValidationContext(tlsCertificates, signature);
+        CertificateToken tlsCertificate = getTLSCertificate(tlsCertificates);
+        final ValidationContext validationContext = prepareValidationContext(tlsCertificate, tlsCertificates, signature);
         validateContext(validationContext);
-        return createDiagnosticDataBuilder(validationContext, signedDocumentValidator, tlsCertificateBindingUrl, signature);
+        return createDiagnosticDataBuilder(validationContext, signedDocumentValidator, tlsCertificate, tlsCertificateBindingUrl, signature);
     }
 
     /**
@@ -164,27 +165,21 @@ public class QWACValidator extends AbstractCertificateValidator<CertificateRepor
     /**
      * This method is used to prepare a {@code ValidationContext} using the configuration and provided data objects
      *
-     * @param tlsCertificates a list of TLS/SSL {@link CertificateToken}s returned by a server
+     * @param tlsCertificate {@link CertificateToken} used to establish the secure TLS/SSL connection
+     * @param otherTlsCertificates a list of TLS/SSL {@link CertificateToken}s returned by a server
      * @param signature {@link AdvancedSignature} TLS Certificate Binding signature, when present
      * @return {@link ValidationContext}
      */
-    protected ValidationContext prepareValidationContext(List<CertificateToken> tlsCertificates, AdvancedSignature signature) {
+    protected ValidationContext prepareValidationContext(CertificateToken tlsCertificate, List<CertificateToken> otherTlsCertificates,
+                                                         AdvancedSignature signature) {
         final CertificateVerifier certificateVerifierForValidation =
                 new CertificateVerifierBuilder(certificateVerifier).buildCompleteCopyForValidation();
 
         ValidationContext validationContext = super.prepareValidationContext(certificateVerifierForValidation);
-        if (certificateToken != null) {
-            validationContext.addCertificateTokenForVerification(certificateToken);
-        } else if (Utils.isCollectionNotEmpty(tlsCertificates)) {
-            // first certificate shall be the peer's end-entity certificate
-            certificateToken = tlsCertificates.iterator().next();
-            validationContext.addCertificateTokenForVerification(certificateToken);
-        } else {
-            throw new DSSException("No valid TLS/SSL certificates have been obtained from the URL '{}'.");
-        }
+        validationContext.addCertificateTokenForVerification(tlsCertificate);
 
         CommonCertificateSource adjunctCertificateSource = new CommonCertificateSource();
-        for (CertificateToken certificate : tlsCertificates) {
+        for (CertificateToken certificate : otherTlsCertificates) {
             adjunctCertificateSource.addCertificate(certificate);
         }
         certificateVerifierForValidation.addAdjunctCertSources(adjunctCertificateSource);
@@ -194,6 +189,18 @@ public class QWACValidator extends AbstractCertificateValidator<CertificateRepor
         }
 
         return validationContext;
+    }
+
+    private CertificateToken getTLSCertificate(List<CertificateToken> tlsCertificates) {
+        if (certificateToken != null) {
+            return certificateToken;
+        } else if (Utils.isCollectionNotEmpty(tlsCertificates)) {
+            // first certificate shall be the peer's end-entity certificate
+            certificateToken = tlsCertificates.iterator().next();
+            return certificateToken;
+        } else {
+            throw new DSSException("No valid TLS/SSL certificates have been obtained from the URL '{}'.");
+        }
     }
 
     private SignedDocumentValidator initSignedDocumentValidator(String tlsCertificateBindingUrl, List<CertificateToken> tlsCertificates) {
@@ -277,18 +284,20 @@ public class QWACValidator extends AbstractCertificateValidator<CertificateRepor
      *
      * @param validationContext {@link ValidationContext}
      * @param signedDocumentValidator {@link SignedDocumentValidator} used to validate a signature
+     * @param tlsCertificate {@link CertificateToken} used to establish a TLS/SSL connection
      * @param tlsCertificateBindingUrl {@link String} TLS Certificate Binding URL, when present
      * @param signature {@link AdvancedSignature} TLS Certificate Binding signature, when present
      * @return {@link DiagnosticDataBuilder}
      */
     protected DiagnosticDataBuilder createDiagnosticDataBuilder(
             ValidationContext validationContext, SignedDocumentValidator signedDocumentValidator,
-            String tlsCertificateBindingUrl, AdvancedSignature signature) {
+            CertificateToken tlsCertificate, String tlsCertificateBindingUrl, AdvancedSignature signature) {
         QWACCertificateDiagnosticDataBuilder diagnosticDataBuilder =
                 (QWACCertificateDiagnosticDataBuilder) super.createDiagnosticDataBuilder(validationContext);
 
         diagnosticDataBuilder = diagnosticDataBuilder
                 .websiteUrl(url)
+                .tlsCertificate(tlsCertificate)
                 .tlsCertificateBindingUrl(tlsCertificateBindingUrl)
                 .tlsCertificateBindingSignature(signature);
 

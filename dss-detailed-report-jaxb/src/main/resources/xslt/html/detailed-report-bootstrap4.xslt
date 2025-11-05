@@ -290,7 +290,14 @@
 	<xsl:template match="dss:ValidationProcessBasicSignature|dss:ValidationProcessLongTermData|dss:ValidationProcessArchivalData
 			|dss:CertificateQualificationProcess|dss:ValidationQWACProcess">
 		<div>
-			<xsl:attribute name="class">card mb-2 mb-sm-3</xsl:attribute>
+			<xsl:choose>
+				<xsl:when test="name()='ValidationQWACProcess'">
+					<xsl:attribute name="class">card mt-3</xsl:attribute>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:attribute name="class">card mb-2 mb-sm-3</xsl:attribute>
+				</xsl:otherwise>
+			</xsl:choose>
     		<div>
 				<xsl:attribute name="class">card-header</xsl:attribute>
 				<xsl:attribute name="data-target">#collapse<xsl:value-of select="name(.)"/><xsl:value-of select="../@Id"/></xsl:attribute>
@@ -558,8 +565,17 @@
 				<xsl:attribute name="data-target">#qwac-<xsl:value-of select="generate-id(.)"/></xsl:attribute>
 				<xsl:attribute name="data-toggle">collapse</xsl:attribute>
 
+				<xsl:variable name="cssClass">
+					<xsl:choose>
+						<xsl:when test="@QWACType='1-QWAC'">badge-success</xsl:when>
+						<xsl:when test="@QWACType='2-QWAC'">badge-success</xsl:when>
+						<xsl:when test="@QWACType='TLS certificate supported by 2-QWAC'">badge-success</xsl:when>
+						<xsl:otherwise>badge-secondary</xsl:otherwise>
+					</xsl:choose>
+				</xsl:variable>
+
 				<span>
-					<xsl:attribute name="class">badge badge-secondary float-right</xsl:attribute>
+					<xsl:attribute name="class">badge <xsl:value-of select="$cssClass" /> float-right</xsl:attribute>
 					<xsl:value-of select="@QWACType"/>
 				</span>
 

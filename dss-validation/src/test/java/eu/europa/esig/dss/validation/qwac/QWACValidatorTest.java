@@ -44,7 +44,6 @@ public class QWACValidatorTest {
 
         CertificateReports reports = validator.validate();
         validateReports(reports);
-        reports.print();
     }
 
     @Test
@@ -109,7 +108,6 @@ public class QWACValidatorTest {
         validator.setCertificateVerifier(certificateVerifier);
 
         CertificateReports reports = validator.validate();
-        reports.print();
         validateReports(reports);
     }
 

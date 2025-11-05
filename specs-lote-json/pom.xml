@@ -10,7 +10,7 @@
     <name>JSON Schema for the List of Trusted Entities</name>
 
     <properties>
-        <module-name>jpms_specs_lote</module-name>
+        <module-name>jpms_specs_lote_json</module-name>
     </properties>
 
     <dependencies>

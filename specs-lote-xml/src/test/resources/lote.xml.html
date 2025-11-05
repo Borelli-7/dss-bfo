@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ListOfTrustedEntities xmlns="http://uri.etsi.org/019602/v1#" LOTETag="http://uri.etsi.org/019602/tag#"
+                       xmlns:tie="http://uri.etsi.org/019602/v1/TrustedEntityExtensions">
+    <ListAndSchemeInformation>
+        <LoTEVersionIdentifier>1</LoTEVersionIdentifier>
+        <LoTESequenceNumber>42</LoTESequenceNumber>
+        <LoTEType>http://example.org/LoTE/type</LoTEType>
+        <SchemeOperatorName>
+            <Name lang="fr">Agence Nationale de la Confiance Numérique</Name>
+        </SchemeOperatorName>
+        <SchemeOperatorName>
+            <Name lang="en">National Agency for Digital Trust</Name>
+        </SchemeOperatorName>
+        <SchemeOperatorAddress>
+            <PostalAddresses>
+                <PostalAddress lang="fr">
+                    <StreetAddress>12 Boulevard Sécurité</StreetAddress>
+                    <Locality>Paris</Locality>
+                    <StateOrProvince>Île-de-France</StateOrProvince>
+                    <PostalCode>75015</PostalCode>
+                    <CountryName>FR</CountryName>
+                </PostalAddress>
+                <PostalAddress lang="en">
+                    <StreetAddress>12 Security Boulevard</StreetAddress>
+                    <Locality>Paris</Locality>
+                    <StateOrProvince>Ile-de-France</StateOrProvince>
+                    <PostalCode>75015</PostalCode>
+                    <CountryName>FR</CountryName>
+                </PostalAddress>
+            </PostalAddresses>
+        </SchemeOperatorAddress>
+        <SchemeName>
+            <Name lang="fr">Liste de confiance française</Name>
+            <Name lang="en">French Trusted List</Name>
+        </SchemeName>
+        <SchemeInformationURI>
+            <URI lang="en">https://example.org/scheme-info</URI>
+        </SchemeInformationURI>
+        <StatusDeterminationApproach>https://example.org/status</StatusDeterminationApproach>
+        <ListIssueDateTime>2025-07-16T12:00:00Z</ListIssueDateTime>
+        <NextUpdate>
+            <dateTime>2025-08-16T12:00:00Z</dateTime>
+        </NextUpdate>
+    </ListAndSchemeInformation>
+    <TrustedEntitiesList>
+        <TrustedEntity>
+            <TrustedEntityInformation>
+                <TEName>
+                    <Name lang="fr">Prestataire Confiance SA</Name>
+                    <Name lang="en">Trust Provider Inc.</Name>
+                </TEName>
+                <TEAddress>
+                    <PostalAddresses>
+                        <PostalAddress lang="fr">
+                            <StreetAddress>1 Rue de la Confiance</StreetAddress>
+                            <Locality>Paris</Locality>
+                            <PostalCode>75001</PostalCode>
+                            <CountryName>FR</CountryName>
+                        </PostalAddress>
+                    </PostalAddresses>
+                </TEAddress>
+                <TEInformationURI>
+                    <URI lang="en">https://example.org/info</URI>
+                </TEInformationURI>
+                <TEInformationExtensions>
+                    <Extention>
+                        <tie:OtherAssociatedBodies>
+                            <tie:AssociatedBody>
+                                <tie:AssociatedBodyName>
+                                    <Name lang="fr">Ministère de la Transition Numérique</Name>
+                                    <Name lang="en">Ministry of Digital Transformation</Name>
+                                </tie:AssociatedBodyName>
+                                <tie:AssociatedBodyTradeName>
+                                    <Name lang="fr">MinTN</Name>
+                                    <Name lang="en">MinDT</Name>
+                                </tie:AssociatedBodyTradeName>
+                                <tie:AssociatedBodyAddress>
+                                    <PostalAddresses>
+                                        <PostalAddress lang="fr">
+                                            <StreetAddress>10 avenue de la République</StreetAddress>
+                                            <Locality>Paris</Locality>
+                                            <StateOrProvince>Île-de-France</StateOrProvince>
+                                            <PostalCode>75011</PostalCode>
+                                            <CountryName>FR</CountryName>
+                                        </PostalAddress>
+                                    </PostalAddresses>
+                                    <ElectronicAddress>
+
+                                    </ElectronicAddress>
+                                </tie:AssociatedBodyAddress>
+                            </tie:AssociatedBody>
+                        </tie:OtherAssociatedBodies>
+                    </Extention>
+                </TEInformationExtensions>
+            </TrustedEntityInformation>
+        </TrustedEntity>
+        <TrustServiceProviderList>
+            <TrustServiceProvider>
+                <ServicesList>
+                    <Service>
+                        <ServiceInformation>
+                            <ServiceName>
+                                <lang>fr</lang>
+                                <value>Signature électronique</value>
+                            </ServiceName>
+                            <ServiceName>
+                                <lang>en</lang>
+                                <value>Electronic Signature</value>
+                            </ServiceName>
+                            <ServiceType>http://uri.etsi.org/TrstSvc/Svctype/CA</ServiceType>
+                            <ServiceStatus>Granted</ServiceStatus>
+                            <StatusStartingTime>2020-01-01T00:00:00Z</StatusStartingTime>
+                            <ServiceInformationURI>https://tsp.example.org/service/signature</ServiceInformationURI>
+                        </ServiceInformation>
+                        <ServiceDigitalIdentityList>
+                            <ServiceDigitalIdentity>
+                                <DigitalId>
+                                    <X509Certificate>MIIDdzCCAl+gAwIBAgIEb... (truncated)</X509Certificate>
+                                </DigitalId>
+                            </ServiceDigitalIdentity>
+                        </ServiceDigitalIdentityList>
+                        <ServiceHistoryList>
+                            <ServiceHistory>
+                                <ServiceHistoryInstance>
+                                    <ServiceStatus>Granted</ServiceStatus>
+                                    <StatusStartingTime>2020-01-01T00:00:00Z</StatusStartingTime>
+                                </ServiceHistoryInstance>
+                            </ServiceHistory>
+                        </ServiceHistoryList>
+                    </Service>
+                </ServicesList>
+            </TrustServiceProvider>
+            <TrustServiceProvider>
+                <TSPInformation>
+                    <TSPName>
+                        <lang>fr</lang>
+                        <value>Autre Prestataire SARL</value>
+                    </TSPName>
+                    <TSPName>
+                        <lang>en</lang>
+                        <value>Other Provider LLC</value>
+                    </TSPName>
+                    <TSPPostalAddress>
+                        <StreetAddress>99 Avenue Exemple</StreetAddress>
+                        <Locality>Lyon</Locality>
+                        <PostalCode>69000</PostalCode>
+                        <Country>FR</Country>
+                    </TSPPostalAddress>
+                    <TSPInformationURI>https://other.example.org</TSPInformationURI>
+                </TSPInformation>
+                <ServicesList>
+                    <Service>
+                        <ServiceInformation>
+                            <ServiceName>
+                                <lang>fr</lang>
+                                <value>Horodatage</value>
+                            </ServiceName>
+                            <ServiceName>
+                                <lang>en</lang>
+                                <value>Timestamping</value>
+                            </ServiceName>
+                            <ServiceType>http://uri.etsi.org/TrstSvc/Svctype/TSA</ServiceType>
+                            <ServiceStatus>Granted</ServiceStatus>
+                            <StatusStartingTime>2019-06-01T00:00:00Z</StatusStartingTime>
+                            <ServiceInformationURI>https://other.example.org/service/timestamp</ServiceInformationURI>
+                        </ServiceInformation>
+                        <ServiceDigitalIdentityList>
+                            <ServiceDigitalIdentity>
+                                <DigitalId>
+                                    <X509Certificate>MIIF... (truncated)</X509Certificate>
+                                </DigitalId>
+                            </ServiceDigitalIdentity>
+                        </ServiceDigitalIdentityList>
+                    </Service>
+                </ServicesList>
+            </TrustServiceProvider>
+        </TrustServiceProviderList>
+    </TrustedEntitiesList>
+</ListOfTrustedEntities>

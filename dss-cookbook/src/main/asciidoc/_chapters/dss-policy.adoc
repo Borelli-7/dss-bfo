@@ -1884,6 +1884,8 @@ Default: `FAIL`
 </SignedAttributes>
 ----
 
+NOTE: For CMS validation (which includes CAdES and PAdES signatures), the verification of the signing-time signed attribute (when present) is enforced on signature integrity validation by the underlying library BouncyCastle. Therefore, disabling the constraint may not achieve the desired effect on validation of these signature formats.
+
 * `ContentType` - this constraint checks whether the "content-type" signed attribute has the expected value. If the "content-type" attribute's value does not match the expected value, the check will fail.
 
 Default: not executed

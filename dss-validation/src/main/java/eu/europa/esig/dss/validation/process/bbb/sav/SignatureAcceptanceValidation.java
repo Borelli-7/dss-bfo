@@ -36,7 +36,6 @@ import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.model.policy.LevelRule;
 import eu.europa.esig.dss.model.policy.MultiValuesRule;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
-import eu.europa.esig.dss.model.policy.ValueRule;
 import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.ArchiveTimeStampCheck;
@@ -249,17 +248,17 @@ public class SignatureAcceptanceValidation extends AbstractAcceptanceValidation<
 	}
 
 	private ChainItem<XmlSAV> contentType() {
-		ValueRule constraint = validationPolicy.getContentTypeConstraint(context);
+		MultiValuesRule constraint = validationPolicy.getContentTypeConstraint(context);
 		return new ContentTypeCheck(i18nProvider, result, token, constraint);
 	}
 
 	private ChainItem<XmlSAV> contentHints() {
-		ValueRule constraint = validationPolicy.getContentHintsConstraint(context);
+		MultiValuesRule constraint = validationPolicy.getContentHintsConstraint(context);
 		return new ContentHintsCheck(i18nProvider, result, token, constraint);
 	}
 
 	private ChainItem<XmlSAV> contentIdentifier() {
-		ValueRule constraint = validationPolicy.getContentIdentifierConstraint(context);
+		MultiValuesRule constraint = validationPolicy.getContentIdentifierConstraint(context);
 		return new ContentIdentifierCheck(i18nProvider, result, token, constraint);
 	}
 

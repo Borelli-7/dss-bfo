@@ -94,7 +94,9 @@
             <KeyIdentifierPresent Level="FAIL" />
             <SigningTime Level="FAIL" />
             <SigningTimeInCertRange Level="FAIL" />
-            <ContentType value="TLS-Certificate-Binding-v1" Level="FAIL" />
+            <ContentType Level="FAIL">
+                <Id>TLS-Certificate-Binding-v1</Id>
+            </ContentType>
         </SignedAttributes>
     </SignatureConstraints>
     <Revocation>

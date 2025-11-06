@@ -167,17 +167,17 @@ public class ValidationPolicyWithCryptographicSuite implements ValidationPolicy 
     }
 
     @Override
-    public ValueRule getContentTypeConstraint(Context context) {
+    public MultiValuesRule getContentTypeConstraint(Context context) {
         return validationPolicy.getContentTypeConstraint(context);
     }
 
     @Override
-    public ValueRule getContentHintsConstraint(Context context) {
+    public MultiValuesRule getContentHintsConstraint(Context context) {
         return validationPolicy.getContentHintsConstraint(context);
     }
 
     @Override
-    public ValueRule getContentIdentifierConstraint(Context context) {
+    public MultiValuesRule getContentIdentifierConstraint(Context context) {
         return validationPolicy.getContentIdentifierConstraint(context);
     }
 

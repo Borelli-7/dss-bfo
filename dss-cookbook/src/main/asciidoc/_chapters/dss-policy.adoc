@@ -1893,7 +1893,9 @@ Default: not executed
 ----
 <SignedAttributes>
     ...
-    <ContentType Level="FAIL" value="1.2.840.113549.1.7.1" />
+    <ContentType Level="FAIL">
+        <Id>1.2.840.113549.1.7.1</Id>
+    </ContentType>
     ...
 </SignedAttributes>
 ----
@@ -1909,7 +1911,9 @@ Note: executed for CAdES only
 ----
 <SignedAttributes>
     ...
-    <ContentHints Level="FAIL" value="1.2.840.113549.1.7.1" />
+    <ContentHints Level="FAIL">
+        <Id>1.2.840.113549.1.7.1</Id>
+    </ContentHints>
     ...
 </SignedAttributes>
 ----
@@ -1925,7 +1929,9 @@ Note: executed for CAdES only
 ----
 <SignedAttributes>
     ...
-    <ContentIdentifier Level="FAIL" value="1.2.840.113549.1.7.1" />
+    <ContentIdentifier Level="FAIL">
+        <Id>1.2.840.113549.1.7.1</Id>
+    </ContentIdentifier>
     ...
 </SignedAttributes>
 ----
@@ -2996,9 +3002,9 @@ This table defines the correspondence between the enforced validation policy con
                                   |KeyIdentifierMatch              |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |SigningTime                     |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
 .11+|SignedAttributesConstraints  |SigningTimeInCertRange          |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
-                                  |ContentType                     |ValueConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
-                                  |ContentHints                    |ValueConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
-                                  |ContentIdentifier               |ValueConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
+                                  |ContentType                     |MultiValuesConstraint             |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
+                                  |ContentHints                    |MultiValuesConstraint             |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
+                                  |ContentIdentifier               |MultiValuesConstraint             |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |MessageDigestOrSignedPropertiesPresent    |LevelConstraint         |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |CommitmentTypeIndication        |MultiValuesConstraint             |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |SignerLocation                  |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE

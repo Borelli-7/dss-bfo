@@ -186,7 +186,7 @@ public class SignatureWrapper extends AbstractSignatureWrapper {
 	}
 
 	/**
-	 * Gets the expiration time of the signature.
+	 * Gets the expiration time of the signature, after which it should not be accepted for processing.
 	 * NOTE: The value is currently used only for the ETSI TS 119 411-5 TLS Certificate Binding signature.
 	 * The maximum effective expiry time is whichever is soonest of this field, the longest-lived TLS certificate
 	 * identified in the sigD member payload (below), or the notAfter time of the signing certificate.

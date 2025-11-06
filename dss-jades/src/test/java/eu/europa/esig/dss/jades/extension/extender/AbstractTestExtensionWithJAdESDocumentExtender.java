@@ -43,6 +43,17 @@ public abstract class AbstractTestExtensionWithJAdESDocumentExtender extends Abs
     }
 
     @Override
+    protected void checkJWSSerializationType(DiagnosticData diagnosticData) {
+        for (SignatureWrapper signatureWrapper : diagnosticData.getSignatures()) {
+            if (getOriginalSignatureLevel() == signatureWrapper.getSignatureFormat()) {
+                assertEquals(getSignatureParameters().getJwsSerializationType(), signatureWrapper.getJWSSerializationType());
+            } else if (getFinalSignatureLevel() == signatureWrapper.getSignatureFormat()) {
+                assertEquals(getExtensionParameters().getJwsSerializationType(), signatureWrapper.getJWSSerializationType());
+            }
+        }
+    }
+
+    @Override
     protected void checkReportsSignatureIdentifier(Reports reports) {
         DiagnosticData diagnosticData = reports.getDiagnosticData();
         ValidationReportType etsiValidationReport = reports.getEtsiValidationReportJaxb();

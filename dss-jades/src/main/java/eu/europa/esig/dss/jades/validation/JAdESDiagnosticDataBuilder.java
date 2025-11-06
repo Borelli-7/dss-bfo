@@ -43,6 +43,7 @@ public class JAdESDiagnosticDataBuilder extends SignedDocumentDiagnosticDataBuil
         JAdESSignature jadesSignature = (JAdESSignature) signature;
         xmlSignature.setSignatureType(jadesSignature.getSignatureType());
         xmlSignature.setJWSSerializationType(jadesSignature.getJws().getJwsSerializationType());
+        xmlSignature.setExpirationTime(jadesSignature.getExpirationTime());
         return xmlSignature;
     }
 

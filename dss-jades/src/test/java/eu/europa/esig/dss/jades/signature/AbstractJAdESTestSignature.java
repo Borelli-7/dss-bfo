@@ -46,10 +46,10 @@ import eu.europa.esig.dss.jades.validation.JWS;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.spi.DSSASN1Utils;
 import eu.europa.esig.dss.spi.DSSUtils;
+import eu.europa.esig.dss.spi.SignatureCertificateSource;
+import eu.europa.esig.dss.spi.signature.AdvancedSignature;
 import eu.europa.esig.dss.test.signature.AbstractPkiFactoryTestDocumentSignatureService;
 import eu.europa.esig.dss.utils.Utils;
-import eu.europa.esig.dss.spi.signature.AdvancedSignature;
-import eu.europa.esig.dss.spi.SignatureCertificateSource;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.validationreport.jaxb.SignatureIdentifierType;
@@ -286,14 +286,30 @@ public abstract class AbstractJAdESTestSignature
 		super.checkMimeType(diagnosticData);
 
 		SignatureWrapper signature = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
-		assertNotNull(signature.getSignatureType());
-		assertEquals(getExpectedMime(), MimeType.fromMimeTypeString(signature.getSignatureType()));
+		if (getSignatureParameters().isIncludeSignatureType()) {
+			assertNotNull(signature.getSignatureType());
+			assertEquals(getExpectedMime(), MimeType.fromMimeTypeString(signature.getSignatureType()));
+		} else {
+			assertNull(signature.getSignatureType());
+		}
 	}
 
 	@Override
 	protected void checkJWSSerializationType(DiagnosticData diagnosticData) {
 		for (SignatureWrapper signatureWrapper : diagnosticData.getSignatures()) {
 			assertEquals(getSignatureParameters().getJwsSerializationType(), signatureWrapper.getJWSSerializationType());
+		}
+	}
+
+	@Override
+	protected void checkExpirationDate(DiagnosticData diagnosticData) {
+		super.checkExpirationDate(diagnosticData);
+
+		SignatureWrapper signature = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
+		if (getSignatureParameters().getExpirationTime() != null) {
+			assertNotNull(signature.getExpirationTime());
+		} else {
+			assertNull(signature.getExpirationTime());
 		}
 	}
 

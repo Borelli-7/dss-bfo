@@ -20,13 +20,14 @@
  */
 package eu.europa.esig.dss.jades;
 
-import eu.europa.esig.dss.signature.AbstractSignatureParameters;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.JWSSerializationType;
 import eu.europa.esig.dss.enumerations.SigDMechanism;
 import eu.europa.esig.dss.enumerations.SignatureForm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
+import eu.europa.esig.dss.signature.AbstractSignatureParameters;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -59,6 +60,14 @@ public class JAdESSignatureParameters extends AbstractSignatureParameters<JAdEST
 	 *           the signing-certificate is defined within the signature parameters).
 	 */
 	private boolean includeKeyIdentifier = true;
+
+	/**
+	 * This property defines the value of the 'cty' (content type) header parameter.
+	 * When set, the value of 'cty' header parameter will be defined with a given String.
+	 * If not set, the value of 'cty' header parameter will be derived from a MimeType of the signer document
+	 * (except for detached packaging).
+	 */
+	private String contentType;
 
 	/**
 	 * This property defines a value for the 'x5u' signed header parameter. The value shall refer to a URI where
@@ -117,6 +126,12 @@ public class JAdESSignatureParameters extends AbstractSignatureParameters<JAdEST
 	 * Identifies a type of claimed signing time header to be used on JAdES signature creation
 	 */
 	private JAdESSigningTimeType jadesSigningTimeType = JAdESSigningTimeType.IAT;
+
+	/**
+	 * The value of the 'exp' (expiration time) signed header parameter as per ETSI TS 119 411-5.
+	 * The value is used for a TLS Certificate Binding signature and contains the expiry date of the binding.
+	 */
+	private Date expirationTime;
 
 	/**
 	 * Default constructor instantiating object with default parameters
@@ -215,6 +230,31 @@ public class JAdESSignatureParameters extends AbstractSignatureParameters<JAdEST
 	 */
 	public void setIncludeKeyIdentifier(boolean includeKeyIdentifier) {
 		this.includeKeyIdentifier = includeKeyIdentifier;
+	}
+
+	/**
+	 * Gets value of the 'cty' (content type) signed header parameter is to be included in
+	 * a protected header of the signature.
+	 *
+	 * @return {@link String} value of the 'cty' (content type) signed header parameter
+	 */
+	public String getContentType() {
+		return contentType;
+	}
+
+	/**
+	 * Sets value of the 'cty' (content type) signed header parameter is to be included in
+	 * a protected header of the signature.
+	 * When set, the 'cty' (content type) protected header parameter will be created and use the given value
+	 * (omitting "application/" prefix, if applicable).
+	 * If not set, the value of the 'cty' (content type) protected header parameter will be derived from
+	 * a MimeType of the signer document (except when a 'sigD' mechanism is used).
+	 *
+	 * @param contentType {@link String} value of the 'cty' (content type) signed header parameter
+	 *                                   to be included in a protected header of the signature
+	 */
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 
 	/**
@@ -326,6 +366,29 @@ public class JAdESSignatureParameters extends AbstractSignatureParameters<JAdEST
 	 */
 	public void setJadesSigningTimeType(JAdESSigningTimeType jadesSigningTimeType) {
 		this.jadesSigningTimeType = jadesSigningTimeType;
+	}
+
+	/**
+	 * Gets the expiration time of the signature.
+	 * NOTE: The signed header is used for an ETSI TS 119 411-5 TLS Certificate Binding signature and
+	 * contains an expiry date of the binding.
+	 *
+	 * @return {@link Date}
+	 */
+	public Date getExpirationTime() {
+		return expirationTime;
+	}
+
+	/**
+	 * Sets the value for the 'exp' (expiration time) signed header of the signature.
+	 * The claim identifies the expiration time on or after which the signature should not be accepted for processing.
+	 * NOTE: The signed header is used for an ETSI TS 119 411-5 TLS Certificate Binding signature and
+	 * contains an expiry date of the binding.
+	 *
+	 * @param expirationTime {@link Date}
+	 */
+	public void setExpirationTime(Date expirationTime) {
+		this.expirationTime = expirationTime;
 	}
 
 	/**

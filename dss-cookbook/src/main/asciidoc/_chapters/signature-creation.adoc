@@ -583,13 +583,16 @@ Unsigned attributes are not obligatory and can be added after the signature crea
                                                                |_class JAdESSignatureParameters_ +
                                                                 *#setSigningCertificateDigestMethod* +
                                                                 *(DigestAlgorithm.SHA256)*                              |/                                    |/                                        |/                                                          |x5t#S256
-.3+|B-Level      .3+|Signed attributes                         |_class JAdESSignatureParameters_ +
+.4+|B-Level      .4+|Signed attributes                         |_class JAdESSignatureParameters_ +
                                                                 *#setSigDMechanism*                                     |/                                    |/                                        |/                                                          |sigD
                                                                |_class JAdESSignatureParameters_ +
                                                                 *#setBase64UrlEncodedPayload*                           |/                                    |/                                        |/                                                          |b64
                                                                |_class DSSDocument_ (for signer document) +
-                                                                *#setMimeType*                                          |DataObjectFormat/MimeType            |mime-type                                |/                                                          |cty
-
+                                                                *#setMimeType*  _or_ +
+                                                                _class JAdESSignatureParameters_ +
+                                                                *#setContentType*                                       |DataObjectFormat/MimeType            |mime-type                                |/                                                          |cty
+                                                               |_class JAdESSignatureParameters_ +
+                                                                *#setExpirationTime*                                    |/                                    |/                                        |/                                                          |exp
 
 .3+|B-Level      .3+|Unsigned attributes                       |_class *AdESService_ +
                                                                 **#getDataToBeCounterSigned** +

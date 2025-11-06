@@ -1641,6 +1641,10 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 		}
 	}
 
+	protected void checkExpirationDate(DiagnosticData diagnosticData) {
+		// not implemented by default
+	}
+
 	protected void checkNoDuplicateTimestamps(List<TimestampWrapper> timestampTokens) {
 		Set<String> tstIds = timestampTokens.stream().map(TimestampWrapper::getId).collect(Collectors.toSet());
 		assertEquals(timestampTokens.size(), tstIds.size());

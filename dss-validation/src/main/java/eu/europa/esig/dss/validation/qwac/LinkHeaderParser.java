@@ -1,10 +1,9 @@
 package eu.europa.esig.dss.validation.qwac;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,14 +11,6 @@ import java.util.Map;
  *
  */
 public class LinkHeaderParser {
-
-    private static final Logger LOG = LoggerFactory.getLogger(LinkHeaderParser.class);
-
-    /** Represents a "rel" (relation type) attribute of the "Link" response header */
-    private static final String RELATION_TYPE = "rel";
-
-    /** Represents "tls-certificate-binding" value of "rel" attribute identifying a Link to a TLS/SSL binding signature file */
-    private static final String TLS_CERTIFICATE_BINDING = "tls-certificate-binding";
 
     /**
      * Default constructor
@@ -29,83 +20,122 @@ public class LinkHeaderParser {
     }
 
     /**
-     * Parses the "Link" header value
+     * Parses a full Link header into 1..n LinkHeader objects.
      *
-     * @param headerValueStr {@link String} representing the "Link" header value content
-     * @return {@link LinkHeader}
+     * @param headerValueStr Link header value string
+     * @return list of parsed LinkHeader entries (never null)
      */
-    public LinkHeader parse(String headerValueStr) {
+    public List<LinkHeader> parse(String headerValueStr) {
         if (headerValueStr == null || headerValueStr.trim().isEmpty()) {
             throw new IllegalArgumentException("Link header cannot be null or empty");
         }
 
-        final LinkHeader linkHeader = new LinkHeader();
+        List<LinkHeader> result = new ArrayList<>();
 
-        // Trim spaces and ensure we start with "<"
-        headerValueStr = headerValueStr.trim();
+        // One header can have multiple links, separated by a comma
+        // BUT commas inside quotes must not split entries
+        List<String> linkValues = splitHeaderValues(headerValueStr);
 
-        // Extract the URL from within the angle brackets
-        int urlStart = headerValueStr.indexOf('<');
-        if (urlStart != 0) {
-            throw new IllegalArgumentException("Link header should start with '<' for the URL");
+        for (String linkValue : linkValues) {
+            LinkHeader header = parseSingleLink(linkValue.trim());
+            result.add(header);
+        }
+
+        return result;
+    }
+
+    /**
+     * Splits a header by commas while respecting quoted values.
+     */
+    private List<String> splitHeaderValues(String headerValueStr) {
+        List<String> values = new ArrayList<>();
+
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < headerValueStr.length(); i++) {
+            char c = headerValueStr.charAt(i);
+
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            }
+
+            if (c == ',' && !inQuotes) {
+                values.add(current.toString());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+
+        if (current.length() > 0) {
+            values.add(current.toString());
+        }
+
+        return values;
+    }
+
+    /**
+     * Parses a single <url>; param1=...; param2=...
+     */
+    private LinkHeader parseSingleLink(String headerValueStr) {
+        if (!headerValueStr.startsWith("<")) {
+            throw new IllegalArgumentException("Link entry must start with '<': " + headerValueStr);
         }
 
         int urlEnd = headerValueStr.indexOf('>');
         if (urlEnd == -1) {
-            throw new IllegalArgumentException("Invalid Link header format, missing closing '>' for URL");
+            throw new IllegalArgumentException("Missing '>' in Link entry: " + headerValueStr);
         }
 
-        // Set the URL
-        linkHeader.setUrl(headerValueStr.substring(urlStart + 1, urlEnd).trim());
-
-        // Parse any attributes following the URL
+        String url = headerValueStr.substring(1, urlEnd).trim();
         Map<String, String> attributes = new HashMap<>();
+
+        // Remaining attributes after >
         String attributesPart = headerValueStr.substring(urlEnd + 1).trim();
 
         if (!attributesPart.isEmpty()) {
+            // Split by semicolons
             String[] parts = attributesPart.split(";");
             for (String part : parts) {
                 part = part.trim();
-                if (part.isEmpty()) {
-                    continue;
-                }
+                if (part.isEmpty()) continue;
 
-                // Split each part into key and value
                 String[] keyValue = part.split("=", 2);
                 if (keyValue.length == 2) {
                     String key = keyValue[0].trim();
-                    String value = keyValue[1].trim().replaceAll("^\"(.*)\"$", "$1"); // remove quotes around value
+                    String value = keyValue[1].trim();
+                    value = stripQuotes(value);
                     attributes.put(key, value);
                 } else {
-                    throw new IllegalArgumentException("Invalid Link header attribute format: " + part);
+                    // attribute without "=", allowed by RFC 8288 (flags)
+                    attributes.put(part, null);
                 }
             }
-
-        } else {
-            LOG.debug("No attributes found within a 'Link' response header value.");
         }
 
-        // Set the parsed attributes
-        linkHeader.setAttributes(attributes);
-
-        return linkHeader;
+        LinkHeader header = new LinkHeader();
+        header.setUrl(url);
+        header.setAttributes(attributes);
+        return header;
     }
 
     /**
-     * Checks whether the "Link" header attributes contain a rel value of tls-certificate-binding
-     *
-     * @param linkHeader {@link LinkHeader} to check
-     * @return TRUE if the "Link" attributes is for TLS Certificate Binding, FALSE otherwise
+     * Removes surrounding quotes if present
      */
-    private boolean isTLSCertificateBindingRel(LinkHeader linkHeader) {
-        return TLS_CERTIFICATE_BINDING.equals(linkHeader.getAttributes().get(RELATION_TYPE));
+    private String stripQuotes(String value) {
+        value = value.trim();
+        if (value.startsWith("\"") && value.endsWith("\"") && value.length() > 1) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
     }
 
     /**
      * Represents a parsed value of the "Link" HTTP response header
      *
      */
-    public class LinkHeader implements Serializable {
+    public static class LinkHeader implements Serializable {
 
         private static final long serialVersionUID = 5652555158066131132L;
 

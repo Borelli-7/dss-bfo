@@ -4,6 +4,7 @@ import eu.europa.esig.dss.diagnostic.CertificateWrapper;
 import eu.europa.esig.dss.diagnostic.SignatureWrapper;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestMatcher;
 import eu.europa.esig.dss.enumerations.DigestMatcherType;
+import eu.europa.esig.dss.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,12 @@ public class QWACUtils {
     /** Represents a "Link" response header */
     private static final String HEADER_LINK = "Link";
 
+    /** Represents a "rel" (relation type) attribute of the "Link" response header */
+    private static final String RELATION_TYPE = "rel";
+
+    /** Represents "tls-certificate-binding" value of "rel" attribute identifying a Link to a TLS/SSL binding signature file */
+    private static final String TLS_CERTIFICATE_BINDING = "tls-certificate-binding";
+
     /**
      * Default constructor
      */
@@ -37,6 +44,10 @@ public class QWACUtils {
      * @return {@link String} TSL Certificate Binding URL
      */
     public static String getTLSCertificateBindingUrl(Map<String, List<String>> headers) {
+        if (headers == null) {
+            return null;
+        }
+
         List<String> headerValues = headers.get(HEADER_LINK);
         if (headerValues == null) {
             LOG.debug("No Link header found in the obtained map of headers.");
@@ -45,10 +56,14 @@ public class QWACUtils {
 
         for (String linkHeaderValue : headerValues) {
             try {
-                LinkHeaderParser.LinkHeader linkHeader = new LinkHeaderParser().parse(linkHeaderValue);
-                if (linkHeader != null) {
-                    LOG.debug("'Link' header value was obtained from with value '{}'", linkHeader.getUrl());
-                    return linkHeader.getUrl();
+                List<LinkHeaderParser.LinkHeader> linkHeader = new LinkHeaderParser().parse(linkHeaderValue);
+                if (Utils.isCollectionNotEmpty(linkHeader)) {
+                    for (LinkHeaderParser.LinkHeader singleHeaderValue : linkHeader) {
+                        if (isTLSCertificateBindingRel(singleHeaderValue)) {
+                            LOG.debug("'Link' header value was obtained from with value '{}'", singleHeaderValue.getUrl());
+                            return singleHeaderValue.getUrl();
+                        }
+                    }
                 }
 
             } catch (Exception e) {
@@ -58,6 +73,16 @@ public class QWACUtils {
         }
         LOG.debug("No Link header contains a rel value of tls-certificate-binding.");
         return null;
+    }
+
+    /**
+     * Checks whether the "Link" header attributes contain a rel value of tls-certificate-binding
+     *
+     * @param linkHeader {@link LinkHeaderParser.LinkHeader} to check
+     * @return TRUE if the "Link" attributes is for TLS Certificate Binding, FALSE otherwise
+     */
+    private static boolean isTLSCertificateBindingRel(LinkHeaderParser.LinkHeader linkHeader) {
+        return TLS_CERTIFICATE_BINDING.equals(linkHeader.getAttributes().get(RELATION_TYPE));
     }
 
     /**

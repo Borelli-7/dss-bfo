@@ -4,7 +4,6 @@ import eu.europa.esig.dss.diagnostic.CertificateWrapper;
 import eu.europa.esig.dss.diagnostic.SignatureWrapper;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestMatcher;
 import eu.europa.esig.dss.enumerations.DigestMatcherType;
-import eu.europa.esig.dss.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +65,7 @@ public class QWACUtils {
      *
      * @param signature {@link SignatureWrapper}
      * @param certificates a list of {@link CertificateWrapper} candidates
-     * @return
+     * @return a list of {@link CertificateWrapper} identified TLS/SSL certificates
      */
     public static List<CertificateWrapper> getIdentifiedTLSCertificates(SignatureWrapper signature,
                                                                         List<CertificateWrapper> certificates) {
@@ -74,12 +73,10 @@ public class QWACUtils {
         for (XmlDigestMatcher digestMatcher : signature.getDigestMatchers()) {
             if (DigestMatcherType.SIG_D_ENTRY == digestMatcher.getType()
                     && digestMatcher.isDataFound() && digestMatcher.isDataIntact()
-                    && Utils.isCollectionNotEmpty(digestMatcher.getDataObjectReferences())) {
-                for (String tokenId : digestMatcher.getDataObjectReferences()) {
-                    for (CertificateWrapper certificate : certificates) {
-                        if (tokenId.equals(certificate.getId())) {
-                            result.add(certificate);
-                        }
+                    && digestMatcher.getDocumentName() != null) {
+                for (CertificateWrapper certificate : certificates) {
+                    if (digestMatcher.getDocumentName().equals(certificate.getId())) {
+                        result.add(certificate);
                     }
                 }
             }

@@ -32,7 +32,6 @@ import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.validation.process.bbb.AbstractMultiValuesCheckItem;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -66,14 +65,14 @@ public class ContentTypeCheck extends AbstractMultiValuesCheckItem<XmlSAV> {
 	}
 
 	private List<String> getContentType() {
-		if (signature.getContentType() == null) {
-			return Collections.emptyList();
-		}
-
 		final List<String> contentTypes = new ArrayList<>();
-		contentTypes.add(signature.getContentType());
-		if (SignatureForm.JAdES == signature.getSignatureFormat().getSignatureForm()) {
-			contentTypes.add(getRFC7515ContentType(signature.getContentType()));
+		if (signature.getContentType() != null) {
+			contentTypes.add(signature.getContentType());
+		}
+		// NOTE: 'cty' (content type) signed header is used to define signed content's MimeType (see 102-2).
+		// The check is merged for simplicity of the users.
+		if (SignatureForm.JAdES == signature.getSignatureFormat().getSignatureForm() && signature.getMimeType() != null) {
+			contentTypes.add(getRFC7515ContentType(signature.getMimeType()));
 		}
 		return contentTypes;
 	}

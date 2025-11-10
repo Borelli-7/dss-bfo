@@ -57,16 +57,16 @@ public class TLSCertificateBindingSignatureExpiryDateCheck extends ChainItem<Xml
          * the longest-lived TLS certificate identified in the sigD member payload (below),
          * or the notAfter time of the signing certificate.
          */
-        if (signature.getExpirationTime() != null && currentTime.before(signature.getExpirationTime())) {
+        if (signature.getExpirationTime() != null && !currentTime.before(signature.getExpirationTime())) {
             return false;
         }
         for (CertificateWrapper certificate : getIdentifiedTLSCertificates()) {
-            if (certificate.getNotAfter() != null && currentTime.before(certificate.getNotAfter())) {
+            if (certificate.getNotAfter() != null && !currentTime.before(certificate.getNotAfter())) {
                 return false;
             }
         }
         if (signature.getSigningCertificate() != null && signature.getSigningCertificate().getNotAfter() != null
-                && currentTime.before(signature.getSigningCertificate().getNotAfter())) {
+                && !currentTime.before(signature.getSigningCertificate().getNotAfter())) {
             return false;
         }
         return true;
@@ -78,18 +78,18 @@ public class TLSCertificateBindingSignatureExpiryDateCheck extends ChainItem<Xml
 
     @Override
     protected String buildAdditionalInfo() {
-        if (signature.getExpirationTime() != null && currentTime.before(signature.getExpirationTime())) {
+        if (signature.getExpirationTime() != null && !currentTime.before(signature.getExpirationTime())) {
             return i18nProvider.getMessage(MessageTag.QWAC_EXPIRY_EXP, ValidationProcessUtils.getFormattedDate(currentTime),
                     ValidationProcessUtils.getFormattedDate(signature.getExpirationTime()));
         }
         for (CertificateWrapper certificate : getIdentifiedTLSCertificates()) {
-            if (certificate.getNotAfter() != null && currentTime.before(certificate.getNotAfter())) {
+            if (certificate.getNotAfter() != null && !currentTime.before(certificate.getNotAfter())) {
                 return i18nProvider.getMessage(MessageTag.QWAC_EXPIRY_EXP, ValidationProcessUtils.getFormattedDate(currentTime),
                         ValidationProcessUtils.getFormattedDate(certificate.getNotAfter()), certificate.getId());
             }
         }
         if (signature.getSigningCertificate() != null && signature.getSigningCertificate().getNotAfter() != null
-                && currentTime.before(signature.getSigningCertificate().getNotAfter())) {
+                && !currentTime.before(signature.getSigningCertificate().getNotAfter())) {
             return i18nProvider.getMessage(MessageTag.QWAC_EXPIRY_EXP, ValidationProcessUtils.getFormattedDate(currentTime),
                     ValidationProcessUtils.getFormattedDate(signature.getSigningCertificate().getNotAfter()),
                     signature.getSigningCertificate().getId());

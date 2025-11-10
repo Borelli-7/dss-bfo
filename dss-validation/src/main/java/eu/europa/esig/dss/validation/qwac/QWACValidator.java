@@ -5,7 +5,6 @@ import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.http.ResponseEnvelope;
 import eu.europa.esig.dss.model.x509.CertificateToken;
-import eu.europa.esig.dss.spi.DSSASN1Utils;
 import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.client.http.AdvancedDataLoader;
 import eu.europa.esig.dss.spi.client.http.NativeHTTPDataLoader;
@@ -23,7 +22,6 @@ import eu.europa.esig.dss.validation.executor.certificate.qwac.QWACCertificatePr
 import eu.europa.esig.dss.validation.reports.CertificateReports;
 import eu.europa.esig.dss.validation.reports.diagnostic.DiagnosticDataBuilder;
 import eu.europa.esig.dss.validation.reports.diagnostic.QWACCertificateDiagnosticDataBuilder;
-import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -247,8 +245,7 @@ public class QWACValidator extends AbstractCertificateValidator<CertificateRepor
 
     private DSSDocument toDSSDocument(CertificateToken certificate) {
         try {
-            return new InMemoryDocument(certificate.getEncoded(),
-                    DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.CN, certificate.getSubject()));
+            return new InMemoryDocument(certificate.getEncoded(), identifierProvider.getIdAsString(certificate));
         } catch (Exception e) {
             LOG.warn("Unable to load certificate : {}. The entry is skipped.", e.getMessage(), e);
             return null;

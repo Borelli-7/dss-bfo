@@ -174,7 +174,7 @@ public class SignatureQualificationBlock extends Chain<XmlValidationSignatureQua
 				result.getValidationCertificateQualification().add(certQualAtIssuanceResult);
 				qualificationAtIssuanceTime = certQualAtIssuanceResult.getCertificateQualification();
 	
-				CertQualificationAtTimeBlock certQualAtSigningTimeBlock = new CertQualificationAtTimeBlock(i18nProvider, ValidationTime.BEST_SIGNATURE_TIME, bestSignatureTime,
+				CertQualificationAtTimeBlock certQualAtSigningTimeBlock = new CertQualificationAtTimeBlock(i18nProvider, getValidationTimeAtSigningTime(), bestSignatureTime,
 						signingCertificate, acceptableServices);
 				XmlValidationCertificateQualification certQualAtSigningTimeResult = certQualAtSigningTimeBlock.execute();
 				result.getValidationCertificateQualification().add(certQualAtSigningTimeResult);
@@ -228,6 +228,15 @@ public class SignatureQualificationBlock extends Chain<XmlValidationSignatureQua
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Gets the validation time type at the signing time
+	 *
+	 * @return {@link ValidationTime}
+	 */
+	protected ValidationTime getValidationTimeAtSigningTime() {
+		return ValidationTime.BEST_SIGNATURE_TIME;
 	}
 
 	@Override

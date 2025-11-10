@@ -7,8 +7,7 @@
             target certificate and certificates used to validate certificate validity status services - CRLs, OCSP).
         </PolicyDescription>
     </ValidationPolicy>
-    <Certificate>
-        <id>C-8ECE05699B2196B46CBB3078FB2F2213C9C04EAF717FD1EBD2F853FA40656009</id>
+    <Certificate Id="C-8ECE05699B2196B46CBB3078FB2F2213C9C04EAF717FD1EBD2F853FA40656009">
         <subject>
             <commonName>www.harica.gr</commonName>
             <organizationName>Greek Universities Network</organizationName>
@@ -51,8 +50,7 @@
             <Error Key="BBB_XCV_CCCBB_ANS">The certificate chain is not trusted, it does not contain a trust anchor.</Error>
         </X509ValidationDetails>
         <Chain>
-            <ChainItem>
-                <id>C-3485C3DFE98C5D5428653479BB90627580EE892890A62DA0D9ABCE3A2002E8E4</id>
+            <ChainItem Id="C-3485C3DFE98C5D5428653479BB90627580EE892890A62DA0D9ABCE3A2002E8E4">
                 <subject>
                     <commonName>HARICA Qualified Web Authentication Certificates RSA</commonName>
                     <organizationName>Greek Universities Network (GUnet)</organizationName>
@@ -88,8 +86,7 @@
                 </X509ValidationDetails>
                 <Chain/>
             </ChainItem>
-            <ChainItem>
-                <id>C-4ACD8DC6020A545A858943A553B5E0F3FC5B859AEA1746650D69CF1210F956D8</id>
+            <ChainItem Id="C-4ACD8DC6020A545A858943A553B5E0F3FC5B859AEA1746650D69CF1210F956D8">
                 <subject>
                     <commonName>HARICA TLS RSA Root CA 2021</commonName>
                     <organizationName>Hellenic Academic and Research Institutions CA</organizationName>
@@ -121,8 +118,7 @@
                 </X509ValidationDetails>
                 <Chain/>
             </ChainItem>
-            <ChainItem>
-                <id>C-A040929A02CE53B4ACF4F2FFC6981CE4496F755E6D45FE0B2A692BCD52523F36</id>
+            <ChainItem Id="C-A040929A02CE53B4ACF4F2FFC6981CE4496F755E6D45FE0B2A692BCD52523F36">
                 <subject>
                     <commonName>Hellenic Academic and Research Institutions RootCA 2015</commonName>
                     <organizationName>Hellenic Academic and Research Institutions Cert. Authority</organizationName>

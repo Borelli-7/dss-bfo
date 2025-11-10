@@ -22,12 +22,14 @@ package eu.europa.esig.dss.simplecertificatereport;
 
 import eu.europa.esig.dss.enumerations.CertificateQualification;
 import eu.europa.esig.dss.enumerations.Indication;
+import eu.europa.esig.dss.enumerations.QWACProfile;
 import eu.europa.esig.dss.enumerations.RevocationReason;
 import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.jaxb.object.Message;
 import eu.europa.esig.dss.simplecertificatereport.jaxb.XmlChainItem;
 import eu.europa.esig.dss.simplecertificatereport.jaxb.XmlMessage;
 import eu.europa.esig.dss.simplecertificatereport.jaxb.XmlRevocation;
+import eu.europa.esig.dss.simplecertificatereport.jaxb.XmlSignature;
 import eu.europa.esig.dss.simplecertificatereport.jaxb.XmlSimpleCertificateReport;
 import eu.europa.esig.dss.simplecertificatereport.jaxb.XmlTrustAnchor;
 
@@ -574,6 +576,84 @@ public class SimpleCertificateReport {
 	}
 
 	/**
+	 * This method returns the QWAC validation result as per ETSI TS 119 411-5.
+	 * NOTE: Applicable only when validation process is executed using the {@code eu.europa.esig.dss.validation.qwac.QWACValidator}
+	 *
+	 * @return {@link QWACProfile}
+	 */
+	public QWACProfile getQWACProfile() {
+		XmlChainItem cert = getFirstCertificate();
+		return cert.getQwacProfile();
+	}
+
+	/**
+	 * Gets the TLS Certificate Binging signature.
+	 * NOTE: Applicable only when validation process is executed using the {@code eu.europa.esig.dss.validation.qwac.QWACValidator}
+	 *
+	 * @return {@link XmlSignature}
+	 */
+	public XmlSignature getTLSBindingSignature() {
+		XmlChainItem cert = getFirstCertificate();
+		return cert.getTLSBindingSignature();
+	}
+
+	/**
+	 * Gets the Indication for the TLS Certificate Binging signature validation.
+	 * NOTE: Applicable only when validation process is executed using the {@code eu.europa.esig.dss.validation.qwac.QWACValidator}
+	 *
+	 * @return {@link Indication}
+	 */
+	public Indication getTLSBindingSignatureIndication() {
+		XmlSignature tlsBindingSignature = getTLSBindingSignature();
+		if (tlsBindingSignature != null) {
+			return tlsBindingSignature.getIndication();
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the SubIndication for the TLS Certificate Binging signature validation.
+	 * NOTE: Applicable only when validation process is executed using the {@code eu.europa.esig.dss.validation.qwac.QWACValidator}
+	 *
+	 * @return {@link SubIndication}
+	 */
+	public SubIndication getTLSBindingSignatureSubIndication() {
+		XmlSignature tlsBindingSignature = getTLSBindingSignature();
+		if (tlsBindingSignature != null) {
+			return tlsBindingSignature.getSubIndication();
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the Indication for the TLS Certificate Binging signature validation.
+	 * NOTE: Applicable only when validation process is executed using the {@code eu.europa.esig.dss.validation.qwac.QWACValidator}
+	 *
+	 * @return {@link Indication}
+	 */
+	public XmlChainItem getTLSBindingSignatureIssuerCertificate() {
+		XmlSignature tlsBindingSignature = getTLSBindingSignature();
+		if (tlsBindingSignature != null && tlsBindingSignature.getChain() != null && !tlsBindingSignature.getChain().isEmpty()) {
+			return tlsBindingSignature.getChain().get(0);
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the Indication for the TLS Certificate Binging signature validation.
+	 * NOTE: Applicable only when validation process is executed using the {@code eu.europa.esig.dss.validation.qwac.QWACValidator}
+	 *
+	 * @return {@link Indication}
+	 */
+	public QWACProfile getTLSBindingSignatureIssuerCertificateQWACProfile() {
+		XmlChainItem xmlChainItem = getTLSBindingSignatureIssuerCertificate();
+		if (xmlChainItem != null) {
+			return xmlChainItem.getQwacProfile();
+		}
+		return null;
+	}
+
+	/**
 	 * This method returns a Set of trust anchor VAT numbers
 	 * 
 	 * @return a Set of VAT numbers
@@ -627,6 +707,16 @@ public class SimpleCertificateReport {
 				return certificate;
 			}
 			List<XmlChainItem> chain = certificate.getChain();
+			for (XmlChainItem xmlChainItem : chain) {
+				if (certificateId.equals(xmlChainItem.getId())) {
+					return xmlChainItem;
+				}
+			}
+		}
+
+		XmlSignature tlsBindingSignature = getTLSBindingSignature();
+		if (tlsBindingSignature != null) {
+			List<XmlChainItem> chain = tlsBindingSignature.getChain();
 			for (XmlChainItem xmlChainItem : chain) {
 				if (certificateId.equals(xmlChainItem.getId())) {
 					return xmlChainItem;

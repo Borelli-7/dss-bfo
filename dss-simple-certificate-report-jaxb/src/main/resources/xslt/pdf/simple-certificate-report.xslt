@@ -134,7 +134,7 @@
 						<fo:block>
 							<xsl:attribute name="font-weight">bold</xsl:attribute>
 
-							<xsl:text>Certificate: </xsl:text><xsl:value-of select="dss:id"/>
+							<xsl:text>Certificate: </xsl:text><xsl:value-of select="@Id"/>
 						</fo:block>
 					</fo:table-cell>
 				</fo:table-row>
@@ -709,185 +709,196 @@
     </xsl:template>
 
 	<xsl:template match="dss:TLSBindingSignature">
-		<xsl:variable name="nodeName" select="name()" />
+		<fo:block-container>
+			<fo:block>
+				<xsl:attribute name="margin-top">7px</xsl:attribute>
+				<xsl:attribute name="margin-bottom">2px</xsl:attribute>
+				<xsl:attribute name="font-size">8pt</xsl:attribute>
 
-		<xsl:variable name="indicationText" select="dss:Indication/text()"/>
-		<xsl:variable name="idToken" select="@Id" />
-		<xsl:variable name="indicationColor">
-			<xsl:choose>
-				<xsl:when test="$indicationText='TOTAL_PASSED'">green</xsl:when>
-				<xsl:when test="$indicationText='PASSED'">green</xsl:when>
-				<xsl:when test="$indicationText='INDETERMINATE'">orange</xsl:when>
-				<xsl:when test="$indicationText='FAILED'">red</xsl:when>
-				<xsl:when test="$indicationText='TOTAL_FAILED'">red</xsl:when>
-			</xsl:choose>
-		</xsl:variable>
+				<xsl:attribute name="font-weight">bold</xsl:attribute>
+				TLS Certificate Binding signature:
+			</fo:block>
+		</fo:block-container>
+		<fo:block-container>
+			<fo:block>
+				<xsl:variable name="indicationText" select="dss:Indication/text()"/>
+				<xsl:variable name="idToken" select="@Id" />
+				<xsl:variable name="indicationColor">
+					<xsl:choose>
+						<xsl:when test="$indicationText='TOTAL_PASSED'">green</xsl:when>
+						<xsl:when test="$indicationText='PASSED'">green</xsl:when>
+						<xsl:when test="$indicationText='INDETERMINATE'">orange</xsl:when>
+						<xsl:when test="$indicationText='FAILED'">red</xsl:when>
+						<xsl:when test="$indicationText='TOTAL_FAILED'">red</xsl:when>
+					</xsl:choose>
+				</xsl:variable>
 
-		<fo:table table-layout="fixed">
-			<xsl:attribute name="id">tls-binding-signature</xsl:attribute>
+				<fo:table table-layout="fixed">
+					<xsl:attribute name="id">tls-binding-signature</xsl:attribute>
 
-			<xsl:attribute name="margin-top">7px</xsl:attribute>
-			<xsl:attribute name="margin-bottom">5px</xsl:attribute>
+					<xsl:attribute name="margin-top">7px</xsl:attribute>
+					<xsl:attribute name="margin-bottom">5px</xsl:attribute>
 
-			<fo:table-body>
-				<xsl:attribute name="start-indent">0</xsl:attribute>
-				<xsl:attribute name="end-indent">0</xsl:attribute>
+					<fo:table-body>
+						<xsl:attribute name="start-indent">0</xsl:attribute>
+						<xsl:attribute name="end-indent">0</xsl:attribute>
 
-				<fo:table-row>
+						<fo:table-row>
 
-					<xsl:attribute name="font-weight">bold</xsl:attribute>
+							<xsl:attribute name="font-weight">bold</xsl:attribute>
 
-					<xsl:attribute name="border-bottom-style">solid</xsl:attribute>
+							<xsl:attribute name="border-bottom-style">solid</xsl:attribute>
+							<xsl:attribute name="border-color">#004494</xsl:attribute>
+							<xsl:attribute name="border-width">1px</xsl:attribute>
+
+							<xsl:attribute name="margin-bottom">2px</xsl:attribute>
+
+							<fo:table-cell>
+								<fo:block>
+									<xsl:attribute name="font-weight">bold</xsl:attribute>
+
+									<xsl:text>Signature: </xsl:text><xsl:value-of select="$idToken" />
+								</fo:block>
+							</fo:table-cell>
+						</fo:table-row>
+
+					</fo:table-body>
+				</fo:table>
+
+				<fo:block-container>
+					<xsl:attribute name="border-left-style">solid</xsl:attribute>
 					<xsl:attribute name="border-color">#004494</xsl:attribute>
 					<xsl:attribute name="border-width">1px</xsl:attribute>
 
-					<xsl:attribute name="margin-bottom">2px</xsl:attribute>
+					<xsl:attribute name="margin-top">5px</xsl:attribute>
+					<xsl:attribute name="margin-bottom">5px</xsl:attribute>
 
-					<fo:table-cell>
-						<fo:block>
-							<xsl:attribute name="font-weight">bold</xsl:attribute>
+					<fo:block-container>
+						<xsl:attribute name="margin-left">10px</xsl:attribute>
+						<fo:block-container>
+							<xsl:attribute name="margin">0</xsl:attribute>
 
-							<xsl:text>Signature: </xsl:text><xsl:value-of select="$idToken" />
-						</fo:block>
-					</fo:table-cell>
-				</fo:table-row>
+							<fo:table table-layout="fixed">
+								<xsl:attribute name="font-size">7pt</xsl:attribute>
 
-			</fo:table-body>
-		</fo:table>
+								<fo:table-column>
+									<xsl:attribute name="column-width">25%</xsl:attribute>
+								</fo:table-column>
+								<fo:table-column>
+									<xsl:attribute name="column-width">75%</xsl:attribute>
+								</fo:table-column>
+								<fo:table-body>
 
-		<fo:block-container>
-			<xsl:attribute name="border-left-style">solid</xsl:attribute>
-			<xsl:attribute name="border-color">#004494</xsl:attribute>
-			<xsl:attribute name="border-width">1px</xsl:attribute>
-
-			<xsl:attribute name="margin-top">5px</xsl:attribute>
-			<xsl:attribute name="margin-bottom">5px</xsl:attribute>
-
-			<fo:block-container>
-				<xsl:attribute name="margin-left">10px</xsl:attribute>
-				<fo:block-container>
-					<xsl:attribute name="margin">0</xsl:attribute>
-
-					<fo:table table-layout="fixed">
-						<xsl:attribute name="font-size">7pt</xsl:attribute>
-
-						<fo:table-column>
-							<xsl:attribute name="column-width">25%</xsl:attribute>
-						</fo:table-column>
-						<fo:table-column>
-							<xsl:attribute name="column-width">75%</xsl:attribute>
-						</fo:table-column>
-						<fo:table-body>
-
-							<xsl:if test="dss:Url">
-								<fo:table-row>
-									<xsl:attribute name="margin-top">1px</xsl:attribute>
-									<xsl:attribute name="margin-bottom">1px</xsl:attribute>
-									<fo:table-cell>
-										<fo:block>
+									<xsl:if test="dss:Url">
+										<fo:table-row>
 											<xsl:attribute name="margin-top">1px</xsl:attribute>
 											<xsl:attribute name="margin-bottom">1px</xsl:attribute>
+											<fo:table-cell>
+												<fo:block>
+													<xsl:attribute name="margin-top">1px</xsl:attribute>
+													<xsl:attribute name="margin-bottom">1px</xsl:attribute>
 
-											<xsl:attribute name="font-weight">bold</xsl:attribute>
-											URL:
-										</fo:block>
-									</fo:table-cell>
-									<fo:table-cell>
-										<fo:block>
+													<xsl:attribute name="font-weight">bold</xsl:attribute>
+													URL:
+												</fo:block>
+											</fo:table-cell>
+											<fo:table-cell>
+												<fo:block>
+													<xsl:attribute name="margin-top">1px</xsl:attribute>
+													<xsl:attribute name="margin-bottom">1px</xsl:attribute>
+
+													<xsl:value-of select="dss:Url" />
+												</fo:block>
+											</fo:table-cell>
+										</fo:table-row>
+									</xsl:if>
+
+									<fo:table-row>
+										<xsl:attribute name="margin-top">1px</xsl:attribute>
+										<xsl:attribute name="margin-bottom">1px</xsl:attribute>
+										<fo:table-cell>
+											<fo:block>
+												<xsl:attribute name="margin-top">1px</xsl:attribute>
+												<xsl:attribute name="margin-bottom">1px</xsl:attribute>
+
+												<xsl:attribute name="font-weight">bold</xsl:attribute>
+												Indication:
+											</fo:block>
+										</fo:table-cell>
+										<fo:table-cell>
+											<fo:block>
+												<xsl:attribute name="margin-top">1px</xsl:attribute>
+												<xsl:attribute name="margin-bottom">1px</xsl:attribute>
+
+												<xsl:attribute name="font-weight">bold</xsl:attribute>
+												<xsl:attribute name="color"><xsl:value-of select="$indicationColor" /></xsl:attribute>
+												<xsl:variable name="subIndication"><xsl:value-of select="dss:SubIndication" /></xsl:variable>
+												<xsl:value-of select="dss:Indication" /><xsl:if test="$subIndication != ''"> - <xsl:value-of select="dss:SubIndication" /></xsl:if>
+											</fo:block>
+										</fo:table-cell>
+									</fo:table-row>
+
+									<xsl:apply-templates select="dss:AdESValidationDetails" />
+
+									<xsl:if test="@SignatureFormat">
+										<fo:table-row>
 											<xsl:attribute name="margin-top">1px</xsl:attribute>
 											<xsl:attribute name="margin-bottom">1px</xsl:attribute>
+											<fo:table-cell>
+												<fo:block>
+													<xsl:attribute name="margin-top">1px</xsl:attribute>
+													<xsl:attribute name="margin-bottom">1px</xsl:attribute>
 
-											<xsl:value-of select="dss:Url" />
-										</fo:block>
-									</fo:table-cell>
-								</fo:table-row>
-							</xsl:if>
+													<xsl:attribute name="font-weight">bold</xsl:attribute>
+													Signature Format:
+												</fo:block>
+											</fo:table-cell>
+											<fo:table-cell>
+												<fo:block>
+													<xsl:attribute name="margin-top">1px</xsl:attribute>
+													<xsl:attribute name="margin-bottom">1px</xsl:attribute>
 
-							<fo:table-row>
-								<xsl:attribute name="margin-top">1px</xsl:attribute>
-								<xsl:attribute name="margin-bottom">1px</xsl:attribute>
-								<fo:table-cell>
-									<fo:block>
+													<xsl:value-of select="@SignatureFormat" />
+												</fo:block>
+											</fo:table-cell>
+										</fo:table-row>
+									</xsl:if>
+
+									<fo:table-row>
 										<xsl:attribute name="margin-top">1px</xsl:attribute>
 										<xsl:attribute name="margin-bottom">1px</xsl:attribute>
+										<fo:table-cell>
+											<fo:block>
+												<xsl:attribute name="margin-top">1px</xsl:attribute>
+												<xsl:attribute name="margin-bottom">1px</xsl:attribute>
 
-										<xsl:attribute name="font-weight">bold</xsl:attribute>
-										Indication:
-									</fo:block>
-								</fo:table-cell>
-								<fo:table-cell>
-									<fo:block>
-										<xsl:attribute name="margin-top">1px</xsl:attribute>
-										<xsl:attribute name="margin-bottom">1px</xsl:attribute>
+												<xsl:attribute name="font-weight">bold</xsl:attribute>
+												On claimed time:
+											</fo:block>
+										</fo:table-cell>
+										<fo:table-cell>
+											<fo:block>
+												<xsl:attribute name="margin-top">1px</xsl:attribute>
+												<xsl:attribute name="margin-bottom">1px</xsl:attribute>
 
-										<xsl:attribute name="font-weight">bold</xsl:attribute>
-										<xsl:attribute name="color"><xsl:value-of select="$indicationColor" /></xsl:attribute>
-										<xsl:variable name="subIndication"><xsl:value-of select="dss:SubIndication" /></xsl:variable>
-										<xsl:value-of select="dss:Indication" /><xsl:if test="$subIndication != ''"> - <xsl:value-of select="dss:SubIndication" /></xsl:if>
-									</fo:block>
-								</fo:table-cell>
-							</fo:table-row>
+												<xsl:call-template name="formatdate">
+													<xsl:with-param name="DateTimeStr" select="dss:SigningTime"/>
+												</xsl:call-template>
+											</fo:block>
+										</fo:table-cell>
+									</fo:table-row>
 
-							<xsl:apply-templates select="dss:AdESValidationDetails" />
+									<xsl:apply-templates select="dss:SignatureScope" />
 
-							<xsl:if test="@SignatureFormat">
-								<fo:table-row>
-									<xsl:attribute name="margin-top">1px</xsl:attribute>
-									<xsl:attribute name="margin-bottom">1px</xsl:attribute>
-									<fo:table-cell>
-										<fo:block>
-											<xsl:attribute name="margin-top">1px</xsl:attribute>
-											<xsl:attribute name="margin-bottom">1px</xsl:attribute>
+								</fo:table-body>
+							</fo:table>
 
-											<xsl:attribute name="font-weight">bold</xsl:attribute>
-											Signature Format:
-										</fo:block>
-									</fo:table-cell>
-									<fo:table-cell>
-										<fo:block>
-											<xsl:attribute name="margin-top">1px</xsl:attribute>
-											<xsl:attribute name="margin-bottom">1px</xsl:attribute>
+							<xsl:apply-templates select="dss:Chain" />
 
-											<xsl:value-of select="@SignatureFormat" />
-										</fo:block>
-									</fo:table-cell>
-								</fo:table-row>
-							</xsl:if>
-
-							<fo:table-row>
-								<xsl:attribute name="margin-top">1px</xsl:attribute>
-								<xsl:attribute name="margin-bottom">1px</xsl:attribute>
-								<fo:table-cell>
-									<fo:block>
-										<xsl:attribute name="margin-top">1px</xsl:attribute>
-										<xsl:attribute name="margin-bottom">1px</xsl:attribute>
-
-										<xsl:attribute name="font-weight">bold</xsl:attribute>
-										On claimed time:
-									</fo:block>
-								</fo:table-cell>
-								<fo:table-cell>
-									<fo:block>
-										<xsl:attribute name="margin-top">1px</xsl:attribute>
-										<xsl:attribute name="margin-bottom">1px</xsl:attribute>
-
-										<xsl:call-template name="formatdate">
-											<xsl:with-param name="DateTimeStr" select="dss:SigningTime"/>
-										</xsl:call-template>
-									</fo:block>
-								</fo:table-cell>
-							</fo:table-row>
-
-							<xsl:apply-templates select="dss:SignatureScope" />
-
-						</fo:table-body>
-					</fo:table>
-
-					<xsl:apply-templates select="dss:Chain" />
-
+						</fo:block-container>
+					</fo:block-container>
 				</fo:block-container>
-			</fo:block-container>
-
+			</fo:block>
 		</fo:block-container>
 
 	</xsl:template>
@@ -1010,7 +1021,7 @@
 											<xsl:attribute name="margin-bottom">1px</xsl:attribute>
 
 											<xsl:attribute name="font-weight">bold</xsl:attribute>
-											TSL Certificate Binding Link URL:
+											TLS Certificate Binding Link URL:
 										</fo:block>
 									</fo:table-cell>
 									<fo:table-cell>

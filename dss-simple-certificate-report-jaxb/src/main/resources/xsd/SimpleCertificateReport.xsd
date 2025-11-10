@@ -32,7 +32,6 @@
 	
 	<xs:complexType name="ChainItem">
 		<xs:sequence>
-			<xs:element name="id" type="xs:string" />
 			<xs:element name="subject" type="Subject" />
 			<xs:element name="issuerId" type="xs:string" minOccurs="0" />
 			<xs:element name="notBefore" type="xs:dateTime" />
@@ -92,6 +91,7 @@
 			<xs:element name="Chain" type="Chain" minOccurs="0" />
 			<xs:element name="TLSBindingSignature" type="Signature" minOccurs="0" />
 		</xs:sequence>
+		<xs:attribute name="Id" type="xs:string" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Subject">

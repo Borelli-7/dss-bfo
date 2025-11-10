@@ -7,8 +7,7 @@
             signer's certificate and certificates used to validate certificate validity status services - CRLs, OCSP, and time-stamps).
         </PolicyDescription>
     </ValidationPolicy>
-    <Certificate>
-        <id>C-0E9B5C373AFEC1CED5723FCD9231F793BB330FFBF2B94BB8698301C90405B9BF</id>
+    <Certificate Id="C-0E9B5C373AFEC1CED5723FCD9231F793BB330FFBF2B94BB8698301C90405B9BF">
         <subject>
             <commonName>Matthias Schlede</commonName>
             <surname>Schlede</surname>
@@ -42,8 +41,7 @@
             <Error Key="BBB_XCV_ICTIVRSC_ANS">The current time is not in the validity range of the signer''s certificate!</Error>
         </X509ValidationDetails>
         <Chain>
-            <ChainItem>
-                <id>C-A3EDFADFCBE288E5688051D3AD081A0CA09633E52E3E9C9A6E2C436657B2D1A9</id>
+            <ChainItem Id="C-A3EDFADFCBE288E5688051D3AD081A0CA09633E52E3E9C9A6E2C436657B2D1A9">
                 <subject>
                     <commonName>D-TRUST Qualified CA 1 2008:PN</commonName>
                     <organizationName>D-Trust GmbH</organizationName>

@@ -22,7 +22,6 @@ package eu.europa.esig.dss.detailedreport;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificate;
-import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificateQualificationProcess;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraintsConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlEvidenceRecord;
@@ -32,9 +31,10 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlSignature;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlTLAnalysis;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlTimestamp;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationCertificateQualification;
-import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessBasicTimestamp;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessArchivalDataTimestamp;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessBasicTimestamp;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessEvidenceRecord;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationSignatureQualification;
 import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.MessageType;
 import eu.europa.esig.dss.enumerations.ValidationTime;
@@ -271,7 +271,7 @@ public class DetailedReportMessageCollector {
 		if (timestampById != null) {
 			return collectTimestampQualification(type, timestampById);
 		}
-		XmlCertificate certificateById = detailedReport.getXmlCertificateById(tokenId);
+		List<XmlValidationCertificateQualification> certificateById = getCertificateQualificationProcess(tokenId);
 		if (certificateById != null) {
 			return collectCertificateQualification(type, certificateById);
 		}
@@ -344,50 +344,71 @@ public class DetailedReportMessageCollector {
 		return result;
 	}
 
-	private List<Message> collectCertificateQualification(MessageType type, XmlCertificate xmlCertificate) {
+	private List<Message> collectCertificateQualification(MessageType type, List<XmlValidationCertificateQualification> certificateQualificationProcess) {
 		List<Message> result = new ArrayList<>();
-		addMessages(result, collectCertificateQualificationAtIssuanceTime(type, xmlCertificate));
-		addMessages(result, collectCertificateQualificationAtBestSignatureTime(type, xmlCertificate));
-		addMessages(result, collectCertificateQualificationAtValidationTime(type, xmlCertificate));
+		addMessages(result, collectCertificateQualificationAtIssuanceTime(type, certificateQualificationProcess));
+		addMessages(result, collectCertificateQualificationAtBestSignatureTime(type, certificateQualificationProcess));
+		addMessages(result, collectCertificateQualificationAtValidationTime(type, certificateQualificationProcess));
 		return result;
 	}
 
-	private List<Message> collectCertificateQualificationAtIssuanceTime(MessageType type, XmlCertificate xmlCertificate) {
-		return collectCertificateQualificationAtTime(type, xmlCertificate, ValidationTime.CERTIFICATE_ISSUANCE_TIME);
+	private List<Message> collectCertificateQualificationAtIssuanceTime(
+			MessageType type, List<XmlValidationCertificateQualification> certificateQualificationProcess) {
+		return collectCertificateQualificationAtTime(type, certificateQualificationProcess, ValidationTime.CERTIFICATE_ISSUANCE_TIME);
 	}
 
-	private List<Message> collectCertificateQualificationAtBestSignatureTime(MessageType type, XmlCertificate xmlCertificate) {
-		return collectCertificateQualificationAtTime(type, xmlCertificate, ValidationTime.BEST_SIGNATURE_TIME);
+	private List<Message> collectCertificateQualificationAtBestSignatureTime(
+			MessageType type, List<XmlValidationCertificateQualification> certificateQualificationProcess) {
+		return collectCertificateQualificationAtTime(type, certificateQualificationProcess, ValidationTime.BEST_SIGNATURE_TIME);
 	}
 
-	private List<Message> collectCertificateQualificationAtValidationTime(MessageType type, XmlCertificate xmlCertificate) {
-		return collectCertificateQualificationAtTime(type, xmlCertificate, ValidationTime.VALIDATION_TIME);
+	private List<Message> collectCertificateQualificationAtValidationTime(
+			MessageType type, List<XmlValidationCertificateQualification> certificateQualificationProcess) {
+		return collectCertificateQualificationAtTime(type, certificateQualificationProcess, ValidationTime.VALIDATION_TIME);
 	}
 
 	private List<Message> collectCertificateQualificationAtIssuanceTime(MessageType type, String certificateId) {
-		XmlCertificate xmlCertificate = detailedReport.getXmlCertificateById(certificateId);
-		if (xmlCertificate != null) {
-			return collectCertificateQualificationAtIssuanceTime(type, xmlCertificate);
+		List<XmlValidationCertificateQualification> certificateQualificationProcess = getCertificateQualificationProcess(certificateId);
+		if (certificateQualificationProcess != null) {
+			return collectCertificateQualificationAtIssuanceTime(type, certificateQualificationProcess);
 		}
+		return Collections.emptyList();
+	}
+
+	private List<XmlValidationCertificateQualification> getCertificateQualificationProcess(String certificateId) {
+		XmlCertificate xmlCertificate = detailedReport.getXmlCertificateById(certificateId);
+		if (xmlCertificate != null && xmlCertificate.getCertificateQualificationProcess() != null) {
+			return xmlCertificate.getCertificateQualificationProcess().getValidationCertificateQualification();
+
+		} else {
+			List<XmlSignature> signatures = detailedReport.getSignatures();
+			if (signatures != null && !signatures.isEmpty()) {
+				for (XmlSignature xmlSignature : signatures) {
+					XmlValidationSignatureQualification signatureQualification = xmlSignature.getValidationSignatureQualification();
+					if (signatureQualification != null) {
+						return signatureQualification.getValidationCertificateQualification();
+					}
+				}
+			}
+		}
+
 		return Collections.emptyList();
 	}
 
 	private List<Message> collectCertificateQualificationAtValidationTime(MessageType type, String certificateId) {
-		XmlCertificate xmlCertificate = detailedReport.getXmlCertificateById(certificateId);
-		if (xmlCertificate != null) {
-			return collectCertificateQualificationAtValidationTime(type, xmlCertificate);
+		List<XmlValidationCertificateQualification> certificateQualificationProcess = getCertificateQualificationProcess(certificateId);
+		if (certificateQualificationProcess != null) {
+			return collectCertificateQualificationAtValidationTime(type, certificateQualificationProcess);
 		}
 		return Collections.emptyList();
 	}
 
-	private List<Message> collectCertificateQualificationAtTime(MessageType type, XmlCertificate xmlCertificate, ValidationTime validationTime) {
-		if (xmlCertificate != null) {
-			XmlCertificateQualificationProcess certificateQualificationProcess = xmlCertificate.getCertificateQualificationProcess();
-			if (certificateQualificationProcess != null) {
-				for (XmlValidationCertificateQualification certificateQualification : certificateQualificationProcess.getValidationCertificateQualification()) {
-					if (validationTime.equals(certificateQualification.getValidationTime())) {
-						return getMessages(type,certificateQualification);
-					}
+	private List<Message> collectCertificateQualificationAtTime(MessageType type, List<XmlValidationCertificateQualification> certificateQualificationProcess,
+																ValidationTime validationTime) {
+		if (certificateQualificationProcess != null) {
+			for (XmlValidationCertificateQualification certificateQualification : certificateQualificationProcess) {
+				if (validationTime.equals(certificateQualification.getValidationTime())) {
+					return getMessages(type,certificateQualification);
 				}
 			}
 		}
@@ -398,15 +419,40 @@ public class DetailedReportMessageCollector {
 	}
 
 	private List<Message> collectQWACValidationDetails(MessageType type, String certificateId) {
+		if (certificateId == null) {
+			return Collections.emptyList();
+		}
+
+		XmlQWACProcess qwacProcess = null;
+
 		XmlCertificate xmlCertificate = detailedReport.getXmlCertificateById(certificateId);
 		if (xmlCertificate != null) {
-			XmlQWACProcess qwacProcess = xmlCertificate.getQWACProcess();
+			qwacProcess = xmlCertificate.getQWACProcess();
+
+		} else {
+			List<XmlSignature> signatures = detailedReport.getSignatures();
+			if (signatures != null && !signatures.isEmpty()) {
+				for (XmlSignature xmlSignature : signatures) {
+					XmlValidationSignatureQualification signatureQualification = xmlSignature.getValidationSignatureQualification();
+					if (signatureQualification != null) {
+						if (signatureQualification.getQWACProcess() != null
+								&& certificateId.equals(signatureQualification.getQWACProcess().getId())) {
+							qwacProcess = signatureQualification.getQWACProcess();
+						}
+					}
+				}
+			}
+		}
+
+
+		if (qwacProcess != null) {
 			return getMessages(type, qwacProcess);
+		} else {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("The QWAC validation is not performed!");
+			}
+			return Collections.emptyList();
 		}
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("The QWAC validation is not performed!");
-		}
-		return Collections.emptyList();
 	}
 
 	private List<Message> getMessages(MessageType type, XmlConstraintsConclusion constraintsConclusion) {

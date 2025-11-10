@@ -76,6 +76,11 @@ class PDFGenerationTest {
 	}
 
 	@Test
+	void generateSimpleCertificateReport2Qwac() throws Exception {
+		createAndValidate("simple-cert-report-2-qwac.xml");
+	}
+
+	@Test
 	void generateSimpleCertificateReportNotQwac() throws Exception {
 		createAndValidate("simple-cert-report-not-qwac.xml");
 	}

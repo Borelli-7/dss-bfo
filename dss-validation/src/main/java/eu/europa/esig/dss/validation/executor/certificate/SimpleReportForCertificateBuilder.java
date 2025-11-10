@@ -404,7 +404,13 @@ public class SimpleReportForCertificateBuilder {
 
 		final List<XmlChainItem> chain = new ArrayList<>();
 		for (CertificateWrapper cert : certificateChain) {
-			chain.add(getChainItem(cert));
+			XmlChainItem chainItem = getChainItem(cert);
+			if (bindingSignature.getSigningCertificate() != null
+					&& bindingSignature.getSigningCertificate().getId().equals(cert.getId())) {
+				addQualifications(chainItem, cert);
+				addQWACProfile(chainItem, cert);
+			}
+			chain.add(chainItem);
 		}
 		xmlSignature.setChain(chain);
 	}

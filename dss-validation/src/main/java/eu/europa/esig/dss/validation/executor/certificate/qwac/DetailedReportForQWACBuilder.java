@@ -2,15 +2,16 @@ package eu.europa.esig.dss.validation.executor.certificate.qwac;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificate;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraintsConclusionWithProofOfExistence;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlDetailedReport;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlQWACProcess;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlSignature;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessBasicSignature;
-import eu.europa.esig.dss.diagnostic.CertificateWrapper;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
 import eu.europa.esig.dss.diagnostic.SignatureWrapper;
 import eu.europa.esig.dss.enumerations.Context;
+import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.QWACProfile;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
@@ -19,6 +20,7 @@ import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.QWAC
 import eu.europa.esig.dss.validation.process.qualification.signature.SignatureQualificationBlock;
 import eu.europa.esig.dss.validation.process.qualification.signature.qwac.TLSBindingSignatureQualificationBlock;
 import eu.europa.esig.dss.validation.process.vpfbs.BasicSignatureValidationProcess;
+import eu.europa.esig.dss.validation.reports.DSSReportException;
 
 import java.util.Collections;
 import java.util.Date;
@@ -79,16 +81,15 @@ public class DetailedReportForQWACBuilder extends DetailedReportForCertificateBu
         if (policy.isEIDASConstraintPresent()) {
 
             // Signature qualification
-            CertificateWrapper signingCertificate = bindingSignature.getSigningCertificate();
-            if (signingCertificate != null) {
-                SignatureQualificationBlock qualificationBlock = new TLSBindingSignatureQualificationBlock(
-                        i18nProvider, bbbs, validation, signingCertificate, detailedReport.getTLAnalysis(), diagnosticData.getWebsiteUrl());
-                xmlSignature.setValidationSignatureQualification(qualificationBlock.execute());
-            }
+            SignatureQualificationBlock qualificationBlock = new TLSBindingSignatureQualificationBlock(
+                    i18nProvider, bbbs, validation, bindingSignature, detailedReport.getTLAnalysis(), diagnosticData.getWebsiteUrl());
+            xmlSignature.setValidationSignatureQualification(qualificationBlock.execute());
 
         }
 
-        xmlSignature.setConclusion(validation.getConclusion());
+        XmlConclusion conclusion = validation.getConclusion();
+        conclusion.setIndication(getSignatureFinalIndication(conclusion.getIndication()));
+        xmlSignature.setConclusion(conclusion);
 
         detailedReport.getSignatureOrTimestampOrEvidenceRecord().add(xmlSignature);
 
@@ -133,6 +134,19 @@ public class DetailedReportForQWACBuilder extends DetailedReportForCertificateBu
             }
         }
         return QWACProfile.NOT_QWAC;
+    }
+
+    private Indication getSignatureFinalIndication(Indication highestIndication) {
+        switch (highestIndication) {
+            case PASSED:
+                return Indication.TOTAL_PASSED;
+            case INDETERMINATE:
+                return Indication.INDETERMINATE;
+            case FAILED:
+                return Indication.TOTAL_FAILED;
+            default:
+                throw new DSSReportException(String.format("The Indication '%s' is not supported!", highestIndication));
+        }
     }
 
 }

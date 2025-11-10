@@ -38,6 +38,7 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationCertificateQualificat
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessArchivalDataTimestamp;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessBasicTimestamp;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessEvidenceRecord;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationSignatureQualification;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationTimestampQualification;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationTimestampQualificationAtTime;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlXCV;
@@ -864,6 +865,10 @@ public class DetailedReport {
 	}
 
 	private CertificateQualification getCertificateQualificationAtTime(ValidationTime validationTime, String certificateId) {
+		if (certificateId == null) {
+			return CertificateQualification.NA;
+		}
+
 		XmlCertificate certificate = getXmlCertificateById(certificateId);
 		if (certificate != null) {
 			XmlCertificateQualificationProcess certificateQualificationProcess = certificate.getCertificateQualificationProcess();
@@ -877,7 +882,23 @@ public class DetailedReport {
 					}
 				}
 			}
+
+		} else {
+			List<XmlSignature> signatures = getSignatures();
+			if (signatures != null && !signatures.isEmpty()) {
+				for (XmlSignature xmlSignature : signatures) {
+					XmlValidationSignatureQualification signatureQualification = xmlSignature.getValidationSignatureQualification();
+					if (signatureQualification != null && signatureQualification.getValidationCertificateQualification() != null) {
+						for (XmlValidationCertificateQualification certificateQualification : signatureQualification.getValidationCertificateQualification()) {
+							if (certificateId.equals(certificateQualification.getId()) && validationTime == certificateQualification.getValidationTime()) {
+								return certificateQualification.getCertificateQualification();
+							}
+						}
+					}
+				}
+			}
 		}
+
 		return CertificateQualification.NA;
 	}
 
@@ -889,14 +910,32 @@ public class DetailedReport {
 	 * @return {@link QWACProfile}
 	 */
 	public QWACProfile getCertificateQWACProfile(String certificateId) {
-		XmlCertificate certificate = getXmlCertificateById(certificateId);
-		if (certificate != null) {
-			XmlQWACProcess qwacProcess = certificate.getQWACProcess();
-			if (qwacProcess != null) {
-				return qwacProcess.getQWACType();
+		if (certificateId == null) {
+			return null;
+		}
+
+		XmlQWACProcess qwacProcess = null;
+
+		XmlCertificate xmlCertificate = getXmlCertificateById(certificateId);
+		if (xmlCertificate != null) {
+			qwacProcess = xmlCertificate.getQWACProcess();
+
+		} else {
+			List<XmlSignature> signatures = getSignatures();
+			if (signatures != null && !signatures.isEmpty()) {
+				for (XmlSignature xmlSignature : signatures) {
+					XmlValidationSignatureQualification signatureQualification = xmlSignature.getValidationSignatureQualification();
+					if (signatureQualification != null) {
+						if (signatureQualification.getQWACProcess() != null
+								&& certificateId.equals(signatureQualification.getQWACProcess().getId())) {
+							qwacProcess = signatureQualification.getQWACProcess();
+						}
+					}
+				}
 			}
 		}
-		return null;
+
+		return qwacProcess != null ? qwacProcess.getQWACType() : null;
 	}
 
 	/**

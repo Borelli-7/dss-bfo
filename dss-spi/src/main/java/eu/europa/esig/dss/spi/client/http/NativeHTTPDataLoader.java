@@ -133,7 +133,7 @@ public class NativeHTTPDataLoader implements DataLoader, AdvancedDataLoader {
 	 */
 	@Deprecated
 	protected byte[] request(String url, HttpMethod method, byte[] content, boolean refresh) {
-		return request(url, method, content, refresh, true, false).getResponseBody();
+		return request(url, method, content, refresh, false, true).getResponseBody();
 	}
 
 	/**
@@ -143,19 +143,19 @@ public class NativeHTTPDataLoader implements DataLoader, AdvancedDataLoader {
 	 * @param method {@link HttpMethod} of the request
 	 * @param content byte array containing a body of the request, when required
 	 * @param refresh defined if the cache should be used
-	 * @param includeResponseBody whether the response message body is to be included in the output response object
 	 * @param includeResponseDetails whether HTTP content information is to be included in the response object
+	 * @param includeResponseBody whether the response message body is to be included in the output response object
 	 * @return {@link Callable} task
 	 */
 	protected Callable<ResponseEnvelope> createNativeHTTPDataLoaderCall(String url, HttpMethod method, byte[] content,
-			boolean refresh, boolean includeResponseBody, boolean includeResponseDetails) {
+			boolean refresh, boolean includeResponseDetails, boolean includeResponseBody) {
 		NativeHTTPDataLoaderCall httpDataLoaderCall = new NativeHTTPDataLoaderCall(url, content);
 		httpDataLoaderCall.setUseCaches(!refresh);
 		httpDataLoaderCall.setMaxInputSize(maxInputSize);
 		httpDataLoaderCall.setConnectTimeout(connectTimeout);
 		httpDataLoaderCall.setReadTimeout(readTimeout);
-		httpDataLoaderCall.setIncludeResponseBody(includeResponseBody);
 		httpDataLoaderCall.setIncludeResponseDetails(includeResponseDetails);
+		httpDataLoaderCall.setIncludeResponseBody(includeResponseBody);
 		return httpDataLoaderCall;
 	}
 
@@ -166,15 +166,15 @@ public class NativeHTTPDataLoader implements DataLoader, AdvancedDataLoader {
 	 * @param method {@link HttpMethod}
 	 * @param content request content
 	 * @param refresh if enforce the refresh
-	 * @param includeResponseBody whether the response message body is to be included in the output response object
 	 * @param includeResponseDetails whether HTTP content information is to be included in the response object
+	 * @param includeResponseBody whether the response message body is to be included in the output response object
 	 * @return response binaries
 	 */
 	protected ResponseEnvelope request(String url, HttpMethod method, byte[] content, boolean refresh,
-									   boolean includeResponseBody, boolean includeResponseDetails) {
+									   boolean includeResponseDetails, boolean includeResponseBody) {
 		try {
 			Callable<ResponseEnvelope> task = createNativeHTTPDataLoaderCall(
-					url, method, content, refresh, includeResponseBody, includeResponseDetails);
+					url, method, content, refresh, includeResponseDetails, includeResponseBody);
 			return task.call();
 		} catch (DSSExternalResourceException e) {
 			throw e;
@@ -229,12 +229,12 @@ public class NativeHTTPDataLoader implements DataLoader, AdvancedDataLoader {
 	 * @return binaries of the extracted data object
 	 */
 	public byte[] get(String url, boolean refresh) {
-		return request(url, HttpMethod.GET, null, refresh, true, false).getResponseBody();
+		return request(url, HttpMethod.GET, null, refresh, false, true).getResponseBody();
 	}
 
 	@Override
 	public byte[] post(String url, byte[] content) {
-		return request(url, HttpMethod.POST, content, false, true, false).getResponseBody();
+		return request(url, HttpMethod.POST, content, false, false, true).getResponseBody();
 	}
 
 	@Override
@@ -243,8 +243,13 @@ public class NativeHTTPDataLoader implements DataLoader, AdvancedDataLoader {
 	}
 
 	@Override
-	public ResponseEnvelope requestGet(String url, boolean includeResponseBody) {
-		return request(url, HttpMethod.GET, null, false, includeResponseBody, true);
+	public ResponseEnvelope requestGet(String url, boolean includeResponseDetails) {
+		return request(url, HttpMethod.GET, null, false, includeResponseDetails, true);
+	}
+
+	@Override
+	public ResponseEnvelope requestGet(String url, boolean includeResponseDetails, boolean includeResponseBody) {
+		return request(url, HttpMethod.GET, null, false, includeResponseDetails, includeResponseBody);
 	}
 
 	@Override
@@ -253,8 +258,13 @@ public class NativeHTTPDataLoader implements DataLoader, AdvancedDataLoader {
 	}
 
 	@Override
-	public ResponseEnvelope requestPost(String url, byte[] content, boolean includeResponseBody) {
-		return request(url, HttpMethod.POST, content, false, includeResponseBody, true);
+	public ResponseEnvelope requestPost(String url, byte[] content, boolean includeResponseDetails) {
+		return request(url, HttpMethod.POST, content, false, includeResponseDetails, true);
+	}
+
+	@Override
+	public ResponseEnvelope requestPost(String url, byte[] content, boolean includeResponseDetails, boolean includeResponseBody) {
+		return request(url, HttpMethod.POST, content, false, includeResponseDetails, includeResponseBody);
 	}
 
 	/**

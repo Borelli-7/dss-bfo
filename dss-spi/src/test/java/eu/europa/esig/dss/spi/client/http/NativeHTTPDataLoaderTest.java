@@ -123,15 +123,15 @@ class NativeHTTPDataLoaderTest {
 
 		@Override
 		protected Callable<ResponseEnvelope> createNativeHTTPDataLoaderCall(String url, HttpMethod method, byte[] content, boolean refresh,
-																			boolean includeResponseBody, boolean includeResponseDetails) {
+																			boolean includeResponseDetails, boolean includeResponseBody) {
 			if (nativeDataLoaderCall == null) {
 				nativeDataLoaderCall = new MockNativeDataLoaderCall(url, content);
 				nativeDataLoaderCall.setConnectTimeout(getConnectTimeout());
 				nativeDataLoaderCall.setReadTimeout(getReadTimeout());
 				nativeDataLoaderCall.setMaxInputSize(getMaxInputSize());
 				nativeDataLoaderCall.setUseCaches(!refresh);
-				nativeDataLoaderCall.setIncludeResponseBody(includeResponseBody);
 				nativeDataLoaderCall.setIncludeResponseDetails(includeResponseDetails);
+				nativeDataLoaderCall.setIncludeResponseBody(includeResponseBody);
 			}
 			return nativeDataLoaderCall;
 		}

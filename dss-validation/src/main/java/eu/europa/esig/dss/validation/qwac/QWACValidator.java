@@ -156,7 +156,7 @@ public class QWACValidator extends AbstractCertificateValidator<CertificateRepor
     protected ResponseEnvelope connectToUrl() {
         final String trimmedUrl = Utils.trim(url);
         if (Protocol.isHttpUrl(trimmedUrl)) {
-            return getDataLoader().requestGet(url, false);
+            return getDataLoader().requestGet(url, true, false);
         }
         throw new UnsupportedOperationException(String.format(
                 "DSS framework supports only HTTP(S) certificate extraction. Obtained URL : '%s'", url));

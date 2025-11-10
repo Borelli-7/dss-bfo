@@ -1,6 +1,7 @@
 package eu.europa.esig.dss.model.http;
 
 import java.security.cert.Certificate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public class ResponseEnvelope {
     private byte[] responseBody;
 
     /** Map of headers returned by the HTTP Response */
-    private Map<String, List<String>> headers;
+    private Map<String, List<String>> headers = new HashMap<>();
 
     /** TLS/SSL certificates used to establish a secure connection, when applicable (for HTTPS calls) */
     private Certificate[] tlsCertificates;
@@ -24,6 +25,13 @@ public class ResponseEnvelope {
      */
     public ResponseEnvelope() {
         // empty
+    }
+
+    /**
+     * Constructor with response message body provided
+     */
+    public ResponseEnvelope(byte[] responseBody) {
+        this.responseBody = responseBody;
     }
 
     /**
@@ -59,7 +67,9 @@ public class ResponseEnvelope {
      * @param headers a map of {@link String} header names and their values
      */
     public void setHeaders(Map<String, List<String>> headers) {
-        this.headers = headers;
+        if (headers != null) {
+            this.headers.putAll(headers);
+        }
     }
 
     /**

@@ -948,29 +948,19 @@ public class CommonsDataLoader implements DataLoader, AdvancedDataLoader {
 	}
 
 	@Override
-	public ResponseEnvelope requestGet(String url, boolean includeResponseBody) {
-		return requestGet(url, includeResponseBody, true);
+	public ResponseEnvelope requestGet(String url, boolean includeResponseDetails) {
+		return requestGet(url, includeResponseDetails, true);
 	}
 
-	/**
-	 * Executes a GET request and returns an {@code HTTPResponse} object.
-	 * This method provides a choice on whether the extended response details are to be included within
-	 * the ResponseEnvelope object (e.g. headers, SSL session details, etc.).
-	 * If {@code includeResponseDetails} is set to FALSE, only the response message body is to be returned.
-	 *
-	 * @param url {@link String} URL to perform request to
-	 * @param includeResponseBody whether the response message body is to be included in the result
-	 * @param includeResponseDetails whether the extended details are to be included in the response
-	 * @return {@link ResponseEnvelope}
-	 */
-	protected ResponseEnvelope requestGet(String url, boolean includeResponseBody, boolean includeResponseDetails) {
+	@Override
+	public ResponseEnvelope requestGet(String url, boolean includeResponseDetails, boolean includeResponseBody) {
 		HttpGet httpRequest = null;
 		CloseableHttpClient client = null;
 		try {
 			httpRequest = getHttpRequest(url);
 			client = getHttpClient(url);
 
-			return executeHttpRequest(client, httpRequest, includeResponseBody, includeResponseDetails);
+			return executeHttpRequest(client, httpRequest, includeResponseDetails, includeResponseBody);
 
 		} catch (URISyntaxException | IOException e) {
 			throw new DSSExternalResourceException(String.format("Unable to process GET call for url [%s]. Reason : [%s]", url, DSSUtils.getExceptionMessage(e)), e);
@@ -992,24 +982,13 @@ public class CommonsDataLoader implements DataLoader, AdvancedDataLoader {
 	}
 
 	@Override
-	public ResponseEnvelope requestPost(String url, byte[] content, boolean includeResponseBody) {
-		return requestPost(url, content, includeResponseBody, true);
+	public ResponseEnvelope requestPost(String url, byte[] content, boolean includeResponseDetails) {
+		return requestPost(url, content, includeResponseDetails, true);
 	}
 
-	/**
-	 * Executes a POST request and returns an {@code HTTPResponse} object.
-	 * This method provides a choice on whether the extended response details are to be included within
-	 * the ResponseEnvelope object (e.g. headers, SSL session details, etc.).
-	 * If {@code includeResponseDetails} is set to FALSE, only the response message body is to be returned.
-	 *
-	 * @param url {@link String} URL to perform request to
-	 * @param content byte array representing a request message body
-	 * @param includeResponseBody whether the response message body is to be included in the result
-	 * @param includeResponseDetails whether the extended details are to be included in the response
-	 * @return {@link ResponseEnvelope}
-	 */
-	protected ResponseEnvelope requestPost(String url, final byte[] content, boolean includeResponseBody,
-										   boolean includeResponseDetails) {
+	@Override
+	public ResponseEnvelope requestPost(String url, final byte[] content, boolean includeResponseDetails,
+										boolean includeResponseBody) {
 		LOG.debug("Fetching data via POST from url {}", url);
 
 		final URI uri = URI.create(Utils.trim(url));
@@ -1029,7 +1008,7 @@ public class CommonsDataLoader implements DataLoader, AdvancedDataLoader {
 			httpRequest.setEntity(requestEntity);
 
 			client = getHttpClient(url);
-			return executeHttpRequest(client, httpRequest, includeResponseBody, includeResponseDetails);
+			return executeHttpRequest(client, httpRequest, includeResponseDetails, includeResponseBody);
 
 		} catch (IOException e) {
 			throw new DSSExternalResourceException(String.format("Unable to process POST call for url [%s]. Reason : [%s]", url, e.getMessage()) , e);
@@ -1050,7 +1029,7 @@ public class CommonsDataLoader implements DataLoader, AdvancedDataLoader {
 	 */
 	@Deprecated
 	protected ResponseEnvelope executeHttpRequest(final CloseableHttpClient client, final HttpUriRequest httpRequest) throws IOException {
-		return executeHttpRequest(client, httpRequest, true, false);
+		return executeHttpRequest(client, httpRequest, false, true);
 	}
 
 	/**
@@ -1058,13 +1037,13 @@ public class CommonsDataLoader implements DataLoader, AdvancedDataLoader {
 	 *
 	 * @param client {@link CloseableHttpClient}
 	 * @param httpRequest {@link HttpUriRequest}
-	 * @param includeResponseBody whether the response message body is to be included in the result
 	 * @param includeResponseDetails whether the response details are to be included
+	 * @param includeResponseBody whether the response message body is to be included in the result
 	 * @return byte array representing the response's content
 	 * @throws IOException if an exception occurs
 	 */
 	protected ResponseEnvelope executeHttpRequest(final CloseableHttpClient client, final HttpUriRequest httpRequest,
-												  boolean includeResponseBody, boolean includeResponseDetails) throws IOException {
+												  boolean includeResponseDetails, boolean includeResponseBody) throws IOException {
 		final HttpHost targetHost = getHttpHost(httpRequest);
 		final HttpContext localContext = getHttpContext(targetHost);
 

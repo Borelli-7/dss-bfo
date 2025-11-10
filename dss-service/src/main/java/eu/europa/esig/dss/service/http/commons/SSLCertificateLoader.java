@@ -20,6 +20,7 @@ import java.util.List;
  *
  * @deprecated since DSS 6.4. Please see {@code QWACValidator} class instead.
  */
+@Deprecated
 public class SSLCertificateLoader implements Serializable {
 
     private static final long serialVersionUID = -2560386894555266018L;
@@ -71,7 +72,7 @@ public class SSLCertificateLoader implements Serializable {
     public List<CertificateToken> getCertificates(final String urlString) {
         final String trimmedUrl = Utils.trim(urlString);
         if (Protocol.isHttpUrl(trimmedUrl)) {
-            ResponseEnvelope responseEnvelope = commonsDataLoader.requestGet(trimmedUrl, false);
+            ResponseEnvelope responseEnvelope = commonsDataLoader.requestGet(trimmedUrl, true, false);
             Certificate[] tlsCertificates = responseEnvelope.getTLSCertificates();
             return toCertificateTokens(tlsCertificates);
         }

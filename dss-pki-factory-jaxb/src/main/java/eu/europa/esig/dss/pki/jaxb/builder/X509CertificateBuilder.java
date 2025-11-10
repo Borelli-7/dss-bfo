@@ -27,6 +27,7 @@ import eu.europa.esig.dss.enumerations.QCType;
 import eu.europa.esig.dss.enumerations.QCTypeEnum;
 import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.model.x509.CertificateToken;
+import eu.europa.esig.dss.pki.jaxb.XmlGeneralName;
 import eu.europa.esig.dss.spi.DSSASN1Utils;
 import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.OID;
@@ -122,6 +123,9 @@ public class X509CertificateBuilder {
 
     /** The list of certificate policies */
     private List<String> certificatePolicies;
+
+    /** The list of subject alternative names */
+    private List<XmlGeneralName> subjectAlternativeNames;
 
     /** List of QcStatements */
     private List<String> qcStatements;
@@ -236,6 +240,17 @@ public class X509CertificateBuilder {
      */
     public X509CertificateBuilder certificatePolicies(List<String> certificatePolicies) {
         this.certificatePolicies = certificatePolicies;
+        return this;
+    }
+
+    /**
+     * Sets the subject alternative names certificate extension
+     *
+     * @param subjectAlternativeNames a list of {@link XmlGeneralName}s
+     * @return {@link X509CertificateBuilder} this
+     */
+    public X509CertificateBuilder subjectAlternativeNames(List<XmlGeneralName> subjectAlternativeNames) {
+        this.subjectAlternativeNames = subjectAlternativeNames;
         return this;
     }
 
@@ -367,6 +382,10 @@ public class X509CertificateBuilder {
             addCertificatePolicies(certBuilder);
         }
 
+        if (subjectAlternativeNames != null) {
+            addSubjectAlternativeNames(certBuilder);
+        }
+
         if (qcStatements != null || qcTypes != null || qcCClegislations != null) {
             addQCStatementIds(certBuilder);
         }
@@ -421,6 +440,16 @@ public class X509CertificateBuilder {
                 index = index + 1;
             }
             certBuilder.addExtension(Extension.certificatePolicies, true, new CertificatePolicies(policyInformation));
+        }
+    }
+
+    private void addSubjectAlternativeNames(X509v3CertificateBuilder certBuilder) throws CertIOException {
+        if (Utils.isCollectionNotEmpty(subjectAlternativeNames)) {
+            ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
+            for (XmlGeneralName gn : subjectAlternativeNames) {
+                asn1EncodableVector.add(new GeneralName(gn.getType(), gn.getValue()));
+            }
+            certBuilder.addExtension(Extension.subjectAlternativeName, false, new DERSequence(asn1EncodableVector));
         }
     }
 

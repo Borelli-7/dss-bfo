@@ -45,7 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyPair;
-import java.security.Security;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -250,6 +249,7 @@ public class JAXBPKILoader {
                     .ocsp(getOcspUrl(certificateType.getOcsp()))
                     .keyUsages(certificateType.getKeyUsages() != null ? certificateType.getKeyUsages().getKeyUsage() : Collections.emptyList())
                     .certificatePolicies(certificateType.getCertificatePolicies() != null ? certificateType.getCertificatePolicies().getCertificatePolicy() : Collections.emptyList())
+                    .subjectAlternativeNames(certificateType.getSubjectAlternativeNames() != null ? certificateType.getSubjectAlternativeNames().getGeneralName() : Collections.emptyList())
                     .qcStatements(certificateType.getQcStatementIds() != null ? certificateType.getQcStatementIds().getQcStatement() : Collections.emptyList())
                     .qcTypes(certificateType.getQcTypes() != null ? certificateType.getQcTypes().getQcType() : Collections.emptyList())
                     .qcCClegislations(certificateType.getQcCClegislation() != null ? certificateType.getQcCClegislation().getCountryName() : Collections.emptyList());

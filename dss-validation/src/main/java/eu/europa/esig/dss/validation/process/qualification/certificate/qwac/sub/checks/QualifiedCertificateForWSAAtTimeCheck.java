@@ -16,7 +16,7 @@ import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
  * This class verifies whether the certificate is a Qualified Certificate for WebSiteAuthentication at the given time
  *
  */
-public class CertificateForWSAAtTimeCheck extends ChainItem<XmlValidationQWACProcess> {
+public class QualifiedCertificateForWSAAtTimeCheck extends ChainItem<XmlValidationQWACProcess> {
 
     /** Certificate qualification validation result at time */
     private final XmlValidationCertificateQualification certificateQualification;
@@ -29,8 +29,8 @@ public class CertificateForWSAAtTimeCheck extends ChainItem<XmlValidationQWACPro
      * @param certificateQualification {@link XmlValidationCertificateQualification}
      * @param constraint {@link LevelRule}
      */
-    public CertificateForWSAAtTimeCheck(final I18nProvider i18nProvider, final XmlValidationQWACProcess result,
-                                        final XmlValidationCertificateQualification certificateQualification, final LevelRule constraint) {
+    public QualifiedCertificateForWSAAtTimeCheck(final I18nProvider i18nProvider, final XmlValidationQWACProcess result,
+                                                 final XmlValidationCertificateQualification certificateQualification, final LevelRule constraint) {
         super(i18nProvider, result, constraint);
         this.certificateQualification = certificateQualification;
     }

@@ -13,7 +13,7 @@ import eu.europa.esig.dss.validation.process.Chain;
 import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
 import eu.europa.esig.dss.validation.process.qualification.certificate.AcceptableBuildingBlockConclusionCheck;
-import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.checks.CertificateForWSAAtTimeCheck;
+import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.checks.QualifiedCertificateForWSAAtTimeCheck;
 import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.checks.CertificateQualificationConclusiveCheck;
 import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.checks.QWAC2ExtKeyUsageCheck;
 import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.checks.QWACCertificatePolicyCheck;
@@ -153,7 +153,7 @@ public abstract class AbstractQWACValidationProcessBlock extends Chain<XmlValida
     }
 
     private ChainItem<XmlValidationQWACProcess> certificateForWSAAtTime(XmlValidationCertificateQualification certQual) {
-        return new CertificateForWSAAtTimeCheck(i18nProvider, result, certQual, getFailLevelRule());
+        return new QualifiedCertificateForWSAAtTimeCheck(i18nProvider, result, certQual, getFailLevelRule());
     }
 
     private ChainItem<XmlValidationQWACProcess> qwacCertificatePolicy() {

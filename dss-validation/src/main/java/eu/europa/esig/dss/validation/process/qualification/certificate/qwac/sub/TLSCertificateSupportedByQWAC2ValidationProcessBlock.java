@@ -195,8 +195,8 @@ public class TLSCertificateSupportedByQWAC2ValidationProcessBlock extends Chain<
     }
 
     private ChainItem<XmlValidationQWACProcess> tlsCertificateBindingSignatureExpiryDate() {
-        return new TLSCertificateBindingSignatureExpiryDateCheck(i18nProvider, result, diagnosticData,
-                diagnosticData.getValidationDate(), diagnosticData.getTLSCertificateBindingSignature(), getFailLevelRule());
+        return new TLSCertificateBindingSignatureExpiryDateCheck(i18nProvider, result, diagnosticData.getValidationDate(),
+                diagnosticData.getTLSCertificateBindingSignature(), diagnosticData.getUsedCertificates(), getFailLevelRule());
     }
 
     private ChainItem<XmlValidationQWACProcess> tlsCertificateBindingIsQWAC() {

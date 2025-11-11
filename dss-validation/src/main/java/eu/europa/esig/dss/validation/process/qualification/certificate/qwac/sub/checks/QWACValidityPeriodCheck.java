@@ -27,7 +27,7 @@ public class QWACValidityPeriodCheck extends CertificateValidityRangeCheck<XmlVa
      * @param constraint {@link LevelRule}
      */
     public QWACValidityPeriodCheck(final I18nProvider i18nProvider, final XmlValidationQWACProcess result,
-                                      final CertificateWrapper certificate, final Date currentTime, final LevelRule constraint) {
+                                   final CertificateWrapper certificate, final Date currentTime, final LevelRule constraint) {
         super(i18nProvider, result, certificate, currentTime, constraint);
     }
 

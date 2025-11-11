@@ -2,7 +2,6 @@ package eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationQWACProcess;
 import eu.europa.esig.dss.diagnostic.CertificateWrapper;
-import eu.europa.esig.dss.diagnostic.DiagnosticData;
 import eu.europa.esig.dss.diagnostic.SignatureWrapper;
 import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.SubIndication;
@@ -22,32 +21,32 @@ import java.util.List;
  */
 public class TLSCertificateBindingSignatureExpiryDateCheck extends ChainItem<XmlValidationQWACProcess> {
 
-    /** Diagnostic data */
-    private final DiagnosticData diagnosticData;
+    /** Current validation time */
+    private final Date currentTime;
 
     /** The TLS Certificate Binding signature */
     private final SignatureWrapper signature;
 
-    /** Current validation time */
-    private final Date currentTime;
+    /** List of certificates derived from the validation process */
+    private final List<CertificateWrapper> certificates;
 
     /**
      * Default constructor
      *
      * @param i18nProvider {@link I18nProvider}
      * @param result {@link XmlValidationQWACProcess}
-     * @param diagnosticData {@link DiagnosticData}
      * @param currentTime {@link Date}
      * @param signature {@link SignatureWrapper}
+     * @param certificates a list of  {@link CertificateWrapper}s
      * @param constraint {@link LevelRule}
      */
     public TLSCertificateBindingSignatureExpiryDateCheck(final I18nProvider i18nProvider, final XmlValidationQWACProcess result,
-            final DiagnosticData diagnosticData, final Date currentTime, final SignatureWrapper signature,
+            final Date currentTime, final SignatureWrapper signature, final List<CertificateWrapper> certificates,
             final LevelRule constraint) {
         super(i18nProvider, result, constraint);
-        this.diagnosticData = diagnosticData;
         this.currentTime = currentTime;
         this.signature = signature;
+        this.certificates = certificates;
     }
 
     @Override
@@ -73,7 +72,7 @@ public class TLSCertificateBindingSignatureExpiryDateCheck extends ChainItem<Xml
     }
 
     private List<CertificateWrapper> getIdentifiedTLSCertificates() {
-        return QWACUtils.getIdentifiedTLSCertificates(signature, diagnosticData.getUsedCertificates());
+        return QWACUtils.getIdentifiedTLSCertificates(signature, certificates);
     }
 
     @Override

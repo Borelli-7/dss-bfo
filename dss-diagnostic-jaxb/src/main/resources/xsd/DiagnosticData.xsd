@@ -137,9 +137,17 @@
 
 	<xs:complexType name="ConnectionInfo">
 		<xs:sequence>
-			<xs:element name="TLSCertificate" type="xs:IDREF" minOccurs="0" />
+			<xs:element name="TLSCertificate" minOccurs="0">
+				<xs:complexType>
+					<xs:attribute name="Certificate" type="xs:IDREF" use="required" />
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="TLSCertificateBindingUrl" type="xs:string" minOccurs="0" />
-			<xs:element name="TLSCertificateBindingSignature" type="xs:IDREF" minOccurs="0" />
+			<xs:element name="TLSCertificateBindingSignature" minOccurs="0">
+				<xs:complexType>
+					<xs:attribute name="Signature" type="xs:IDREF" use="required" />
+				</xs:complexType>
+			</xs:element>
 		</xs:sequence>
 		<xs:attribute name="url" type="xs:string" use="required" />
 	</xs:complexType>

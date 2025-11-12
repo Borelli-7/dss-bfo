@@ -369,12 +369,12 @@
         </jaxb:property>
     </jaxb:bindings>
 
-	  <jaxb:bindings node="//xs:complexType[@name='ConnectionInfo']//xs:element[@name='TLSCertificate']">
+	  <jaxb:bindings node="//xs:complexType[@name='ConnectionInfo']//xs:element[@name='TLSCertificate']//xs:attribute[@name='Certificate']">
 		  <jaxb:property>
 			  <jaxb:baseType name="eu.europa.esig.dss.diagnostic.jaxb.XmlCertificate" />
 		  </jaxb:property>
 	  </jaxb:bindings>
-	  <jaxb:bindings node="//xs:complexType[@name='ConnectionInfo']//xs:element[@name='TLSCertificateBindingSignature']">
+	  <jaxb:bindings node="//xs:complexType[@name='ConnectionInfo']//xs:element[@name='TLSCertificateBindingSignature']//xs:attribute[@name='Signature']">
 		  <jaxb:property>
 			  <jaxb:baseType name="eu.europa.esig.dss.diagnostic.jaxb.XmlSignature" />
 		  </jaxb:property>

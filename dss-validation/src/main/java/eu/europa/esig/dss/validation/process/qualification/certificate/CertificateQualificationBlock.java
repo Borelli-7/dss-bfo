@@ -98,9 +98,10 @@ public class CertificateQualificationBlock extends Chain<XmlCertificateQualifica
 		// cover incomplete cert chain / expired/ revoked certs
 		ChainItem<XmlCertificateQualificationProcess> item = firstItem = isAcceptableBuildingBlockConclusion(buildingBlocksConclusion);
 
-		if (signingCertificate.isTrustedListReached()) {
+		Set<String> acceptableTLUrls = new HashSet<>();
+		List<TrustServiceWrapper> originalTSPs = signingCertificate.getTrustServices();
 
-			List<TrustServiceWrapper> originalTSPs = signingCertificate.getTrustServices();
+		if (signingCertificate.isTrustedListReached()) {
 			
 			Set<String> listOfTrustedListUrls = originalTSPs.stream().filter(t -> t.getListOfTrustedLists() != null)
 					.map(t -> t.getListOfTrustedLists().getUrl()).collect(Collectors.toSet());
@@ -122,7 +123,6 @@ public class CertificateQualificationBlock extends Chain<XmlCertificateQualifica
 					(t.getListOfTrustedLists() == null || acceptableLOTLUrls.contains(t.getListOfTrustedLists().getUrl())) )
 					.map(t -> t.getTrustedList().getUrl()).collect(Collectors.toSet());
 
-			Set<String> acceptableTLUrls = new HashSet<>();
 			if (Utils.isCollectionNotEmpty(trustedListUrls)) {
 				for (String tlURL : trustedListUrls) {
 					XmlTLAnalysis currentTL = getTlAnalysis(tlURL);
@@ -135,25 +135,26 @@ public class CertificateQualificationBlock extends Chain<XmlCertificateQualifica
 					}
 				}
 			}
-			
-			item = item.setNextItem(isAcceptableTLPresent(acceptableTLUrls));
-			
-			if (Utils.isCollectionNotEmpty(acceptableTLUrls)) {
-
-				// 1. filter by service for CAQC
-				TrustServiceFilter filter = TrustServicesFilterFactory.createFilterByUrls(acceptableTLUrls);
-				List<TrustServiceWrapper> acceptableServices = filter.filter(originalTSPs);
-
-				CertQualificationAtTimeBlock certQualAtIssuanceBlock = new CertQualificationAtTimeBlock(i18nProvider, ValidationTime.CERTIFICATE_ISSUANCE_TIME,
-						signingCertificate, acceptableServices);
-				result.getValidationCertificateQualification().add(certQualAtIssuanceBlock.execute());
-
-				CertQualificationAtTimeBlock certQualAtSigningTimeBlock = new CertQualificationAtTimeBlock(i18nProvider, ValidationTime.VALIDATION_TIME,
-						validationTime, signingCertificate, acceptableServices);
-				result.getValidationCertificateQualification().add(certQualAtSigningTimeBlock.execute());
-			
-			}
 		}
+
+		item = item.setNextItem(isAcceptableTLPresent(acceptableTLUrls));
+
+		if (Utils.isCollectionNotEmpty(acceptableTLUrls)) {
+
+			// 1. filter by service for CAQC
+			TrustServiceFilter filter = TrustServicesFilterFactory.createFilterByUrls(acceptableTLUrls);
+			List<TrustServiceWrapper> acceptableServices = filter.filter(originalTSPs);
+
+			CertQualificationAtTimeBlock certQualAtIssuanceBlock = new CertQualificationAtTimeBlock(i18nProvider, ValidationTime.CERTIFICATE_ISSUANCE_TIME,
+					signingCertificate, acceptableServices);
+			result.getValidationCertificateQualification().add(certQualAtIssuanceBlock.execute());
+
+			CertQualificationAtTimeBlock certQualAtSigningTimeBlock = new CertQualificationAtTimeBlock(i18nProvider, ValidationTime.VALIDATION_TIME,
+					validationTime, signingCertificate, acceptableServices);
+			result.getValidationCertificateQualification().add(certQualAtSigningTimeBlock.execute());
+
+		}
+
 	}
 
 	private XmlTLAnalysis getTlAnalysis(String url) {

@@ -1360,8 +1360,9 @@ public class DiagnosticData {
 	 * @return {@link CertificateWrapper}
 	 */
 	public CertificateWrapper getTLSCertificate() {
-		if (wrapped.getConnectionInfo() != null && wrapped.getConnectionInfo().getTLSCertificate() != null) {
-			return new CertificateWrapper(wrapped.getConnectionInfo().getTLSCertificate());
+		if (wrapped.getConnectionInfo() != null && wrapped.getConnectionInfo().getTLSCertificate() != null
+                && wrapped.getConnectionInfo().getTLSCertificate().getCertificate() != null) {
+			return new CertificateWrapper(wrapped.getConnectionInfo().getTLSCertificate().getCertificate());
 		}
 		return null;
 	}
@@ -1373,8 +1374,9 @@ public class DiagnosticData {
 	 * @return {@link SignatureWrapper}
 	 */
 	public SignatureWrapper getTLSCertificateBindingSignature() {
-		if (wrapped.getConnectionInfo() != null && wrapped.getConnectionInfo().getTLSCertificateBindingSignature() != null) {
-			return new SignatureWrapper(wrapped.getConnectionInfo().getTLSCertificateBindingSignature());
+		if (wrapped.getConnectionInfo() != null && wrapped.getConnectionInfo().getTLSCertificateBindingSignature() != null
+				&& wrapped.getConnectionInfo().getTLSCertificateBindingSignature().getSignature() != null) {
+			return new SignatureWrapper(wrapped.getConnectionInfo().getTLSCertificateBindingSignature().getSignature());
 		}
 		return null;
 	}

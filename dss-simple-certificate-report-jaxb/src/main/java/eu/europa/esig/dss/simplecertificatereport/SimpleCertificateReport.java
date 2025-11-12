@@ -541,6 +541,51 @@ public class SimpleCertificateReport {
 		return Collections.emptyList();
 	}
 
+	/**
+	 * This method retrieve the QWAC validation process's errors for a given certificate by id
+	 *
+	 * @param certificateId
+	 *            {@link String} certificate id
+	 * @return the linked errors
+	 */
+	public List<Message> getQWACValidationErrors(final String certificateId) {
+		XmlChainItem certificate = getCertificate(certificateId);
+		if (certificate != null && certificate.getQwacDetails() != null) {
+			return convert(certificate.getQwacDetails().getError());
+		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * This method retrieve the QWAC validation process's warnings for a given certificate by id
+	 *
+	 * @param certificateId
+	 *            {@link String} certificate id
+	 * @return the linked errors
+	 */
+	public List<Message> getQWACValidationWarnings(final String certificateId) {
+		XmlChainItem certificate = getCertificate(certificateId);
+		if (certificate != null && certificate.getQwacDetails() != null) {
+			return convert(certificate.getQwacDetails().getWarning());
+		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * This method retrieve the QWAC validation process's information messages for a given certificate by id
+	 *
+	 * @param certificateId
+	 *            {@link String} certificate id
+	 * @return the linked errors
+	 */
+	public List<Message> getQWACValidationInfo(final String certificateId) {
+		XmlChainItem certificate = getCertificate(certificateId);
+		if (certificate != null && certificate.getQwacDetails() != null) {
+			return convert(certificate.getQwacDetails().getInfo());
+		}
+		return Collections.emptyList();
+	}
+
 	private Message convert(XmlMessage v) {
 		if (v != null) {
 			return new Message(v.getKey(), v.getValue());

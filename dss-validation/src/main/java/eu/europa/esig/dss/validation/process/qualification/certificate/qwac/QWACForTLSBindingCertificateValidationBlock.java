@@ -14,7 +14,7 @@ import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.validation.process.Chain;
 import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.QWAC2ValidationProcessBlock;
-import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.checks.QWACValidationResultCheck;
+import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.sub.checks.QWAC2ValidationResultCheck;
 
 import java.util.Date;
 import java.util.Map;
@@ -95,7 +95,7 @@ public class QWACForTLSBindingCertificateValidationBlock extends Chain<XmlQWACPr
     }
 
     private ChainItem<XmlQWACProcess> qwacValidation(XmlValidationQWACProcess... qwacValidationProcesses) {
-        return new QWACValidationResultCheck(i18nProvider, result, qwacValidationProcesses, getFailLevelRule());
+        return new QWAC2ValidationResultCheck(i18nProvider, result, qwacValidationProcesses, getFailLevelRule());
     }
 
     private XmlSubXCV getSigningCertificateValidationProcess() {

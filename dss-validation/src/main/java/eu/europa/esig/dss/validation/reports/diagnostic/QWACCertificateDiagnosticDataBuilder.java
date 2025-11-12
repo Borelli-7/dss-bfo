@@ -4,6 +4,8 @@ import eu.europa.esig.dss.diagnostic.jaxb.XmlConnectionInfo;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDiagnosticData;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestMatcher;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlSignature;
+import eu.europa.esig.dss.diagnostic.jaxb.XmlTLSCertificate;
+import eu.europa.esig.dss.diagnostic.jaxb.XmlTLSCertificateBindingSignature;
 import eu.europa.esig.dss.enumerations.DigestMatcherType;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.spi.signature.AdvancedSignature;
@@ -108,13 +110,17 @@ public class QWACCertificateDiagnosticDataBuilder extends SignedDocumentDiagnost
             xmlConnectionInfo.setUrl(websiteUrl);
         }
         if (tlsCertificate != null) {
-            xmlConnectionInfo.setTLSCertificate(xmlCertsMap.get(tlsCertificate.getDSSIdAsString()));
+            XmlTLSCertificate xmlTLSCertificate = new XmlTLSCertificate();
+            xmlTLSCertificate.setCertificate(xmlCertsMap.get(tlsCertificate.getDSSIdAsString()));
+            xmlConnectionInfo.setTLSCertificate(xmlTLSCertificate);
         }
         if (tlsCertificateBindingUrl != null) {
             xmlConnectionInfo.setTLSCertificateBindingUrl(tlsCertificateBindingUrl);
         }
         if (tlsCertificateBindingSignature != null) {
-            xmlConnectionInfo.setTLSCertificateBindingSignature(xmlSignaturesMap.get(tlsCertificateBindingSignature.getId()));
+            XmlTLSCertificateBindingSignature xmlTLSCertificateBindingSignature = new XmlTLSCertificateBindingSignature();
+            xmlTLSCertificateBindingSignature.setSignature(xmlSignaturesMap.get(tlsCertificateBindingSignature.getId()));
+            xmlConnectionInfo.setTLSCertificateBindingSignature(xmlTLSCertificateBindingSignature);
         }
         return xmlConnectionInfo;
     }

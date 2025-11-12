@@ -103,7 +103,7 @@ public abstract class AbstractQWACValidationProcessBlock extends Chain<XmlValida
 
         item = item.setNextItem(certificateQualificationConclusive());
 
-        if (certificateQualification != null && Utils.isCollectionEmpty(certificateQualification.getValidationCertificateQualification())) {
+        if (certificateQualification != null && Utils.isCollectionNotEmpty(certificateQualification.getValidationCertificateQualification())) {
 
             for (XmlValidationCertificateQualification certQual : certificateQualification.getValidationCertificateQualification()) {
 
@@ -173,8 +173,7 @@ public abstract class AbstractQWACValidationProcessBlock extends Chain<XmlValida
     }
 
     private ChainItem<XmlValidationQWACProcess> isAcceptableBuildingBlockConclusion() {
-        // TODO : fail ?
-        return new AcceptableBuildingBlockConclusionCheck<>(i18nProvider, result, buildingBlocksConclusion, getWarnLevelRule());
+        return new AcceptableBuildingBlockConclusionCheck<>(i18nProvider, result, buildingBlocksConclusion, getFailLevelRule());
     }
 
 }

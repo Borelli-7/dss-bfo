@@ -161,8 +161,7 @@ public class TLSCertificateSupportedByQWAC2ValidationProcessBlock extends Chain<
     }
 
     private ChainItem<XmlValidationQWACProcess> isAcceptableBuildingBlockConclusion() {
-        // TODO : fail ?
-        return new AcceptableBuildingBlockConclusionCheck<>(i18nProvider, result, tlsCertificateBasicValidationConclusion, getWarnLevelRule());
+        return new AcceptableBuildingBlockConclusionCheck<>(i18nProvider, result, tlsCertificateBasicValidationConclusion, getFailLevelRule());
     }
 
     private ChainItem<XmlValidationQWACProcess> qwacDomainName() {

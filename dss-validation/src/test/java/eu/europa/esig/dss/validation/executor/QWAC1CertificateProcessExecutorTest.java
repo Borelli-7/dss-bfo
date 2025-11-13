@@ -825,7 +825,7 @@ class QWAC1CertificateProcessExecutorTest extends AbstractTestValidationExecutor
 
             } else if (i18nProvider.getMessage(MessageTag.QWAC_VALIDATION_PROFILE,
                     ValidationProcessUtils.getQWACValidationMessageTag(QWACProfile.TLS_BY_QWAC_2)).equals(xmlValidationQWACProcess.getTitle())) {
-                assertEquals(Indication.FAILED, xmlValidationQWACProcess.getConclusion().getIndication());
+                assertEquals(Indication.INDETERMINATE, xmlValidationQWACProcess.getConclusion().getIndication());
                 is2QWACProcessPresent = true;
             }
         }

@@ -259,7 +259,15 @@
 		
     </xsl:template>
 
-	<xsl:template match="dss:X509ValidationDetails">
+	<xsl:template match="dss:X509ValidationDetails|dss:AdESValidationDetails">
+		<xsl:variable name="label">
+			<xsl:choose>
+				<xsl:when test="name() = 'X509ValidationDetails'">X509 Validation Details</xsl:when>
+				<xsl:when test="name() = 'AdESValidationDetails'">AdES Validation Details</xsl:when>
+				<xsl:otherwise>?</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+
 		<fo:table-row>
 			<xsl:attribute name="margin-top">1px</xsl:attribute>
 			<xsl:attribute name="margin-bottom">1px</xsl:attribute>
@@ -269,7 +277,7 @@
 					<xsl:attribute name="margin-bottom">1px</xsl:attribute>
 
 					<xsl:attribute name="font-weight">bold</xsl:attribute>
-					X509 Validation Details:
+					<xsl:value-of select="$label" />:
 				</fo:block>
 			</fo:table-cell>
 			<fo:table-cell>

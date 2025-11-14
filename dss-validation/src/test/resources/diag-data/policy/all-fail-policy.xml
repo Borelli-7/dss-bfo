@@ -176,8 +176,12 @@
 			<KeyIdentifierMatch Level="FAIL" />
 			<SigningTime Level="FAIL" />
 			<SigningTimeInCertRange Level="FAIL" />
-			<ContentType Level="FAIL" value="1.2.840.113549.1.7.1" />
-			<ContentHints Level="FAIL" value="*" />
+			<ContentType Level="FAIL">
+				<Id>1.2.840.113549.1.7.1</Id>
+			</ContentType>
+			<ContentHints Level="FAIL">
+				<Id>*</Id>
+			</ContentHints>
 			<MessageDigestOrSignedPropertiesPresent Level="FAIL" />
 			<EllipticCurveKeySize Level="FAIL" />
 			<CommitmentTypeIndication Level="FAIL">
@@ -314,8 +318,12 @@
 			<KeyIdentifierMatch Level="FAIL" />
 			<SigningTime Level="FAIL" />
 			<SigningTimeInCertRange Level="FAIL" />
-			<ContentType Level="FAIL" value="1.2.840.113549.1.7.1" />
-			<ContentHints Level="FAIL" value="*" />
+			<ContentType Level="FAIL">
+				<Id>1.2.840.113549.1.7.1</Id>
+			</ContentType>
+			<ContentHints Level="FAIL">
+				<Id>*</Id>
+			</ContentHints>
 			<MessageDigestOrSignedPropertiesPresent Level="FAIL" />
 			<EllipticCurveKeySize Level="FAIL" />
 			<CommitmentTypeIndication Level="FAIL">

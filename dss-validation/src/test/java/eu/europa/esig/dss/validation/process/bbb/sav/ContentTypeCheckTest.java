@@ -80,7 +80,7 @@ class ContentTypeCheckTest extends AbstractTestCheck {
 	@Test
 	void tlsBindingCheck() {
 		XmlSignature sig = new XmlSignature();
-		sig.setContentType("application/TLS-Certificate-Binding-v1");
+		sig.setMimeType("application/TLS-Certificate-Binding-v1");
 		sig.setSignatureFormat(SignatureLevel.JAdES_BASELINE_B);
 
 		MultiValuesConstraint constraint = new MultiValuesConstraint();
@@ -99,7 +99,7 @@ class ContentTypeCheckTest extends AbstractTestCheck {
 	@Test
 	void tlsBindingClearCheck() {
 		XmlSignature sig = new XmlSignature();
-		sig.setContentType("TLS-Certificate-Binding-v1");
+		sig.setMimeType("TLS-Certificate-Binding-v1");
 		sig.setSignatureFormat(SignatureLevel.JAdES_BASELINE_B);
 
 		MultiValuesConstraint constraint = new MultiValuesConstraint();
@@ -118,7 +118,7 @@ class ContentTypeCheckTest extends AbstractTestCheck {
 	@Test
 	void tlsBindingJsonCheck() {
 		XmlSignature sig = new XmlSignature();
-		sig.setContentType("application/TLS-Certificate-Binding-v1");
+		sig.setMimeType("application/TLS-Certificate-Binding-v1");
 		sig.setSignatureFormat(SignatureLevel.JSON_NOT_ETSI);
 
 		MultiValuesConstraint constraint = new MultiValuesConstraint();

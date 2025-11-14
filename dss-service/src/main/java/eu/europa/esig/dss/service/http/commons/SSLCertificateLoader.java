@@ -72,7 +72,7 @@ public class SSLCertificateLoader implements Serializable {
     public List<CertificateToken> getCertificates(final String urlString) {
         final String trimmedUrl = Utils.trim(urlString);
         if (Protocol.isHttpUrl(trimmedUrl)) {
-            ResponseEnvelope responseEnvelope = commonsDataLoader.requestGet(trimmedUrl, true, false);
+            ResponseEnvelope responseEnvelope = getCommonsDataLoader().requestGet(trimmedUrl, true, false);
             Certificate[] tlsCertificates = responseEnvelope.getTLSCertificates();
             return toCertificateTokens(tlsCertificates);
         }

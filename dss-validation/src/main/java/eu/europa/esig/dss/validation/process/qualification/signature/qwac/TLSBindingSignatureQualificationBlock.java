@@ -8,13 +8,17 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlQWACProcess;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlTLAnalysis;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationCertificateQualification;
 import eu.europa.esig.dss.diagnostic.SignatureWrapper;
+import eu.europa.esig.dss.diagnostic.TrustServiceWrapper;
 import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.ValidationTime;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.utils.Utils;
+import eu.europa.esig.dss.validation.process.qualification.certificate.CertQualificationAtTimeBlock;
+import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.CertQualificationAtTimeForQWACBlock;
 import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.QWACForTLSBindingCertificateValidationBlock;
 import eu.europa.esig.dss.validation.process.qualification.signature.SignatureQualificationBlock;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -85,8 +89,13 @@ public class TLSBindingSignatureQualificationBlock extends SignatureQualificatio
     }
 
     @Override
-    protected ValidationTime getValidationTimeAtSigningTime() {
-        return ValidationTime.VALIDATION_TIME;
+    protected CertQualificationAtTimeBlock getCertQualificationAtIssuanceTimeBlock(List<TrustServiceWrapper> acceptableServices) {
+        return new CertQualificationAtTimeForQWACBlock(i18nProvider, ValidationTime.CERTIFICATE_ISSUANCE_TIME, signingCertificate, acceptableServices);
+    }
+
+    @Override
+    protected CertQualificationAtTimeBlock getCertQualificationAtSigningTimeBlock(List<TrustServiceWrapper> acceptableServices, Date signingTime) {
+        return new CertQualificationAtTimeForQWACBlock(i18nProvider, ValidationTime.VALIDATION_TIME, signingTime, signingCertificate, acceptableServices);
     }
 
 }

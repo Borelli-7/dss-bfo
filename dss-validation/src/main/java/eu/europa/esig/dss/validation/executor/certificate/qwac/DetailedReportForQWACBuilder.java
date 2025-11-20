@@ -16,6 +16,8 @@ import eu.europa.esig.dss.enumerations.QWACProfile;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.validation.executor.certificate.DetailedReportForCertificateBuilder;
+import eu.europa.esig.dss.validation.process.qualification.certificate.CertificateQualificationBlock;
+import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.CertificateQualificationForQWACBlock;
 import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.QWACForTLSCertificateValidationBlock;
 import eu.europa.esig.dss.validation.process.qualification.signature.SignatureQualificationBlock;
 import eu.europa.esig.dss.validation.process.qualification.signature.qwac.TLSBindingSignatureQualificationBlock;
@@ -124,6 +126,12 @@ public class DetailedReportForQWACBuilder extends DetailedReportForCertificateBu
         xmlCertificate.setQWACProcess(xmlQWACProcess);
 
         return xmlCertificate;
+    }
+
+    @Override
+    protected CertificateQualificationBlock getCertificateQualificationBlock(XmlDetailedReport detailedReport, XmlBasicBuildingBlocks basicBuildingBlocks) {
+        return new CertificateQualificationForQWACBlock(i18nProvider, basicBuildingBlocks.getConclusion(), currentTime,
+                getCertificate(), detailedReport.getTLAnalysis());
     }
 
     private QWACProfile getQWACProfile(XmlSignature bindingSignature) {

@@ -123,14 +123,25 @@ public class DetailedReportForCertificateBuilder extends AbstractDetailedReportB
 		XmlCertificate xmlCertificate = new XmlCertificate();
 		xmlCertificate.setId(certificateId);
 
-		CertificateQualificationBlock cqb = new CertificateQualificationBlock(
-				i18nProvider, basicBuildingBlocks.getConclusion(), currentTime, getCertificate(), detailedReport.getTLAnalysis());
+		CertificateQualificationBlock cqb = getCertificateQualificationBlock(detailedReport, basicBuildingBlocks);
 		XmlCertificateQualificationProcess xmlCertificateQualificationProcess = cqb.execute();
 		xmlCertificate.setCertificateQualificationProcess(xmlCertificateQualificationProcess);
 
 		detailedReport.getSignatureOrTimestampOrEvidenceRecord().add(xmlCertificate);
 
 		return xmlCertificate;
+	}
+
+	/**
+	 * Gets the certificate qualification block
+	 *
+	 * @param detailedReport {@link XmlDetailedReport}
+	 * @param basicBuildingBlocks {@link XmlBasicBuildingBlocks}
+	 * @return {@link CertificateQualificationBlock}
+	 */
+	protected CertificateQualificationBlock getCertificateQualificationBlock(XmlDetailedReport detailedReport, XmlBasicBuildingBlocks basicBuildingBlocks) {
+		return new CertificateQualificationBlock(i18nProvider, basicBuildingBlocks.getConclusion(), currentTime,
+				getCertificate(), detailedReport.getTLAnalysis());
 	}
 
 }

@@ -167,15 +167,13 @@ public class SignatureQualificationBlock extends Chain<XmlValidationSignatureQua
 				// 1. filter by service for CAQC
 				TrustServiceFilter filter = TrustServicesFilterFactory.createFilterByUrls(acceptableTLUrls);
 				List<TrustServiceWrapper> acceptableServices = filter.filter(originalTSPs);
-	
-				CertQualificationAtTimeBlock certQualAtIssuanceBlock = new CertQualificationAtTimeBlock(i18nProvider, ValidationTime.CERTIFICATE_ISSUANCE_TIME,
-						signingCertificate, acceptableServices);
+
+				CertQualificationAtTimeBlock certQualAtIssuanceBlock = getCertQualificationAtIssuanceTimeBlock(acceptableServices);
 				XmlValidationCertificateQualification certQualAtIssuanceResult = certQualAtIssuanceBlock.execute();
 				result.getValidationCertificateQualification().add(certQualAtIssuanceResult);
 				qualificationAtIssuanceTime = certQualAtIssuanceResult.getCertificateQualification();
-	
-				CertQualificationAtTimeBlock certQualAtSigningTimeBlock = new CertQualificationAtTimeBlock(i18nProvider, getValidationTimeAtSigningTime(), bestSignatureTime,
-						signingCertificate, acceptableServices);
+
+				CertQualificationAtTimeBlock certQualAtSigningTimeBlock = getCertQualificationAtSigningTimeBlock(acceptableServices, bestSignatureTime);
 				XmlValidationCertificateQualification certQualAtSigningTimeResult = certQualAtSigningTimeBlock.execute();
 				result.getValidationCertificateQualification().add(certQualAtSigningTimeResult);
 				qualificationAtSigningTime = certQualAtSigningTimeResult.getCertificateQualification();
@@ -221,6 +219,27 @@ public class SignatureQualificationBlock extends Chain<XmlValidationSignatureQua
 		}
 	}
 
+	/**
+	 * Gets a certificate qualification determination process for validation at the certificate issuance time
+	 *
+	 * @param acceptableServices a list of {@link TrustServiceWrapper}s acceptable for the given certificate
+	 * @return {@link CertQualificationAtTimeBlock}
+	 */
+	protected CertQualificationAtTimeBlock getCertQualificationAtIssuanceTimeBlock(List<TrustServiceWrapper> acceptableServices) {
+		return new CertQualificationAtTimeBlock(i18nProvider, ValidationTime.CERTIFICATE_ISSUANCE_TIME, signingCertificate, acceptableServices);
+	}
+
+	/**
+	 * Gets a certificate qualification determination process for validation at the certificate signing time
+	 *
+	 * @param acceptableServices a list of {@link TrustServiceWrapper}s acceptable for the given certificate
+	 * @param signingTime {@link Date}
+	 * @return {@link CertQualificationAtTimeBlock}
+	 */
+	protected CertQualificationAtTimeBlock getCertQualificationAtSigningTimeBlock(List<TrustServiceWrapper> acceptableServices, Date signingTime) {
+		return new CertQualificationAtTimeBlock(i18nProvider, ValidationTime.BEST_SIGNATURE_TIME, signingTime, signingCertificate, acceptableServices);
+	}
+
 	private XmlTLAnalysis getTlAnalysis(String url) {
 		for (XmlTLAnalysis xmlTLAnalysis : tlAnalysis) {
 			if (Utils.areStringsEqual(url, xmlTLAnalysis.getURL())) {
@@ -228,15 +247,6 @@ public class SignatureQualificationBlock extends Chain<XmlValidationSignatureQua
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Gets the validation time type at the signing time
-	 *
-	 * @return {@link ValidationTime}
-	 */
-	protected ValidationTime getValidationTimeAtSigningTime() {
-		return ValidationTime.BEST_SIGNATURE_TIME;
 	}
 
 	@Override

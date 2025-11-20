@@ -22,6 +22,7 @@ import eu.europa.esig.dss.diagnostic.jaxb.XmlOID;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlQcStatements;
 import eu.europa.esig.dss.enumerations.CertificateExtensionEnum;
 import eu.europa.esig.dss.enumerations.CertificatePolicy;
+import eu.europa.esig.dss.enumerations.CertificateQualification;
 import eu.europa.esig.dss.enumerations.CertificateStatus;
 import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.Level;
@@ -85,6 +86,16 @@ class QWAC1CertificateProcessExecutorTest extends AbstractTestValidationExecutor
 
         SimpleCertificateReport simpleReport = reports.getSimpleReport();
         assertNotNull(simpleReport);
+
+        assertEquals(CertificateQualification.QCERT_FOR_WSA, simpleReport.getQualificationAtCertificateIssuance());
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtIssuanceTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtIssuanceTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtIssuanceTime(certificateId)));
+
+        assertEquals(CertificateQualification.QCERT_FOR_WSA, simpleReport.getQualificationAtValidationTime());
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtValidationTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtValidationTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtValidationTime(certificateId)));
 
         assertEquals(QWACProfile.QWAC_1, simpleReport.getQWACProfile());
 

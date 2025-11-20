@@ -685,6 +685,32 @@ public class SimpleCertificateReport {
 	}
 
 	/**
+	 * This method returns the qualification of the first certificate at its issuance
+	 *
+	 * @return the qualification at the certificate creation
+	 */
+	public CertificateQualification getTLSBindingSignatureIssuerQualificationAtCertificateIssuance() {
+		XmlChainItem xmlChainItem = getTLSBindingSignatureIssuerCertificate();
+		if (xmlChainItem != null) {
+			return xmlChainItem.getQualificationAtIssuance();
+		}
+		return null;
+	}
+
+	/**
+	 * This method returns the qualification of the first certificate at the validation time
+	 *
+	 * @return the qualification at the validation time
+	 */
+	public CertificateQualification getTLSBindingSignatureIssuerQualificationAtValidationTime() {
+		XmlChainItem xmlChainItem = getTLSBindingSignatureIssuerCertificate();
+		if (xmlChainItem != null) {
+			return xmlChainItem.getQualificationAtValidation();
+		}
+		return null;
+	}
+
+	/**
 	 * Gets the Indication for the TLS Certificate Binging signature validation.
 	 * NOTE: Applicable only when validation process is executed using the {@code eu.europa.esig.dss.validation.qwac.QWACValidator}
 	 *

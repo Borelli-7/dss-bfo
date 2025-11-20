@@ -35,6 +35,7 @@ import eu.europa.esig.dss.diagnostic.jaxb.XmlTrustService;
 import eu.europa.esig.dss.enumerations.AdditionalServiceInformation;
 import eu.europa.esig.dss.enumerations.CertificateExtensionEnum;
 import eu.europa.esig.dss.enumerations.CertificatePolicy;
+import eu.europa.esig.dss.enumerations.CertificateQualification;
 import eu.europa.esig.dss.enumerations.CertificateRefOrigin;
 import eu.europa.esig.dss.enumerations.CertificateStatus;
 import eu.europa.esig.dss.enumerations.GeneralNameType;
@@ -103,12 +104,32 @@ class QWAC2CertificateProcessExecutorTest extends AbstractTestValidationExecutor
         executor.setCurrentTime(diagnosticData.getValidationDate());
 
         CertificateReports reports = executor.execute();
-        reports.print();
 
         SimpleCertificateReport simpleReport = reports.getSimpleReport();
         assertNotNull(simpleReport);
 
+        assertEquals(CertificateQualification.NA, simpleReport.getQualificationAtCertificateIssuance());
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtIssuanceTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtIssuanceTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtIssuanceTime(certificateId)));
+
+        assertEquals(CertificateQualification.NA, simpleReport.getQualificationAtValidationTime());
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtValidationTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtValidationTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtValidationTime(certificateId)));
+
         assertEquals(QWACProfile.TLS_BY_QWAC_2, simpleReport.getQWACProfile());
+
+        String bindingSignatureIssuerId = simpleReport.getTLSBindingSignatureIssuerCertificate().getId();
+        assertEquals(CertificateQualification.QCERT_FOR_WSA, simpleReport.getTLSBindingSignatureIssuerQualificationAtCertificateIssuance());
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtIssuanceTime(bindingSignatureIssuerId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtIssuanceTime(bindingSignatureIssuerId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtIssuanceTime(bindingSignatureIssuerId)));
+
+        assertEquals(CertificateQualification.QCERT_FOR_WSA, simpleReport.getTLSBindingSignatureIssuerQualificationAtCertificateIssuance());
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtValidationTime(bindingSignatureIssuerId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtValidationTime(bindingSignatureIssuerId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtValidationTime(bindingSignatureIssuerId)));
         assertEquals(QWACProfile.QWAC_2, simpleReport.getTLSBindingSignatureIssuerCertificateQWACProfile());
 
         DetailedReport detailedReport = reports.getDetailedReport();

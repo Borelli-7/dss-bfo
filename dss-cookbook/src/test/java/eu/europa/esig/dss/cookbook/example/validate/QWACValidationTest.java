@@ -22,12 +22,15 @@ package eu.europa.esig.dss.cookbook.example.validate;
 
 import eu.europa.esig.dss.detailedreport.DetailedReport;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
+import eu.europa.esig.dss.enumerations.QWACProfile;
+import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.model.x509.revocation.crl.CRL;
 import eu.europa.esig.dss.model.x509.revocation.ocsp.OCSP;
 import eu.europa.esig.dss.service.crl.OnlineCRLSource;
 import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
 import eu.europa.esig.dss.service.ocsp.OnlineOCSPSource;
 import eu.europa.esig.dss.simplecertificatereport.SimpleCertificateReport;
+import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.spi.validation.CertificateVerifier;
 import eu.europa.esig.dss.spi.validation.CommonCertificateVerifier;
@@ -38,6 +41,8 @@ import eu.europa.esig.dss.validation.qwac.QWACValidator;
 import eu.europa.esig.dss.validation.reports.CertificateReports;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -86,13 +91,34 @@ class QWACValidationTest {
 		CertificateReports reports = qwacValidator.validate();
 		SimpleCertificateReport simpleReport = reports.getSimpleReport();
 
+		// Read validation status
+		QWACProfile qwacProfile = simpleReport.getQWACProfile();
+
 		// end::demo[]
+
+		assertNotNull(qwacProfile);
 
 		DetailedReport detailedReport = reports.getDetailedReport();
 		DiagnosticData diagnosticData = reports.getDiagnosticData();
 		assertNotNull(simpleReport);
 		assertNotNull(detailedReport);
 		assertNotNull(diagnosticData);
+
+		CertificateToken tlsCertificate = DSSUtils.loadCertificate(new File("src/main/resources/keystore/ec.europa.eu.1.cer"));
+
+		// tag::demo-offline[]
+		// import eu.europa.esig.dss.model.x509.CertificateToken;
+		// import eu.europa.esig.dss.validation.qwac.QWACValidator;
+		// import eu.europa.esig.dss.validation.reports.CertificateReports;
+
+		qwacValidator = QWACValidator.fromUrlAndCertificate("http://nowina.lu", tlsCertificate);
+
+		// Configure as required
+		qwacValidator.setCertificateVerifier(cv);
+
+		reports = qwacValidator.validate();
+
+		// end::demo-offline[]
 
 	}
 

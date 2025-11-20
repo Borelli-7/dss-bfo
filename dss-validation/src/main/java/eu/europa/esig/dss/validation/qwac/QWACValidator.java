@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.security.cert.Certificate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -227,6 +228,9 @@ public class QWACValidator extends AbstractCertificateValidator<CertificateRepor
     }
 
     private List<CertificateToken> toCertificateTokenList(Certificate[] certificates) {
+        if (Utils.isArrayEmpty(certificates)) {
+            return Collections.emptyList();
+        }
         return Arrays.stream(certificates).map(this::toCertificateToken).filter(Objects::nonNull).collect(Collectors.toList());
     }
 

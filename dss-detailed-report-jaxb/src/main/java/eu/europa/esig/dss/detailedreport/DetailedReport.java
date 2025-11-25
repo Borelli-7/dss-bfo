@@ -949,28 +949,39 @@ public class DetailedReport {
 		if (certificates == null || certificates.isEmpty()) {
 			throw new UnsupportedOperationException("Only supported in report for certificate");
 		}
+
+		// process cert chain for signatures
+		List<String> signatureIds = getSignatureIds();
 		List<XmlBasicBuildingBlocks> basicBuildingBlocks = jaxbDetailedReport.getBasicBuildingBlocks();
 		for (XmlBasicBuildingBlocks xmlBasicBuildingBlocks : basicBuildingBlocks) {
+			if (!signatureIds.contains(xmlBasicBuildingBlocks.getId())) {
+				continue; // skip for signature
+			}
+
 			XmlXCV xcv = xmlBasicBuildingBlocks.getXCV();
 			if (xcv != null) {
-				boolean trustAnchorReached = false;
 				List<XmlSubXCV> subXCV = xcv.getSubXCV();
 				for (XmlSubXCV xmlSubXCV : subXCV) {
-					if (xmlSubXCV.isTrustAnchor() != null && xmlSubXCV.isTrustAnchor()) {
-						trustAnchorReached = true;
-					}
 					if (certificateId.equals(xmlSubXCV.getId())) {
 						return xmlSubXCV.getConclusion();
 					}
 				}
-				if (trustAnchorReached) {
-					XmlConclusion xmlConclusion = new XmlConclusion();
-					xmlConclusion.setIndication(Indication.PASSED);
-					return xmlConclusion;
-				} else {
-					// if {@link SubX509CertificateValidation} is not executed and
-					// the certificate is in untrusted chain, return global XmlConclusion
-					return xcv.getConclusion();
+			}
+		}
+
+		// process other certificates (certificate validation only)
+		for (XmlBasicBuildingBlocks xmlBasicBuildingBlocks : basicBuildingBlocks) {
+			if (signatureIds.contains(xmlBasicBuildingBlocks.getId())) {
+				continue; // skip for signature
+			}
+
+			XmlXCV xcv = xmlBasicBuildingBlocks.getXCV();
+			if (xcv != null) {
+				List<XmlSubXCV> subXCV = xcv.getSubXCV();
+				for (XmlSubXCV xmlSubXCV : subXCV) {
+					if (certificateId.equals(xmlSubXCV.getId())) {
+						return xmlSubXCV.getConclusion();
+					}
 				}
 			}
 		}

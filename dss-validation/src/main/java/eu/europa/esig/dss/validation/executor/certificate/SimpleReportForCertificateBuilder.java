@@ -31,6 +31,7 @@ import eu.europa.esig.dss.diagnostic.jaxb.XmlLangAndValue;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlOID;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlTrustService;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlTrustServiceProvider;
+import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.jaxb.object.Message;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
@@ -107,15 +108,17 @@ public class SimpleReportForCertificateBuilder {
 		simpleReport.setValidationTime(currentTime);
 
 		CertificateWrapper certificate = diagnosticData.getUsedCertificateById(certificateId);
-		XmlChainItem targetCertificate = getChainItem(certificate);
+		XmlChainItem targetCertificate = getChainItem(certificate, false);
 		addQualifications(targetCertificate, certificate);
 		addQWACValidationDetails(targetCertificate, certificate);
 		simpleReport.setCertificate(targetCertificate);
 
 		List<XmlChainItem> chain = new ArrayList<>();
+		boolean trustAnchorReached = false;
 		List<CertificateWrapper> certificateChain = certificate.getCertificateChain();
 		for (CertificateWrapper cert : certificateChain) {
-			chain.add(getChainItem(cert));
+			trustAnchorReached |= cert.isTrusted();
+			chain.add(getChainItem(cert, trustAnchorReached));
 		}
 		targetCertificate.setChain(chain);
 
@@ -135,7 +138,7 @@ public class SimpleReportForCertificateBuilder {
 		report.setValidationTime(currentTime);
 	}
 
-	private XmlChainItem getChainItem(CertificateWrapper certificate) {
+	private XmlChainItem getChainItem(CertificateWrapper certificate, boolean trustAnchorReached) {
 		XmlChainItem item = new XmlChainItem();
 		item.setId(certificate.getId());
 		item.setSubject(getSubject(certificate));
@@ -191,8 +194,18 @@ public class SimpleReportForCertificateBuilder {
 		}
 
 		XmlConclusion conclusion = detailedReport.getCertificateXCVConclusion(certificate.getId());
-		item.setIndication(conclusion.getIndication());
-		item.setSubIndication(conclusion.getSubIndication());
+		if (conclusion != null) {
+			item.setIndication(conclusion.getIndication());
+			item.setSubIndication(conclusion.getSubIndication());
+
+		} else if (certificate.isTrusted() || trustAnchorReached) {
+			item.setIndication(Indication.PASSED);
+
+		} else {
+			// if certificate was not validated or not trusted
+			item.setIndication(Indication.INDETERMINATE);
+			item.setSubIndication(SubIndication.NO_CERTIFICATE_CHAIN_FOUND);
+		}
 
 		XmlDetails validationDetails = getValidationDetails(certificate.getId());
 		if (isNotEmpty(validationDetails)) {
@@ -402,9 +415,11 @@ public class SimpleReportForCertificateBuilder {
 			return;
 		}
 
+		boolean trustAnchorReached = false;
 		final List<XmlChainItem> chain = new ArrayList<>();
 		for (CertificateWrapper cert : certificateChain) {
-			XmlChainItem chainItem = getChainItem(cert);
+			trustAnchorReached |= cert.isTrusted();
+			XmlChainItem chainItem = getChainItem(cert, trustAnchorReached);
 			if (bindingSignature.getSigningCertificate() != null
 					&& bindingSignature.getSigningCertificate().getId().equals(cert.getId())) {
 				addQualifications(chainItem, cert);

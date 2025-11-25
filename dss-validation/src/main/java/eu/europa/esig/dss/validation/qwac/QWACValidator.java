@@ -171,8 +171,7 @@ public class QWACValidator extends AbstractCertificateValidator<CertificateRepor
      */
     protected ValidationContext prepareValidationContext(CertificateToken tlsCertificate, List<CertificateToken> otherTlsCertificates,
                                                          AdvancedSignature signature) {
-        final CertificateVerifier certificateVerifierForValidation =
-                new CertificateVerifierBuilder(certificateVerifier).buildCompleteCopyForValidation();
+        final CertificateVerifier certificateVerifierForValidation = getOfflineCertificateVerifier();
 
         ValidationContext validationContext = super.prepareValidationContext(certificateVerifierForValidation);
         validationContext.addCertificateTokenForVerification(tlsCertificate);
@@ -208,6 +207,7 @@ public class QWACValidator extends AbstractCertificateValidator<CertificateRepor
             if (tlsCertificateBindingSignatureBytes != null) {
                 DSSDocument signatureDocument = new InMemoryDocument(tlsCertificateBindingSignatureBytes, tlsCertificateBindingUrl);
                 SignedDocumentValidator documentValidator = SignedDocumentValidator.fromDocument(signatureDocument);
+                documentValidator.setCertificateVerifier(getOfflineCertificateVerifier());
                 documentValidator.setDetachedContents(toDetachedDocumentsList(tlsCertificates));
                 return documentValidator;
             }
@@ -310,6 +310,15 @@ public class QWACValidator extends AbstractCertificateValidator<CertificateRepor
         return diagnosticDataBuilder
                 .foundSignatures(validationContext.getProcessedSignatures())
                 .documentCertificateSource(validationContext.getDocumentCertificateSource());
+    }
+
+    /**
+     * Builds a complete copy of the CertificateVerifier for the offline validation
+     *
+     * @return {@link CertificateVerifier}
+     */
+    protected CertificateVerifier getOfflineCertificateVerifier() {
+        return new CertificateVerifierBuilder(certificateVerifier).buildCompleteCopyForValidation();
     }
 
     @Override

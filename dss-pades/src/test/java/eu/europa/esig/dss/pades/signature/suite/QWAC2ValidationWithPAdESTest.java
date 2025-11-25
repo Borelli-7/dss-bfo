@@ -1,10 +1,10 @@
-package eu.europa.esig.dss.jades.signature.qwac;
+package eu.europa.esig.dss.pades.signature.suite;
 
 import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.QWACProfile;
+import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.enumerations.TSLType;
-import eu.europa.esig.dss.jades.signature.JAdESLevelB2QWACTest;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.http.ResponseEnvelope;
@@ -18,6 +18,10 @@ import eu.europa.esig.dss.model.tsl.TrustService;
 import eu.europa.esig.dss.model.tsl.TrustServiceProvider;
 import eu.europa.esig.dss.model.tsl.TrustServiceStatusAndInformationExtensions;
 import eu.europa.esig.dss.model.x509.CertificateToken;
+import eu.europa.esig.dss.pades.PAdESSignatureParameters;
+import eu.europa.esig.dss.pades.PAdESTimestampParameters;
+import eu.europa.esig.dss.pades.signature.PAdESService;
+import eu.europa.esig.dss.signature.DocumentSignatureService;
 import eu.europa.esig.dss.simplecertificatereport.SimpleCertificateReport;
 import eu.europa.esig.dss.simplecertificatereport.jaxb.XmlSignature;
 import eu.europa.esig.dss.spi.DSSUtils;
@@ -39,19 +43,25 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
-public abstract class AbstractQWACValidationTest extends JAdESLevelB2QWACTest {
+class QWAC2ValidationWithPAdESTest extends AbstractPAdESTestSignature {
 
-    protected DSSDocument tlsCertificateDocument;
-
-    protected DSSDocument documentToSign;
+    private DocumentSignatureService<PAdESSignatureParameters, PAdESTimestampParameters> service;
+    private PAdESSignatureParameters signatureParameters;
+    private DSSDocument documentToSign;
 
     @BeforeEach
     void init() throws Exception {
-        tlsCertificateDocument = new InMemoryDocument(getTLSCertificate().getEncoded(), "TLSCertificate");
-        documentToSign = tlsCertificateDocument;
+
+        documentToSign = new InMemoryDocument(QWAC2ValidationWithPAdESTest.class.getResourceAsStream("/sample.pdf"));
+
+        signatureParameters = new PAdESSignatureParameters();
+        signatureParameters.setSigningCertificate(getSigningCert());
+        signatureParameters.setCertificateChain(getCertificateChain());
+        signatureParameters.setSignatureLevel(SignatureLevel.PAdES_BASELINE_B);
+
+        service = new PAdESService(getOfflineCertificateVerifier());
     }
 
     @Test
@@ -62,30 +72,15 @@ public abstract class AbstractQWACValidationTest extends JAdESLevelB2QWACTest {
 
         CertificateReports certificateReports = qwacValidator.validate();
         assertNotNull(certificateReports);
-        // certificateReports.print();
 
         SimpleCertificateReport simpleReport = certificateReports.getSimpleReport();
         assertEquals(getExpectedQWACProfile(), simpleReport.getQWACProfile());
 
         XmlSignature tlsBindingSignature = simpleReport.getTLSBindingSignature();
-        if (tlsBindingSignaturePresent()) {
-            assertNotNull(tlsBindingSignature);
-            assertEquals(getExpectedTLSBindingSignatureIndication(), simpleReport.getTLSBindingSignatureIndication());
-            assertEquals(getExpectedTLSBindingSignatureSubIndication(), simpleReport.getTLSBindingSignatureSubIndication());
-            assertEquals(getExpectedSignatureBindingCertificateQWACProfile(), simpleReport.getTLSBindingSignatureIssuerCertificateQWACProfile());
-        } else {
-            assertNull(tlsBindingSignature);
-        }
-    }
-
-    @Override
-    public void signAndVerify() {
-        // skip
-    }
-
-    @Override
-    protected DSSDocument getDocumentToSign() {
-        return documentToSign;
+        assertNotNull(tlsBindingSignature);
+        assertEquals(Indication.INDETERMINATE, simpleReport.getTLSBindingSignatureIndication());
+        assertEquals(SubIndication.SIG_CONSTRAINTS_FAILURE, simpleReport.getTLSBindingSignatureSubIndication());
+        assertEquals(getExpectedSignatureBindingCertificateQWACProfile(), simpleReport.getTLSBindingSignatureIssuerCertificateQWACProfile());
     }
 
     @Override
@@ -199,20 +194,37 @@ public abstract class AbstractQWACValidationTest extends JAdESLevelB2QWACTest {
         return responseEnvelope;
     }
 
-    protected abstract QWACProfile getExpectedQWACProfile();
-
-    protected abstract QWACProfile getExpectedSignatureBindingCertificateQWACProfile();
-
-    protected boolean tlsBindingSignaturePresent() {
-        return true;
+    protected QWACProfile getExpectedQWACProfile() {
+        return QWACProfile.NOT_QWAC;
     }
 
-    protected Indication getExpectedTLSBindingSignatureIndication() {
-        return Indication.TOTAL_PASSED;
+    protected QWACProfile getExpectedSignatureBindingCertificateQWACProfile() {
+        return QWACProfile.QWAC_2;
     }
 
-    protected SubIndication getExpectedTLSBindingSignatureSubIndication() {
-        return null;
+    @Override
+    protected DocumentSignatureService<PAdESSignatureParameters, PAdESTimestampParameters> getService() {
+        return service;
+    }
+
+    @Override
+    protected PAdESSignatureParameters getSignatureParameters() {
+        return signatureParameters;
+    }
+
+    @Override
+    protected DSSDocument getDocumentToSign() {
+        return documentToSign;
+    }
+
+    @Override
+    public void signAndVerify() {
+        // skip
+    }
+
+    @Override
+    protected String getSigningAlias() {
+        return "2-QWAC";
     }
 
 }

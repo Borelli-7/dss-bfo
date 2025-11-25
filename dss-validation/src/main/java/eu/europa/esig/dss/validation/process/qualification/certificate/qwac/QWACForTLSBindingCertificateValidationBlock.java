@@ -2,6 +2,7 @@ package eu.europa.esig.dss.validation.process.qualification.certificate.qwac;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificateQualificationProcess;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlQWACProcess;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlSubXCV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationQWACProcess;
@@ -78,9 +79,9 @@ public class QWACForTLSBindingCertificateValidationBlock extends Chain<XmlQWACPr
     @Override
     protected void initChain() {
 
-        XmlSubXCV subXCV = getSigningCertificateValidationProcess();
+        XmlConclusion xmlConclusion = getSigningCertificateValidationProcessConclusion();
         QWAC2ValidationProcessBlock qwac2Process = new QWAC2ValidationProcessBlock(
-                i18nProvider, validationTime, certificate, subXCV.getConclusion(), certificateQualification, websiteUrl);
+                i18nProvider, validationTime, certificate, xmlConclusion, certificateQualification, websiteUrl);
         XmlValidationQWACProcess qwac2ValidationResult = qwac2Process.execute();
         result.getValidationQWACProcess().add(qwac2ValidationResult);
 
@@ -98,7 +99,7 @@ public class QWACForTLSBindingCertificateValidationBlock extends Chain<XmlQWACPr
         return new QWAC2ValidationResultCheck(i18nProvider, result, qwacValidationProcesses, getFailLevelRule());
     }
 
-    private XmlSubXCV getSigningCertificateValidationProcess() {
+    private XmlConclusion getSigningCertificateValidationProcessConclusion() {
         XmlBasicBuildingBlocks signatureBBB = bbbs.get(bindingSignature.getId());
         if (signatureBBB == null) {
             throw new IllegalStateException(String.format("The signature basic validation process shall be performed! " +
@@ -108,11 +109,10 @@ public class QWACForTLSBindingCertificateValidationBlock extends Chain<XmlQWACPr
         XmlXCV xcv = signatureBBB.getXCV();
         for (XmlSubXCV subXCV : xcv.getSubXCV()) {
             if (certificate.getId().equals(subXCV.getId())) {
-                return subXCV;
+                return subXCV.getConclusion();
             }
         }
-        throw new IllegalStateException(String.format(
-                "Unable to find sub X.509 validation process for a certificate with Id '%s'!", certificate.getId()));
+        return xcv.getConclusion();
     }
 
 }

@@ -126,7 +126,7 @@ class QWAC2CertificateProcessExecutorTest extends AbstractTestValidationExecutor
         assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtIssuanceTime(bindingSignatureIssuerId)));
         assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtIssuanceTime(bindingSignatureIssuerId)));
 
-        assertEquals(CertificateQualification.QCERT_FOR_WSA, simpleReport.getTLSBindingSignatureIssuerQualificationAtCertificateIssuance());
+        assertEquals(CertificateQualification.QCERT_FOR_WSA, simpleReport.getTLSBindingSignatureIssuerQualificationAtValidationTime());
         assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtValidationTime(bindingSignatureIssuerId)));
         assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtValidationTime(bindingSignatureIssuerId)));
         assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtValidationTime(bindingSignatureIssuerId)));
@@ -4976,6 +4976,253 @@ class QWAC2CertificateProcessExecutorTest extends AbstractTestValidationExecutor
         assertTrue(domainNamePresent);
         assertTrue(extKeyUsageCheckPresent);
         assertTrue(bbbCheckConclusive);
+        assertTrue(is2QWACProcessPresent);
+
+        checkReports(reports);
+    }
+
+    @Test
+    void qwac2ValidationInPastTest() throws Exception {
+        XmlDiagnosticData diagnosticData = DiagnosticDataFacade.newFacade().unmarshall(
+                new File("src/test/resources/diag-data/qwac-validation/2-qwac-valid-diag-data.xml"));
+        assertNotNull(diagnosticData);
+
+        diagnosticData.setValidationDate(DSSUtils.getUtcDate(2020, Calendar.JANUARY, 1));
+
+        String certificateId = "C-83D242F9A51C7A62BA1B774268EAAECBAB097479E83D8675C14F02DFB269FE77";
+
+        QWACCertificateProcessExecutor executor = new QWACCertificateProcessExecutor();
+        executor.setCertificateId(certificateId);
+        executor.setDiagnosticData(diagnosticData);
+        executor.setValidationPolicy(loadDefaultPolicy());
+        executor.setCurrentTime(diagnosticData.getValidationDate());
+
+        CertificateReports reports = executor.execute();
+
+        SimpleCertificateReport simpleReport = reports.getSimpleReport();
+        assertNotNull(simpleReport);
+
+        assertEquals(CertificateQualification.NA, simpleReport.getQualificationAtCertificateIssuance());
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtIssuanceTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtIssuanceTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtIssuanceTime(certificateId)));
+
+        assertEquals(CertificateQualification.NA, simpleReport.getQualificationAtValidationTime());
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtValidationTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtValidationTime(certificateId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtValidationTime(certificateId)));
+
+        assertEquals(QWACProfile.NOT_QWAC, simpleReport.getQWACProfile());
+
+        String bindingSignatureIssuerId = simpleReport.getTLSBindingSignatureIssuerCertificate().getId();
+        assertEquals(CertificateQualification.QCERT_FOR_WSA, simpleReport.getTLSBindingSignatureIssuerQualificationAtCertificateIssuance());
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtIssuanceTime(bindingSignatureIssuerId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtIssuanceTime(bindingSignatureIssuerId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationErrorsAtIssuanceTime(bindingSignatureIssuerId)));
+
+        assertEquals(CertificateQualification.CERT_FOR_WSA, simpleReport.getTLSBindingSignatureIssuerQualificationAtValidationTime());
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationInfoAtValidationTime(bindingSignatureIssuerId)));
+        assertTrue(Utils.isCollectionEmpty(simpleReport.getQualificationWarningsAtValidationTime(bindingSignatureIssuerId)));
+        assertEquals(1, Utils.collectionSize(simpleReport.getQualificationErrorsAtValidationTime(bindingSignatureIssuerId)));
+        assertEquals(QWACProfile.NOT_QWAC, simpleReport.getTLSBindingSignatureIssuerCertificateQWACProfile());
+
+        DetailedReport detailedReport = reports.getDetailedReport();
+        assertEquals(QWACProfile.NOT_QWAC, detailedReport.getCertificateQWACProfile(certificateId));
+
+        XmlCertificate xmlCertificate = detailedReport.getXmlCertificateById(certificateId);
+        assertNotNull(xmlCertificate);
+
+        XmlQWACProcess qwacProcess = xmlCertificate.getQWACProcess();
+        assertNotNull(qwacProcess);
+        assertEquals(certificateId, qwacProcess.getId());
+        assertEquals(QWACProfile.NOT_QWAC, qwacProcess.getQWACType());
+        assertEquals(Indication.FAILED, qwacProcess.getConclusion().getIndication());
+
+        boolean isQWACValidCheckFound = false;
+        for (XmlConstraint xmlConstraint : qwacProcess.getConstraint()) {
+            if (MessageTag.QWAC_VALID.getId().equals(xmlConstraint.getName().getKey())) {
+                assertEquals(XmlStatus.NOT_OK, xmlConstraint.getStatus());
+                assertEquals(MessageTag.QWAC_VALID_ANS.getId(), xmlConstraint.getError().getKey());
+                isQWACValidCheckFound = true;
+            }
+        }
+        assertTrue(isQWACValidCheckFound);
+
+        // 1-qwac checks
+        boolean is1QWACProcessPresent = false;
+        boolean bbbCheckPresent = false;
+        boolean qwac1DomainNamePresent = false;
+        boolean linkHeaderPresent = false;
+        boolean sigFormCheckPresent = false;
+        boolean jadesCheckPresent = false;
+        boolean jadesCompactCheckPresent = false;
+        boolean expTimeCheckPresent = false;
+        boolean sigExpCheckPresent = false;
+        boolean qwac2CheckPresent = false;
+        boolean sigValidCheckPresent = false;
+        boolean tlsCertBindingValidCheckPresent = false;
+
+        boolean isTlsSupportedBy2QWACProcessPresent = false;
+        for (XmlValidationQWACProcess xmlValidationQWACProcess : qwacProcess.getValidationQWACProcess()) {
+            if (i18nProvider.getMessage(MessageTag.QWAC_VALIDATION_PROFILE,
+                    ValidationProcessUtils.getQWACValidationMessageTag(QWACProfile.QWAC_1)).equals(xmlValidationQWACProcess.getTitle())) {
+                assertEquals(Indication.FAILED, xmlValidationQWACProcess.getConclusion().getIndication());
+                is1QWACProcessPresent = true;
+
+            } else if (i18nProvider.getMessage(MessageTag.QWAC_VALIDATION_PROFILE,
+                    ValidationProcessUtils.getQWACValidationMessageTag(QWACProfile.TLS_BY_QWAC_2)).equals(xmlValidationQWACProcess.getTitle())) {
+                assertEquals(Indication.INDETERMINATE, xmlValidationQWACProcess.getConclusion().getIndication());
+                assertEquals(SubIndication.OUT_OF_BOUNDS_NOT_REVOKED, xmlValidationQWACProcess.getConclusion().getSubIndication());
+                for (XmlConstraint xmlConstraint : xmlValidationQWACProcess.getConstraint()) {
+                    if (MessageTag.BBB_ACCEPT.getId().equals(xmlConstraint.getName().getKey())) {
+                        assertEquals(XmlStatus.NOT_OK, xmlConstraint.getStatus());
+                        assertEquals(MessageTag.BBB_ACCEPT_ANS.getId(), xmlConstraint.getError().getKey());
+                        bbbCheckPresent = true;
+                    } else if (MessageTag.QWAC_DOMAIN_NAME.getId().equals(xmlConstraint.getName().getKey())) {
+                        qwac1DomainNamePresent = true;
+                    } else if (MessageTag.TLS_CERT_BINDING_URL.getId().equals(xmlConstraint.getName().getKey())) {
+                        linkHeaderPresent = true;
+                    } else if (MessageTag.TLS_CERT_BINDING_SIG.getId().equals(xmlConstraint.getName().getKey())) {
+                        sigFormCheckPresent = true;
+                    } else if (MessageTag.TLS_CERT_BINDING_SIG_FORM.getId().equals(xmlConstraint.getName().getKey())) {
+                        jadesCheckPresent = true;
+                    } else if (MessageTag.TLS_CERT_BINDING_SIG_SER.getId().equals(xmlConstraint.getName().getKey())) {
+                        jadesCompactCheckPresent = true;
+                    } else if (MessageTag.TLS_CERT_BINDING_SIG_EXP.getId().equals(xmlConstraint.getName().getKey())) {
+                        expTimeCheckPresent = true;
+                    } else if (MessageTag.TLS_CERT_BINDING_SIG_EXPIRY_DATE.getId().equals(xmlConstraint.getName().getKey())) {
+                        sigExpCheckPresent = true;
+                    } else if (MessageTag.TLS_CERT_BINDING_QWAC2.getId().equals(xmlConstraint.getName().getKey())) {
+                        qwac2CheckPresent = true;
+                    } else if (MessageTag.TLS_CERT_BINDING_SIG_VALID.getId().equals(xmlConstraint.getName().getKey())) {
+                        sigValidCheckPresent = true;
+                    } else if (MessageTag.TLS_CERT_BINDING_CERT_IDENTIFIED.getId().equals(xmlConstraint.getName().getKey())) {
+                        tlsCertBindingValidCheckPresent = true;
+                    }
+                }
+
+                isTlsSupportedBy2QWACProcessPresent = true;
+            }
+        }
+        assertTrue(is1QWACProcessPresent);
+        assertTrue(bbbCheckPresent);
+        assertFalse(qwac1DomainNamePresent);
+        assertFalse(linkHeaderPresent);
+        assertFalse(sigFormCheckPresent);
+        assertFalse(jadesCheckPresent);
+        assertFalse(jadesCompactCheckPresent);
+        assertFalse(expTimeCheckPresent);
+        assertFalse(sigExpCheckPresent);
+        assertFalse(qwac2CheckPresent);
+        assertFalse(sigValidCheckPresent);
+        assertFalse(tlsCertBindingValidCheckPresent);
+        assertTrue(isTlsSupportedBy2QWACProcessPresent);
+
+        XmlSignature tlsCertificateBindingSignature = diagnosticData
+                .getConnectionInfo().getTLSCertificateBindingSignature().getSignature();
+
+        XmlBasicBuildingBlocks sigBBB = detailedReport.getBasicBuildingBlockById(tlsCertificateBindingSignature.getId());
+        assertNotNull(sigBBB);
+        assertEquals(Indication.INDETERMINATE, sigBBB.getConclusion().getIndication());
+        assertEquals(SubIndication.OUT_OF_BOUNDS_NOT_REVOKED, sigBBB.getConclusion().getSubIndication());
+
+        XmlSAV xmlSAV = sigBBB.getSAV();
+        assertNotNull(xmlSAV);
+        assertEquals(Indication.PASSED, xmlSAV.getConclusion().getIndication());
+
+        boolean signCertCheckPresent = false;
+        boolean signCertOnlyOneCheckPresent = false;
+        boolean kidCheckPresent = false;
+        boolean signTimeCheckPresent = false;
+        boolean ctyCheckPresent = false;
+        for (XmlConstraint xmlConstraint : xmlSAV.getConstraint()) {
+            assertEquals(XmlStatus.OK, xmlConstraint.getStatus());
+            if (MessageTag.BBB_ICS_ISASCP.getId().equals(xmlConstraint.getName().getKey())) {
+                signCertCheckPresent = true;
+            } else if (MessageTag.BBB_ICS_ISASCPU.getId().equals(xmlConstraint.getName().getKey())) {
+                signCertOnlyOneCheckPresent = true;
+            } else if (MessageTag.BBB_ICS_ISAKIDP.getId().equals(xmlConstraint.getName().getKey())) {
+                kidCheckPresent = true;
+            } else if (MessageTag.BBB_SAV_ISQPSTP.getId().equals(xmlConstraint.getName().getKey())) {
+                signTimeCheckPresent = true;
+            } else if (MessageTag.BBB_SAV_ISQPCTP.getId().equals(xmlConstraint.getName().getKey())) {
+                ctyCheckPresent = true;
+            }
+        }
+        assertTrue(signCertCheckPresent);
+        assertTrue(signCertOnlyOneCheckPresent);
+        assertTrue(kidCheckPresent);
+        assertTrue(signTimeCheckPresent);
+        assertTrue(ctyCheckPresent);
+
+        eu.europa.esig.dss.diagnostic.jaxb.XmlCertificate signingCertificate =
+                tlsCertificateBindingSignature.getSigningCertificate().getCertificate();
+        assertEquals(QWACProfile.NOT_QWAC, detailedReport.getCertificateQWACProfile(signingCertificate.getId()));
+
+        eu.europa.esig.dss.detailedreport.jaxb.XmlSignature xmlSignature = detailedReport.getXmlSignatureById(tlsCertificateBindingSignature.getId());
+        assertEquals(Indication.INDETERMINATE, xmlSignature.getConclusion().getIndication());
+        assertEquals(SubIndication.OUT_OF_BOUNDS_NOT_REVOKED, xmlSignature.getConclusion().getSubIndication());
+
+        XmlValidationSignatureQualification signatureQualification = xmlSignature.getValidationSignatureQualification();
+        assertEquals(SignatureQualification.NOT_ADES, signatureQualification.getSignatureQualification());
+
+        XmlQWACProcess signatureQWACProcess = signatureQualification.getQWACProcess();
+        assertEquals(signingCertificate.getId(), signatureQWACProcess.getId());
+        assertEquals(QWACProfile.NOT_QWAC, signatureQWACProcess.getQWACType());
+        assertEquals(Indication.FAILED, signatureQWACProcess.getConclusion().getIndication());
+
+        // 2-qwac checks
+        boolean certPolicyCheckPresent = false;
+        boolean certQualConclusiveCheckPresent = false;
+        boolean wsaCheckAtIssuanceTimePresent = false;
+        boolean wsaCheckAtValidationTimePresent = false;
+        boolean certValidityPeriodCheckPresent = false;
+        boolean domainNamePresent = false;
+        boolean extKeyUsageCheckPresent = false;
+        boolean bbbCheckConclusive = false;
+        boolean is2QWACProcessPresent = false;
+        for (XmlValidationQWACProcess xmlValidationQWACProcess : signatureQWACProcess.getValidationQWACProcess()) {
+            if (i18nProvider.getMessage(MessageTag.QWAC_VALIDATION_PROFILE,
+                    ValidationProcessUtils.getQWACValidationMessageTag(QWACProfile.QWAC_2)).equals(xmlValidationQWACProcess.getTitle())) {
+                assertEquals(Indication.FAILED, xmlValidationQWACProcess.getConclusion().getIndication());
+                for (XmlConstraint xmlConstraint : xmlValidationQWACProcess.getConstraint()) {
+                    if (MessageTag.QWAC_CERT_POLICY.getId().equals(xmlConstraint.getName().getKey())) {
+                        assertEquals(XmlStatus.OK, xmlConstraint.getStatus());
+                        certPolicyCheckPresent = true;
+                    } else if (MessageTag.QWAC_CERT_QUAL_CONCLUSIVE.getId().equals(xmlConstraint.getName().getKey())) {
+                        assertEquals(XmlStatus.NOT_OK, xmlConstraint.getStatus());
+                        assertEquals(MessageTag.QWAC_CERT_QUAL_CONCLUSIVE_ANS.getId(), xmlConstraint.getError().getKey());
+                        certQualConclusiveCheckPresent = true;
+                    } else if (MessageTag.QWAC_IS_WSA_AT_TIME.getId().equals(xmlConstraint.getName().getKey())) {
+                        if (i18nProvider.getMessage(MessageTag.QWAC_IS_WSA_AT_TIME, ValidationProcessUtils.getValidationTimeMessageTag(
+                                ValidationTime.CERTIFICATE_ISSUANCE_TIME)).equals(xmlConstraint.getName().getValue())) {
+                            wsaCheckAtIssuanceTimePresent = true;
+                        } else if (i18nProvider.getMessage(MessageTag.QWAC_IS_WSA_AT_TIME, ValidationProcessUtils.getValidationTimeMessageTag(
+                                ValidationTime.VALIDATION_TIME)).equals(xmlConstraint.getName().getValue())) {
+                            wsaCheckAtValidationTimePresent = true;
+                        }
+                    } else if (MessageTag.QWAC_VAL_PERIOD.getId().equals(xmlConstraint.getName().getKey())) {
+                        certValidityPeriodCheckPresent = true;
+                    } else if (MessageTag.QWAC_DOMAIN_NAME.getId().equals(xmlConstraint.getName().getKey())) {
+                        domainNamePresent = true;
+                    } else if (MessageTag.QWAC2_EXT_KEY_USAGE.getId().equals(xmlConstraint.getName().getKey())) {
+                        extKeyUsageCheckPresent = true;
+                    } else if (MessageTag.BBB_ACCEPT.getId().equals(xmlConstraint.getName().getKey())) {
+                        bbbCheckConclusive = true;
+                    }
+                }
+
+                is2QWACProcessPresent = true;
+            }
+        }
+        assertTrue(certPolicyCheckPresent);
+        assertTrue(certQualConclusiveCheckPresent);
+        assertFalse(wsaCheckAtIssuanceTimePresent);
+        assertFalse(wsaCheckAtValidationTimePresent);
+        assertFalse(certValidityPeriodCheckPresent);
+        assertFalse(domainNamePresent);
+        assertFalse(extKeyUsageCheckPresent);
+        assertFalse(bbbCheckConclusive);
         assertTrue(is2QWACProcessPresent);
 
         checkReports(reports);

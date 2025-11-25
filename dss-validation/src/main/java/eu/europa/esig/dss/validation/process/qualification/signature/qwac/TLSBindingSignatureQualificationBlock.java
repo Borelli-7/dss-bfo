@@ -18,6 +18,7 @@ import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.Cert
 import eu.europa.esig.dss.validation.process.qualification.certificate.qwac.QWACForTLSBindingCertificateValidationBlock;
 import eu.europa.esig.dss.validation.process.qualification.signature.SignatureQualificationBlock;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +75,7 @@ public class TLSBindingSignatureQualificationBlock extends SignatureQualificatio
 
         for (XmlValidationCertificateQualification certificateQualificationAtTime : result.getValidationCertificateQualification()) {
             if (!isValid(certificateQualificationAtTime)) {
-                result.setConclusion(certificateQualificationAtTime.getConclusion());
+                result.setConclusion(getConclusion(certificateQualificationAtTime.getConclusion()));
                 return xmlCertificateQualificationProcess;
             }
         }
@@ -85,6 +86,16 @@ public class TLSBindingSignatureQualificationBlock extends SignatureQualificatio
     private XmlConclusion getConclusion(Indication indication) {
         XmlConclusion xmlConclusion = new XmlConclusion();
         xmlConclusion.setIndication(indication);
+        return xmlConclusion;
+    }
+
+    private XmlConclusion getConclusion(XmlConclusion conclusion) {
+        XmlConclusion xmlConclusion = new XmlConclusion();
+        xmlConclusion.setIndication(conclusion.getIndication());
+        xmlConclusion.setSubIndication(conclusion.getSubIndication());
+        xmlConclusion.getErrors().addAll(new ArrayList<>(conclusion.getErrors()));
+        xmlConclusion.getWarnings().addAll(new ArrayList<>(conclusion.getWarnings()));
+        xmlConclusion.getInfos().addAll(new ArrayList<>(conclusion.getInfos()));
         return xmlConclusion;
     }
 

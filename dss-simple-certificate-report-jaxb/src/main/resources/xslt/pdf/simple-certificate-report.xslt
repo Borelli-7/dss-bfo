@@ -75,7 +75,8 @@
 				<fo:flow>
 					<xsl:attribute name="flow-name">xsl-region-body</xsl:attribute>
 					<xsl:attribute name="font-size">8pt</xsl:attribute>
-					
+
+					<xsl:apply-templates select="dss:ValidationPolicy"/>
 					<xsl:apply-templates select="dss:Certificate"/>
 					<xsl:apply-templates select="dss:ConnectionDetails"/>
 	    			
@@ -1017,6 +1018,57 @@
 							</xsl:if>
 						</fo:table-body>
 					</fo:table>
+				</fo:block-container>
+			</fo:block-container>
+
+		</fo:block-container>
+
+	</xsl:template>
+
+	<xsl:template match="dss:ValidationPolicy">
+
+		<fo:block-container>
+			<xsl:attribute name="margin-top">4px</xsl:attribute>
+			<fo:block-container>
+				<xsl:attribute name="margin">0</xsl:attribute>
+
+				<fo:block>
+					<xsl:attribute name="keep-with-next">always</xsl:attribute>
+					<xsl:attribute name="font-weight">bold</xsl:attribute>
+
+					<xsl:attribute name="border-bottom-style">solid</xsl:attribute>
+					<xsl:attribute name="border-color">#004494</xsl:attribute>
+					<xsl:attribute name="border-width">1px</xsl:attribute>
+
+					<xsl:attribute name="margin-bottom">2px</xsl:attribute>
+
+					<xsl:attribute name="id">policy</xsl:attribute>
+					<xsl:text>Validation Policy: </xsl:text><xsl:value-of select="dss:PolicyName"/>
+				</fo:block>
+			</fo:block-container>
+		</fo:block-container>
+
+		<fo:block-container>
+			<xsl:attribute name="border-left-style">solid</xsl:attribute>
+			<xsl:attribute name="border-color">#004494</xsl:attribute>
+			<xsl:attribute name="border-width">1px</xsl:attribute>
+
+			<xsl:attribute name="margin-top">7px</xsl:attribute>
+			<xsl:attribute name="margin-bottom">5px</xsl:attribute>
+
+			<fo:block-container>
+				<xsl:attribute name="margin-left">10px</xsl:attribute>
+
+				<fo:block-container>
+					<xsl:attribute name="margin">0</xsl:attribute>
+
+					<fo:block>
+						<xsl:attribute name="margin-top">5px</xsl:attribute>
+						<xsl:attribute name="margin-bottom">5px</xsl:attribute>
+						<xsl:attribute name="font-size">7pt</xsl:attribute>
+
+						<xsl:value-of select="dss:PolicyDescription"/>
+					</fo:block>
 				</fo:block-container>
 			</fo:block-container>
 

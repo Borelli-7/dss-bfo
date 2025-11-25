@@ -96,9 +96,9 @@ class OnlineOCSPSourceTest extends OnlineSourceTest {
 		invalidSigGoodUser = DSSUtils.loadCertificate(dataLoader.get(ONLINE_PKI_HOST + "/crt/good-user-ocsp-invalid-sig.crt"));
 		timeoutSigGoodUser = DSSUtils.loadCertificate(dataLoader.get(ONLINE_PKI_HOST + "/crt/good-user-ocsp-timeout.crt"));
 
-		qtspUser = DSSUtils.loadCertificate(new File("src/test/resources/sk_user.cer"));
-		qtspCa = DSSUtils.loadCertificate(new File("src/test/resources/sk_ca.cer"));
-		qtspOcsp = DSSUtils.toByteArray(new File("src/test/resources/sk_ocsp.bin"));
+		qtspUser = DSSUtils.loadCertificate(new File("src/test/resources/lu_user.cer"));
+		qtspCa = DSSUtils.loadCertificate(new File("src/test/resources/lu_ca.cer"));
+		qtspOcsp = DSSUtils.toByteArray(new File("src/test/resources/lu_ocsp.bin"));
 	}
 
 	@Test

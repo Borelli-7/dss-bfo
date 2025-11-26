@@ -238,7 +238,7 @@ class RemoteCertificateValidationServiceTest {
 		assertNotNull(reportsDTO.getDetailedReport());
 		
 		XmlDiagnosticData diagnosticData = reportsDTO.getDiagnosticData();
-		List<XmlChainItem> chain = reportsDTO.getSimpleCertificateReport().getChain();
+		List<XmlChainItem> chain = reportsDTO.getSimpleCertificateReport().getCertificate().getChain();
 		assertNotNull(chain);
 		assertTrue(Utils.isCollectionNotEmpty(chain));
 		List<XmlCertificate> usedCertificates = diagnosticData.getUsedCertificates();

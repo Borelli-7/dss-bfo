@@ -176,6 +176,7 @@ For the DSS demo: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html[GNU
 |[[R29]]    R29 |Document management - Portable document format - Part 2: PDF 2.0               |https://developer.adobe.com/document-services/docs/assets/5b15559b96303194340b99820d3a70fa/PDF_ISO_32000-2.pdf[ISO 32000-2]                       	            |2.0 (2017)
 |[[R30]]    R30 |Internet RFC 9608: No Revocation Available for X.509 Public Key Certificates   |https://www.ietf.org/rfc/rfc9608.txt[RFC 9608]                       	                                                                                        |
 |[[R31]]    R31 |Internet RFC 5652:  Cryptographic Message Syntax (CMS)                         |https://www.ietf.org/rfc/rfc5652.txt[RFC 5652]                       	                                                                                        |
+|[[R32]]	R32	|ESI - Policy and security requirements for Trust Service Providers issuing certificates; Part 5: Implementation of QWAC as in amended Regulation 910/2014     |https://www.etsi.org/deliver/etsi_ts/119400_119499/11941105/02.01.01_60/ts_11941105v020101p.pdf[ETSI TS 119 411-5]      |2.1.1 (2025-02)
 
 |=======================
 

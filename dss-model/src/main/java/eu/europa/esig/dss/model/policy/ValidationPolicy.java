@@ -155,18 +155,18 @@ public interface ValidationPolicy {
 	 * constraint file then null is returned.
 	 *
 	 * @param context {@link Context}
-	 * @return {@code ValueRule} if ContentType element is present in the constraint file, null otherwise.
+	 * @return {@code MultiValuesRule} if ContentType element is present in the constraint file, null otherwise.
 	 */
-	ValueRule getContentTypeConstraint(Context context);
+	MultiValuesRule getContentTypeConstraint(Context context);
 
 	/**
 	 * Indicates if the signed property: content-hints should be checked. If ContentHints element is absent within the
 	 * constraint file then null is returned.
 	 *
 	 * @param context {@link Context}
-	 * @return {@code ValueRule} if ContentHints element is present in the constraint file, null otherwise.
+	 * @return {@code MultiValuesRule} if ContentHints element is present in the constraint file, null otherwise.
 	 */
-	ValueRule getContentHintsConstraint(Context context);
+	MultiValuesRule getContentHintsConstraint(Context context);
 
 	/**
 	 * Indicates if the signed property: content-identifier should be checked. If ContentIdentifier element is absent
@@ -174,9 +174,9 @@ public interface ValidationPolicy {
 	 * returned.
 	 *
 	 * @param context {@link Context}
-	 * @return {@code ValueRule} if ContentIdentifier element is present in the constraint file, null otherwise.
+	 * @return {@code MultiValuesRule} if ContentIdentifier element is present in the constraint file, null otherwise.
 	 */
-	ValueRule getContentIdentifierConstraint(Context context);
+	MultiValuesRule getContentIdentifierConstraint(Context context);
 
 	/**
 	 * Indicates if the signed property: message-digest (for CAdES) or SignedProperties (for XAdES) should be checked.

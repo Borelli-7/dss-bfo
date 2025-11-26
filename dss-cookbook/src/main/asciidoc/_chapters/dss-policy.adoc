@@ -1860,8 +1860,6 @@ Note: the check is executed only for JAdES
 
 Default: `FAIL`
 
-Note: the check is executed only for JAdES
-
 [source,xml,indent=0]
 .Example of SigningTime usage (with FAIL validation level)
 ----
@@ -1872,6 +1870,22 @@ Note: the check is executed only for JAdES
 </SignedAttributes>
 ----
 
+* `SigningTimeInCertRange` - this constraint checks whether the value of the "signing-time" signed attribute lies within the validity range of the signing-certificate, when present. If the value "signing-time" attribute lies beyond the validity of the signing-certificate, the check will fail.
+
+Default: `FAIL`
+
+[source,xml,indent=0]
+.Example of SigningTimeInCertRange usage (with FAIL validation level)
+----
+<SignedAttributes>
+    ...
+    <SigningTimeInCertRange Level="FAIL" />
+    ...
+</SignedAttributes>
+----
+
+NOTE: For CMS validation (which includes CAdES and PAdES signatures), the verification of the signing-time signed attribute (when present) is enforced on signature integrity validation by the underlying library BouncyCastle. Therefore, disabling the constraint may not achieve the desired effect on validation of these signature formats.
+
 * `ContentType` - this constraint checks whether the "content-type" signed attribute has the expected value. If the "content-type" attribute's value does not match the expected value, the check will fail.
 
 Default: not executed
@@ -1881,7 +1895,9 @@ Default: not executed
 ----
 <SignedAttributes>
     ...
-    <ContentType Level="FAIL" value="1.2.840.113549.1.7.1" />
+    <ContentType Level="FAIL">
+        <Id>1.2.840.113549.1.7.1</Id>
+    </ContentType>
     ...
 </SignedAttributes>
 ----
@@ -1897,7 +1913,9 @@ Note: executed for CAdES only
 ----
 <SignedAttributes>
     ...
-    <ContentHints Level="FAIL" value="1.2.840.113549.1.7.1" />
+    <ContentHints Level="FAIL">
+        <Id>1.2.840.113549.1.7.1</Id>
+    </ContentHints>
     ...
 </SignedAttributes>
 ----
@@ -1913,7 +1931,9 @@ Note: executed for CAdES only
 ----
 <SignedAttributes>
     ...
-    <ContentIdentifier Level="FAIL" value="1.2.840.113549.1.7.1" />
+    <ContentIdentifier Level="FAIL">
+        <Id>1.2.840.113549.1.7.1</Id>
+    </ContentIdentifier>
     ...
 </SignedAttributes>
 ----
@@ -2972,7 +2992,7 @@ This table defines the correspondence between the enforced validation policy con
                                   |PSD2QcCompetentAuthorityId      |MultiValuesConstraint             |INDETERMINATE         |CHAIN_CONSTRAINTS_FAILURE
                                   |UsePseudonym                    |LevelConstraint                   |INDETERMINATE         |CHAIN_CONSTRAINTS_FAILURE
                                   |Cryptographic                   |CryptographicConstraint         2+|See CryptographicConstraint
-.10+|SignedAttributesConstraints  |SigningCertificatePresent       |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
+.11+|SignedAttributesConstraints  |SigningCertificatePresent       |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |UnicitySigningCertificate       |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |SigningCertificateRefersCertificateChain  |LevelConstraint         |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |ReferencesToAllCertificateChainPresent    |LevelConstraint         |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
@@ -2982,10 +3002,11 @@ This table defines the correspondence between the enforced validation policy con
                                   |IssuerSerialMatch               |LevelConstraint                   |INDETERMINATE         |NO_SIGNING_CERTIFICATE_FOUND
                                   |KeyIdentifierPresent            |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |KeyIdentifierMatch              |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
-.11+|SignedAttributesConstraints  |SigningTime                     |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
-                                  |ContentType                     |ValueConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
-                                  |ContentHints                    |ValueConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
-                                  |ContentIdentifier               |ValueConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
+                                  |SigningTime                     |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
+.11+|SignedAttributesConstraints  |SigningTimeInCertRange          |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
+                                  |ContentType                     |MultiValuesConstraint             |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
+                                  |ContentHints                    |MultiValuesConstraint             |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
+                                  |ContentIdentifier               |MultiValuesConstraint             |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |MessageDigestOrSignedPropertiesPresent    |LevelConstraint         |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |CommitmentTypeIndication        |MultiValuesConstraint             |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE
                                   |SignerLocation                  |LevelConstraint                   |INDETERMINATE         |SIG_CONSTRAINTS_FAILURE

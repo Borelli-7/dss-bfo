@@ -176,8 +176,12 @@
 			<KeyIdentifierMatch Level="WARN" />
 			<SigningTime Level="WARN" />
 			<SigningTimeInCertRange Level="WARN" />
-			<ContentType Level="WARN" value="1.2.840.113549.1.7.1" />
-			<ContentHints Level="WARN" value="*" />
+			<ContentType Level="WARN">
+				<Id>1.2.840.113549.1.7.1</Id>
+			</ContentType>
+			<ContentHints Level="WARN">
+				<Id>*</Id>
+			</ContentHints>
 			<MessageDigestOrSignedPropertiesPresent Level="WARN" />
 			<EllipticCurveKeySize Level="WARN" />
 			<CommitmentTypeIndication Level="WARN">
@@ -314,8 +318,12 @@
 			<KeyIdentifierMatch Level="WARN" />
 			<SigningTime Level="WARN" />
 			<SigningTimeInCertRange Level="WARN" />
-			<ContentType Level="WARN" value="1.2.840.113549.1.7.1" />
-			<ContentHints Level="WARN" value="*" />
+			<ContentType Level="WARN">
+				<Id>1.2.840.113549.1.7.1</Id>
+			</ContentType>
+			<ContentHints Level="WARN">
+				<Id>*</Id>
+			</ContentHints>
 			<MessageDigestOrSignedPropertiesPresent Level="WARN" />
 			<EllipticCurveKeySize Level="WARN" />
 			<CommitmentTypeIndication Level="WARN">

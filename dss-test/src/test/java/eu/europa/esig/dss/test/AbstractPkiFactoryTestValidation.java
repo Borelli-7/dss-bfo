@@ -89,6 +89,7 @@ import eu.europa.esig.dss.enumerations.MessageType;
 import eu.europa.esig.dss.enumerations.RevocationOrigin;
 import eu.europa.esig.dss.enumerations.RevocationRefOrigin;
 import eu.europa.esig.dss.enumerations.RevocationType;
+import eu.europa.esig.dss.enumerations.SignatureForm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignaturePolicyType;
 import eu.europa.esig.dss.enumerations.SignatureScopeType;
@@ -579,6 +580,7 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 		checkTrustServices(diagnosticData);
 		checkContainerInfo(diagnosticData);
 		checkPDFAInfo(diagnosticData);
+		checkJWSSerializationType(diagnosticData);
 
 		checkNoDuplicateSignatures(diagnosticData);
 		checkNoDuplicateCompleteCertificates(diagnosticData);
@@ -1632,6 +1634,20 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 		if (diagnosticData.isPDFAValidationPerformed()) {
 			assertNotNull(diagnosticData.getPDFAProfileId());
 		}
+	}
+
+	protected void checkJWSSerializationType(DiagnosticData diagnosticData) {
+		for (SignatureWrapper signatureWrapper : diagnosticData.getSignatures()) {
+				if (signatureWrapper.getSignatureFormat() != null && signatureWrapper.getSignatureFormat().getSignatureForm() == SignatureForm.JAdES) {
+					assertNotNull(signatureWrapper.getJWSSerializationType());
+				} else {
+					assertNull(signatureWrapper.getJWSSerializationType());
+				}
+		}
+	}
+
+	protected void checkExpirationDate(DiagnosticData diagnosticData) {
+		// not implemented by default
 	}
 
 	protected void checkNoDuplicateTimestamps(List<TimestampWrapper> timestampTokens) {

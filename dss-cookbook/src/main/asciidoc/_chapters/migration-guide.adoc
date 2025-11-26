@@ -157,6 +157,58 @@ import eu.europa.esig.dss.spi.x509.aia.AIACertificateSource;
 AIACertificateSource aiaCertificateSource = AIACertificateSource.forCertificateToken(certificateToken, aiaSource);
 ----
 
+a|TLS/SSL certificates downloading          a|
+[source,java]
+----
+import eu.europa.esig.dss.model.x509.CertificateToken;
+import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
+import eu.europa.esig.dss.service.http.commons.SSLCertificateLoader;
+
+SSLCertificateLoader sslCertificateLoader = new SSLCertificateLoader();
+sslCertificateLoader.setCommonsDataLoader(new CommonsDataLoader());
+List<CertificateToken> certificates = sslCertificateLoader.getCertificates("https://website.com");
+----
+                                                                     a|
+
+[source,java]
+----
+import eu.europa.esig.dss.model.http.ResponseEnvelope;
+import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
+import java.security.cert.Certificate;
+
+CommonsDataLoader dataLoader = new CommonsDataLoader();
+ResponseEnvelope response = dataLoader.requestGet("https://website.com");
+Certificate[] certificates = response.getTLSCertificates();
+----
+Hint: for validation of TLS/SSL certificates please see <<QWACValidation>>.
+
+a|NativeDataLoaderCall deprecated          a|
+[source,java]
+----
+import eu.europa.esig.dss.spi.client.http.NativeDataLoaderCall;
+
+NativeDataLoaderCall nativeDataLoaderCall = new NativeDataLoaderCall(
+        url, content, refresh, maxInputSize, connectTimeout, readTimeout);
+byte[] responseBytes = nativeDataLoaderCall.call();
+----
+                                                                     a|
+
+[source,java]
+----
+import eu.europa.esig.dss.model.http.ResponseEnvelope;
+import eu.europa.esig.dss.spi.client.http.NativeHTTPDataLoaderCall;
+
+NativeHTTPDataLoaderCall httpDataLoaderCall = new NativeHTTPDataLoaderCall(url, content);
+httpDataLoaderCall.setUseCaches(refresh);
+httpDataLoaderCall.setMaxInputSize(maxInputSize);
+httpDataLoaderCall.setConnectTimeout(connectTimeout);
+httpDataLoaderCall.setReadTimeout(readTimeout);
+ResponseEnvelope response = httpDataLoaderCall.call();
+byte[] responseBytes = responsegetResponseBody();
+
+----
+Hint: for validation of TLS/SSL certificates please see <<QWACValidation>>.
+
 |===
 
 [cols="2,5,5"]

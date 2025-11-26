@@ -176,8 +176,12 @@
 			<KeyIdentifierMatch Level="INFORM" />
 			<SigningTime Level="INFORM" />
 			<SigningTimeInCertRange Level="INFORM" />
-			<ContentType Level="INFORM" value="1.2.840.113549.1.7.1" />
-			<ContentHints Level="INFORM" value="*" />
+			<ContentType Level="INFORM">
+				<Id>1.2.840.113549.1.7.1</Id>
+			</ContentType>
+			<ContentHints Level="INFORM">
+				<Id>*</Id>
+			</ContentHints>
 			<MessageDigestOrSignedPropertiesPresent Level="INFORM" />
 			<EllipticCurveKeySize Level="INFORM" />
 			<CommitmentTypeIndication Level="INFORM">
@@ -314,8 +318,12 @@
 			<KeyIdentifierMatch Level="INFORM" />
 			<SigningTime Level="INFORM" />
 			<SigningTimeInCertRange Level="INFORM" />
-			<ContentType Level="INFORM" value="1.2.840.113549.1.7.1" />
-			<ContentHints Level="INFORM" value="*" />
+			<ContentType Level="INFORM">
+				<Id>1.2.840.113549.1.7.1</Id>
+			</ContentType>
+			<ContentHints Level="INFORM">
+				<Id>*</Id>
+			</ContentHints>
 			<MessageDigestOrSignedPropertiesPresent Level="INFORM" />
 			<EllipticCurveKeySize Level="INFORM" />
 			<CommitmentTypeIndication Level="INFORM">

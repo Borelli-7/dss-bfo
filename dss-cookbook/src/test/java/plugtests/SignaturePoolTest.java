@@ -101,6 +101,7 @@ import java.util.stream.Stream;
 import static java.time.Duration.ofSeconds;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
@@ -808,6 +809,15 @@ class SignaturePoolTest extends AbstractDocumentTestValidation {
 	@Override
 	protected void checkEvidenceRecordTimestampedReferences(DiagnosticData diagnosticData) {
 		// skip
+	}
+
+	@Override
+	protected void checkCertificateExtensions(DiagnosticData diagnosticData) {
+		super.checkCertificateExtensions(diagnosticData);
+
+		for (CertificateWrapper certificateWrapper : diagnosticData.getUsedCertificates()) {
+			assertFalse(certificateWrapper.isValAssuredShortTermCertificate(), "VAL ASSURED !!!");
+		}
 	}
 
 }

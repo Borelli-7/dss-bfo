@@ -176,12 +176,10 @@ class ValidationPolicyWithCryptographicSuiteTest {
         assertNull(policy.getContentTimeStampConstraint(Context.SIGNATURE));
         assertNull(policy.getContentTimeStampMessageImprintConstraint(Context.SIGNATURE));
 
-        ValueConstraint valueConstraint = new ValueConstraint();
-        valueConstraint.setLevel(Level.FAIL);
+        signedAttr.setContentType(multi);
+        signedAttr.setContentHints(multi);
+        signedAttr.setContentIdentifier(multi);
 
-        signedAttr.setContentType(valueConstraint);
-        signedAttr.setContentHints(valueConstraint);
-        signedAttr.setContentIdentifier(valueConstraint);
         signedAttr.setContentTimeStamp(level);
         signedAttr.setContentTimeStampMessageImprint(level);
 

@@ -311,10 +311,28 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 	}
 
 	@Override
-	public ValueRule getContentTypeConstraint(Context context) {
+	public MultiValuesRule getContentTypeConstraint(Context context) {
 		SignedAttributesConstraints signedAttributeConstraints = getSignedAttributeConstraints(context);
 		if (signedAttributeConstraints != null) {
 			return toRule(signedAttributeConstraints.getContentType());
+		}
+		return null;
+	}
+
+	@Override
+	public MultiValuesRule getContentHintsConstraint(Context context) {
+		SignedAttributesConstraints signedAttributeConstraints = getSignedAttributeConstraints(context);
+		if (signedAttributeConstraints != null) {
+			return toRule(signedAttributeConstraints.getContentHints());
+		}
+		return null;
+	}
+
+	@Override
+	public MultiValuesRule getContentIdentifierConstraint(Context context) {
+		SignedAttributesConstraints signedAttributeConstraints = getSignedAttributeConstraints(context);
+		if (signedAttributeConstraints != null) {
+			return toRule(signedAttributeConstraints.getContentIdentifier());
 		}
 		return null;
 	}
@@ -387,24 +405,6 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 		UnsignedAttributesConstraints unsignedAttributeConstraints = getUnsignedAttributeConstraints(context);
 		if (unsignedAttributeConstraints != null) {
 			return toLevelRule(unsignedAttributeConstraints.getLTALevelTimeStamp());
-		}
-		return null;
-	}
-
-	@Override
-	public ValueRule getContentHintsConstraint(Context context) {
-		SignedAttributesConstraints signedAttributeConstraints = getSignedAttributeConstraints(context);
-		if (signedAttributeConstraints != null) {
-			return toRule(signedAttributeConstraints.getContentHints());
-		}
-		return null;
-	}
-
-	@Override
-	public ValueRule getContentIdentifierConstraint(Context context) {
-		SignedAttributesConstraints signedAttributeConstraints = getSignedAttributeConstraints(context);
-		if (signedAttributeConstraints != null) {
-			return toRule(signedAttributeConstraints.getContentIdentifier());
 		}
 		return null;
 	}

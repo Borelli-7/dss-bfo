@@ -176,8 +176,12 @@
 			<KeyIdentifierMatch Level="IGNORE" />
 			<SigningTime Level="IGNORE" />
 			<SigningTimeInCertRange Level="IGNORE" />
-			<ContentType Level="IGNORE" value="1.2.840.113549.1.7.1" />
-			<ContentHints Level="IGNORE" value="*" />
+			<ContentType Level="IGNORE">
+				<Id>1.2.840.113549.1.7.1</Id>
+			</ContentType>
+			<ContentHints Level="IGNORE">
+				<Id>*</Id>
+			</ContentHints>
 			<MessageDigestOrSignedPropertiesPresent Level="IGNORE" />
 			<EllipticCurveKeySize Level="IGNORE" />
 			<CommitmentTypeIndication Level="IGNORE">
@@ -314,8 +318,12 @@
 			<KeyIdentifierMatch Level="IGNORE" />
 			<SigningTime Level="IGNORE" />
 			<SigningTimeInCertRange Level="IGNORE" />
-			<ContentType Level="IGNORE" value="1.2.840.113549.1.7.1" />
-			<ContentHints Level="IGNORE" value="*" />
+			<ContentType Level="IGNORE">
+				<Id>1.2.840.113549.1.7.1</Id>
+			</ContentType>
+			<ContentHints Level="IGNORE">
+				<Id>*</Id>
+			</ContentHints>
 			<MessageDigestOrSignedPropertiesPresent Level="IGNORE" />
 			<EllipticCurveKeySize Level="IGNORE" />
 			<CommitmentTypeIndication Level="IGNORE">

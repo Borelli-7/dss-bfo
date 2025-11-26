@@ -169,7 +169,7 @@ public class PdfBoxSignatureService extends AbstractPDFSignatureService {
 			checkPdfPermissions(documentReader, fieldParameters);
 			assertContentSizeSufficient(cmsSignedData, parameters);
 
-			signDocumentAndReturnDigest(parameters, cmsSignedData, os, documentReader);
+			signDocument(parameters, cmsSignedData, os, documentReader);
 
 			DSSDocument signedDocument = resourcesHandler.writeToDSSDocument();
 			signedDocument.setMimeType(MimeTypeEnum.PDF);
@@ -180,8 +180,18 @@ public class PdfBoxSignatureService extends AbstractPDFSignatureService {
 		}
 	}
 
+	private DSSMessageDigest signDocument(final PAdESCommonParameters parameters, final byte[] cmsSignedData,
+										  final OutputStream outputStream, final PdfBoxDocumentReader documentReader) {
+		return signDocumentAndReturnDigest(parameters, cmsSignedData, outputStream, documentReader, false);
+	}
+
 	private DSSMessageDigest signDocumentAndReturnDigest(final PAdESCommonParameters parameters, final byte[] cmsSignedData,
 			final OutputStream outputStream, final PdfBoxDocumentReader documentReader) {
+		return signDocumentAndReturnDigest(parameters, cmsSignedData, outputStream, documentReader, true);
+	}
+
+	private DSSMessageDigest signDocumentAndReturnDigest(final PAdESCommonParameters parameters, final byte[] cmsSignedData,
+			final OutputStream outputStream, final PdfBoxDocumentReader documentReader, boolean computeDigest) {
 		PDDocument pdDocument = documentReader.getPDDocument();
 
 		final DigestAlgorithm digestAlgorithm = parameters.getDigestAlgorithm();
@@ -190,11 +200,14 @@ public class PdfBoxSignatureService extends AbstractPDFSignatureService {
 
 			@Override
 			public byte[] sign(InputStream content) throws IOException {
-
-				byte[] b = new byte[8192];
-				int count;
-				while ((count = content.read(b)) > 0) {
-					digest.update(b, 0, count);
+				if (computeDigest) {
+					byte[] b = new byte[8192];
+					int count;
+					while ((count = content.read(b)) > 0) {
+						digest.update(b, 0, count);
+					}
+				} else {
+					Utils.closeQuietly(content);
 				}
 				return cmsSignedData;
 			}
@@ -241,7 +254,11 @@ public class PdfBoxSignatureService extends AbstractPDFSignatureService {
 
 			checkEncryptedAndSaveIncrementally(pdDocument, outputStream, parameters);
 
-			return new DSSMessageDigest(digestAlgorithm, digest.digest());
+			if (computeDigest) {
+				return new DSSMessageDigest(digestAlgorithm, digest.digest());
+			} else {
+				return DSSMessageDigest.createEmptyDigest();
+			}
 
 		} catch (IOException e) {
 			throw new DSSException(String.format("Unable to compute digest for a PDF : %s", e.getMessage()), e);
@@ -746,7 +763,7 @@ public class PdfBoxSignatureService extends AbstractPDFSignatureService {
 			checkPdfPermissions(documentReader, fieldParameters);
 
 			final byte[] signatureValue = DSSUtils.EMPTY_BYTE_ARRAY;
-			signDocumentAndReturnDigest(parameters, signatureValue, os, documentReader);
+			signDocument(parameters, signatureValue, os, documentReader);
 
 			DSSDocument doc = resourcesHandler.writeToDSSDocument();
 
@@ -772,7 +789,7 @@ public class PdfBoxSignatureService extends AbstractPDFSignatureService {
 					parameters.getImageParameters().getFieldParameters().getPage());
 
 			final byte[] signatureValue = DSSUtils.EMPTY_BYTE_ARRAY;
-			signDocumentAndReturnDigest(parameters, signatureValue, os, documentReader);
+			signDocument(parameters, signatureValue, os, documentReader);
 
 			DSSDocument doc = resourcesHandler.writeToDSSDocument();
 			return getNewSignatureFieldScreenshot(doc, parameters, originalAnnotations);

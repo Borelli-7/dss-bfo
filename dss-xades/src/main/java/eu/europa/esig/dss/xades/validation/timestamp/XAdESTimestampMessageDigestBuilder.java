@@ -48,7 +48,6 @@ import org.apache.xml.security.signature.XMLSignatureInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -743,20 +742,12 @@ public class XAdESTimestampMessageDigestBuilder implements TimestampMessageDiges
 				 * If ds:Canonicalization is present, the algorithm indicated by this element is used.
 				 * If not, the standard canonicalization method specified by XMLDSIG is used.
 				 */
-				final NamedNodeMap attributes = node.getAttributes();
-				final int length = attributes.getLength();
-				String id = "";
-				for (int jj = 0; jj < length; jj++) {
-					final Node item = attributes.item(jj);
-					final String nodeName = item.getNodeName();
-					if (Utils.areStringsEqualIgnoreCase("ID", nodeName)) {
-						id = item.getNodeValue();
-						break;
+				String id = DSSXMLUtils.getIDIdentifier(node);
+				if (id != null) {
+					final boolean contains = referenceURIs.contains(id);
+					if (contains) {
+						continue;
 					}
-				}
-				final boolean contains = referenceURIs.contains(id);
-				if (contains) {
-					continue;
 				}
 			}
 			writeDigestValueOnCanonicalizedNode(digestCalculator, node, canonicalizationMethod);

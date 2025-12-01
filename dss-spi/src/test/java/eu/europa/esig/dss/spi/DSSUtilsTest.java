@@ -378,6 +378,86 @@ class DSSUtilsTest {
 	}
 
 	@Test
+	void encodeURI() {
+		assertNull(DSSUtils.encodeURI(null));
+		assertEquals("", DSSUtils.encodeURI(""));
+
+		// simple filename
+		assertEquals("helloworld", DSSUtils.encodeURI("helloworld"));
+		assertEquals("helloworld.txt", DSSUtils.encodeURI("helloworld.txt"));
+
+		// Basic fragment identifiers
+		assertEquals("#helloworld", DSSUtils.encodeURI("#helloworld"));
+		assertEquals("#abc123", DSSUtils.encodeURI("#abc123"));
+		assertEquals("#a_b-c~d", DSSUtils.encodeURI("#a_b-c~d"));
+		assertEquals("#äöü", DSSUtils.encodeURI("#äöü"));
+
+		// Fragment with characters needing encoding
+		assertEquals("#hello%20world", DSSUtils.encodeURI("#hello world"));
+		assertEquals("#hello/?world", DSSUtils.encodeURI("#hello/?world"));
+		assertEquals("#hello:@world", DSSUtils.encodeURI("#hello:@world"));
+
+		// Multiple # inside fragment
+		assertEquals("#hello%23world", DSSUtils.encodeURI("#hello#world"));
+		assertEquals("#one%23two%23three", DSSUtils.encodeURI("#one#two#three"));
+
+		// Full URLs with fragments
+		assertEquals("https://example.com/test#section", DSSUtils.encodeURI("https://example.com/test#section"));
+		assertEquals("https://example.com/a/b#c/d", DSSUtils.encodeURI("https://example.com/a/b#c/d"));
+		assertEquals("https://example.com/hi#world/tree%23one", DSSUtils.encodeURI("https://example.com/hi#world/tree#one"));
+
+		// Full URLs containing spaces / illegal chars
+		assertEquals("https://example.com/hello%20world#frag", DSSUtils.encodeURI("https://example.com/hello world#frag"));
+		assertEquals("https://example.com/a%20b/c#d%20e", DSSUtils.encodeURI("https://example.com/a b/c#d e"));
+
+		// Corrupted URLs
+		assertEquals("https:/example.com/a%20b/c#d%20e", DSSUtils.encodeURI("https:/example.com/a b/c#d e"));
+		assertEquals("https/example.com/a%20b/c#d%20e", DSSUtils.encodeURI("https/example.com/a b/c#d e"));
+		assertEquals("https//example.com/a%20b/c#d%20e", DSSUtils.encodeURI("https//example.com/a b/c#d e"));
+
+		// Failed URL transformation URL
+		assertEquals("https:example.com/a b/c#d e", DSSUtils.encodeURI("https:example.com/a b/c#d e"));
+
+		// URL with complex query
+		assertEquals("https://test.com/search?q=a%20b&sort=asc#top", DSSUtils.encodeURI("https://test.com/search?q=a b&sort=asc#top"));
+
+		// Path-only references
+		assertEquals("Hello%20world.txt", DSSUtils.encodeURI("Hello world.txt"));
+		assertEquals("Hello+world.txt", DSSUtils.encodeURI("Hello+world.txt"));
+		assertEquals("hello/world", DSSUtils.encodeURI("hello/world"));
+		assertEquals("hello/world%20wide", DSSUtils.encodeURI("hello/world wide"));
+		assertEquals("hello%2520world", DSSUtils.encodeURI("hello%20world"));
+		assertEquals("path/with%25percent", DSSUtils.encodeURI("path/with%percent"));
+
+		// Path + fragment
+		assertEquals("my/path#id", DSSUtils.encodeURI("my/path#id"));
+		assertEquals("my/path#id%23sub", DSSUtils.encodeURI("my/path#id#sub"));
+		assertEquals("folder/file%20name#my%20fragment", DSSUtils.encodeURI("folder/file name#my fragment"));
+
+		// Relative references
+		assertEquals("doc.xml", DSSUtils.encodeURI("doc.xml"));
+		assertEquals("doc.xml#sig", DSSUtils.encodeURI("doc.xml#sig"));
+		assertEquals("doc%20name.xml#frag%20id", DSSUtils.encodeURI("doc name.xml#frag id"));
+
+		// Embedded scheme inside path
+		assertEquals("hello/https://google.com/hi#world/tree%23one", DSSUtils.encodeURI("hello/https://google.com/hi#world/tree#one"));
+		assertEquals("prefix/urn:example:abc#x%23y", DSSUtils.encodeURI("prefix/urn:example:abc#x#y"));
+
+		// Unicode outside fragment
+		assertEquals("hällo/world", DSSUtils.encodeURI("hällo/world"));
+		assertEquals("path/✓/check", DSSUtils.encodeURI("path/✓/check"));
+		assertEquals("привет.xml", DSSUtils.encodeURI("привет.xml"));
+		assertEquals("δοκιμή.xml", DSSUtils.encodeURI("δοκιμή.xml"));
+
+		// Illegal characters requiring encoding
+		assertEquals("a%3Cb", DSSUtils.encodeURI("a<b"));
+		assertEquals("a%3Eb", DSSUtils.encodeURI("a>b"));
+		assertEquals("x%7Cy", DSSUtils.encodeURI("x|y"));
+		assertEquals("file%20name#frag", DSSUtils.encodeURI("file name#frag"));
+		assertEquals("file#f%20r%23a*g", DSSUtils.encodeURI("file#f r#a*g"));
+	}
+
+	@Test
 	void testRSASSAPSS() {
 		CertificateToken token = DSSUtils.loadCertificate(this.getClass().getResourceAsStream("/BA-QC-Wurzel-CA-2_PN.txt"));
 		assertTrue(token.isSelfSigned());

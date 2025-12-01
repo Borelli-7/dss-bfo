@@ -27,6 +27,7 @@ import org.bouncycastle.asn1.x509.ReasonFlags;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
@@ -91,7 +92,7 @@ public class CRLValidity implements Serializable {
 	private Date thisUpdate;
 
 	/** The CRL Number extension value */
-	private String crlNumber;
+	private BigInteger crlNumber;
 	
 	/**
 	 * Default constructor
@@ -187,18 +188,18 @@ public class CRLValidity implements Serializable {
 	/**
 	 * Gets the CRL Number extension value
 	 *
-	 * @return {@link String} CRL Number
+	 * @return {@link BigInteger} CRL Number
 	 */
-	public String getCrlNumber() {
+	public BigInteger getCrlNumber() {
 		return crlNumber;
 	}
 
 	/**
 	 * Sets the CRL Number extension value
 	 *
-	 * @param crlNumber {@link String} CRL Number
+	 * @param crlNumber {@link BigInteger} CRL Number
 	 */
-	public void setCrlNumber(String crlNumber) {
+	public void setCrlNumber(BigInteger crlNumber) {
 		this.crlNumber = crlNumber;
 	}
 

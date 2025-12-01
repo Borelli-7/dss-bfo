@@ -28,8 +28,6 @@ import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.KeyUsageBit;
 import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.model.x509.CertificateToken;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x509.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,30 +166,6 @@ public class CRLUtilsStreamImpl extends AbstractCRLUtils implements ICRLUtils {
 		}
 		LOG.warn("Only RSASSA_PSS signature parameters are supported!");
 		return null;
-	}
-
-	/**
-	 * Extracts the CRL Number extension and sets it in the CRLValidity object.
-	 * Note: The extension content in CRLInfo is already the inner value (not wrapped in OCTET STRING).
-	 *
-	 * @param crlValidity the {@link CRLValidity} object to populate
-	 * @param extensionContent the raw extension content from CRLInfo
-	 */
-	private void extractCrlNumber(CRLValidity crlValidity, byte[] extensionContent) {
-		if (extensionContent == null) {
-			return;
-		}
-
-		try {
-			// The extension content from CRLInfo is already the inner value (the INTEGER)
-			ASN1Primitive primitive = ASN1Primitive.fromByteArray(extensionContent);
-			if (primitive instanceof ASN1Integer) {
-				BigInteger crlNumber = ((ASN1Integer) primitive).getPositiveValue();
-				crlValidity.setCrlNumber(crlNumber.toString());
-			}
-		} catch (Exception e) {
-			LOG.warn("Unable to extract CRL Number extension : {}", e.getMessage());
-		}
 	}
 
 }

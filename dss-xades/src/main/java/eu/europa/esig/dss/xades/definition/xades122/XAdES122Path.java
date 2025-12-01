@@ -370,6 +370,26 @@ public class XAdES122Path extends AbstractPath implements XAdESPath {
 	}
 
 	@Override
+	public String getCurrentCRLRefCRLIdentifier() {
+		return fromCurrentPosition(XAdES122Element.CRL_IDENTIFIER);
+	}
+
+	@Override
+	public String getCurrentCRLRefCRLIdentifierIssuer() {
+		return fromCurrentPosition(XAdES122Element.CRL_IDENTIFIER, XAdES122Element.ISSUER);
+	}
+
+	@Override
+	public String getCurrentCRLRefCRLIdentifierIssueTime() {
+		return fromCurrentPosition(XAdES122Element.CRL_IDENTIFIER, XAdES122Element.ISSUE_TIME);
+	}
+
+	@Override
+	public String getCurrentCRLRefCRLIdentifierNumber() {
+		return fromCurrentPosition(XAdES122Element.CRL_IDENTIFIER, XAdES122Element.NUMBER);
+	}
+
+	@Override
 	public String getCurrentOCSPRefsChildren() {
 		return fromCurrentPosition(XAdES122Element.OCSP_REFS, XAdES122Element.OCSP_REF);
 	}

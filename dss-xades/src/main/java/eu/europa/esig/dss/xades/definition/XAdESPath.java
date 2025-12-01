@@ -454,6 +454,34 @@ public interface XAdESPath extends Serializable {
 	String getCurrentCRLRefsChildren();
 
 	/**
+	 * Gets path "./xades:CRLIdentifier"
+	 *
+	 * @return {@link String} path
+	 */
+	String getCurrentCRLRefCRLIdentifier();
+
+	/**
+	 * Gets path "./xades:CRLIdentifier/xades:Issuer"
+	 *
+	 * @return {@link String} path
+	 */
+	String getCurrentCRLRefCRLIdentifierIssuer();
+
+	/**
+	 * Gets path "./xades:CRLIdentifier/xades:IssueTime"
+	 *
+	 * @return {@link String} path
+	 */
+	String getCurrentCRLRefCRLIdentifierIssueTime();
+
+	/**
+	 * Gets path "./xades:CRLIdentifier/xades:Number"
+	 *
+	 * @return {@link String} path
+	 */
+	String getCurrentCRLRefCRLIdentifierNumber();
+
+	/**
 	 * Gets path "./xades:OCSPValues/xades:EncapsulatedOCSPValue"
 	 *
 	 * @return {@link String} path
@@ -475,14 +503,14 @@ public interface XAdESPath extends Serializable {
 	String getCurrentOCSPRefResponderID();
 
 	/**
-	 * Gets path "./xades:OCSPIdentifier/xades:ResponderI/xades:ByName"
+	 * Gets path "./xades:OCSPIdentifier/xades:ResponderID/xades:ByName"
 	 *
 	 * @return {@link String} path
 	 */
 	String getCurrentOCSPRefResponderIDByName();
 
 	/**
-	 * Gets path "./xades:OCSPIdentifier/xades:ResponderI/xades:ByKey"
+	 * Gets path "./xades:OCSPIdentifier/xades:ResponderID/xades:ByKey"
 	 *
 	 * @return {@link String} path
 	 */

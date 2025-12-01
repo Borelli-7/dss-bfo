@@ -163,9 +163,9 @@ public class CRLToken extends RevocationToken<CRL> {
 	/**
 	 * Returns the CRL Number extension value from the associated CRLValidity
 	 *
-	 * @return {@link String} CRL Number, or null if not present
+	 * @return {@link BigInteger} CRL Number, or null if not present
 	 */
-	public String getCrlNumber() {
+	public BigInteger getCrlNumber() {
 		if (crlValidity != null) {
 			return crlValidity.getCrlNumber();
 		}

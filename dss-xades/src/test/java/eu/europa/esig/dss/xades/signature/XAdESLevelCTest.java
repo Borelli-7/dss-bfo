@@ -20,6 +20,7 @@
  */
 package eu.europa.esig.dss.xades.signature;
 
+import eu.europa.esig.dss.xades.definition.XAdESPath;
 import eu.europa.esig.dss.xml.utils.DomUtils;
 import eu.europa.esig.dss.diagnostic.CertificateRefWrapper;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
@@ -54,6 +55,7 @@ import eu.europa.esig.validationreport.jaxb.SARevIDListType;
 import eu.europa.esig.validationreport.jaxb.SignatureAttributesType;
 import org.junit.jupiter.api.BeforeEach;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -65,9 +67,10 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class XAdESLevelCTest extends AbstractXAdESTestSignature {
+public class XAdESLevelCTest extends AbstractXAdESTestSignature {
 
 	protected CertificateVerifier certificateVerifier;
 	protected XAdESSignatureParameters signatureParameters;
@@ -118,6 +121,25 @@ class XAdESLevelCTest extends AbstractXAdESTestSignature {
 
 		NodeList completeRevocationRefsList = DomUtils.getNodeList(signature, paths.getCompleteRevocationRefsPath());
 		assertEquals(1, completeRevocationRefsList.getLength());
+		validateCompleteRevocationRefsList(completeRevocationRefsList, paths);
+	}
+	
+	protected void validateCompleteRevocationRefsList(NodeList completeRevocationRefsList, XAdESPath paths) {
+		Node completeRevocationRefNode = completeRevocationRefsList.item(0);
+		NodeList crlRefs = DomUtils.getNodeList(completeRevocationRefNode, paths.getCurrentCRLRefsChildren());
+		assertEquals(1, crlRefs.getLength());
+		NodeList ocspRefs = DomUtils.getNodeList(completeRevocationRefNode, paths.getCurrentOCSPRefsChildren());
+		assertEquals(1, ocspRefs.getLength());
+
+		Element crlIdentifier = DomUtils.getElement(crlRefs.item(0), paths.getCurrentCRLRefCRLIdentifier());
+		assertNotNull(crlIdentifier);
+
+		Element crlIdentifierIssuer = DomUtils.getElement(crlRefs.item(0), paths.getCurrentCRLRefCRLIdentifierIssuer());
+		assertNotNull(crlIdentifierIssuer);
+		Element crlIdentifierIssueTime = DomUtils.getElement(crlRefs.item(0), paths.getCurrentCRLRefCRLIdentifierIssueTime());
+		assertNotNull(crlIdentifierIssueTime);
+		Element crlIdentifierNumber = DomUtils.getElement(crlRefs.item(0), paths.getCurrentCRLRefCRLIdentifierNumber());
+		assertNull(crlIdentifierNumber);
 	}
 
 	@Override
@@ -156,39 +178,6 @@ class XAdESLevelCTest extends AbstractXAdESTestSignature {
 				assertNotNull(crlRef.getDigest());
 				assertNotNull(crlRef.getDigest().getAlgorithm());
 				assertNotNull(crlRef.getDigest().getValue());
-			}
-		}
-
-		// Additional test: verify CRL Number in XML when present
-		checkCRLNumberInSignatureXML(signatures);
-	}
-
-	private void checkCRLNumberInSignatureXML(List<AdvancedSignature> signatures) {
-		if (signatures.isEmpty()) {
-			return;
-		}
-		
-		// Get the signature element and check for CRL Number elements
-		AdvancedSignature advancedSignature = signatures.get(0);
-		if (!(advancedSignature instanceof eu.europa.esig.dss.xades.validation.XAdESSignature)) {
-			return;
-		}
-		
-		eu.europa.esig.dss.xades.validation.XAdESSignature signature = 
-			(eu.europa.esig.dss.xades.validation.XAdESSignature) advancedSignature;
-		
-		// Check for CRL Number elements in CompleteRevocationRefs
-		NodeList crlNumberNodes = DomUtils.getNodeList(signature.getSignatureElement(), ".//*[local-name()='Number']");
-		
-		// If CRL Number nodes exist, verify they contain valid numeric values
-		if (crlNumberNodes.getLength() > 0) {
-			for (int i = 0; i < crlNumberNodes.getLength(); i++) {
-				Node numberNode = crlNumberNodes.item(i);
-				String numberValue = numberNode.getTextContent();
-				assertNotNull(numberValue);
-				assertTrue(Utils.isStringNotEmpty(numberValue));
-				// Verify it's a valid number
-				new java.math.BigInteger(numberValue);
 			}
 		}
 	}

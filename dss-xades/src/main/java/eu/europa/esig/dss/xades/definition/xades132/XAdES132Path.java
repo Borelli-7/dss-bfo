@@ -22,6 +22,7 @@ package eu.europa.esig.dss.xades.definition.xades132;
 
 import eu.europa.esig.dss.xades.definition.XAdESNamespace;
 import eu.europa.esig.dss.xades.definition.XAdESPath;
+import eu.europa.esig.dss.xades.definition.xades122.XAdES122Element;
 import eu.europa.esig.dss.xades.definition.xades141.XAdES141Element;
 import eu.europa.esig.dss.xades.definition.xadesen.XAdESEvidencerecordNamespaceElement;
 import eu.europa.esig.dss.xml.common.definition.AbstractPath;
@@ -407,6 +408,26 @@ public class XAdES132Path extends AbstractPath implements XAdESPath {
 	@Override
 	public String getCurrentCRLRefsChildren() {
 		return fromCurrentPosition(XAdES132Element.CRL_REFS, XAdES132Element.CRL_REF);
+	}
+
+	@Override
+	public String getCurrentCRLRefCRLIdentifier() {
+		return fromCurrentPosition(XAdES132Element.CRL_IDENTIFIER);
+	}
+
+	@Override
+	public String getCurrentCRLRefCRLIdentifierIssuer() {
+		return fromCurrentPosition(XAdES132Element.CRL_IDENTIFIER, XAdES132Element.ISSUER);
+	}
+
+	@Override
+	public String getCurrentCRLRefCRLIdentifierIssueTime() {
+		return fromCurrentPosition(XAdES132Element.CRL_IDENTIFIER, XAdES132Element.ISSUE_TIME);
+	}
+
+	@Override
+	public String getCurrentCRLRefCRLIdentifierNumber() {
+		return fromCurrentPosition(XAdES132Element.CRL_IDENTIFIER, XAdES132Element.NUMBER);
 	}
 
 	@Override

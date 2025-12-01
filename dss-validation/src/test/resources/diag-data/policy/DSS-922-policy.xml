@@ -1,5 +1,5 @@
 
-<ConstraintsParameters Name="QES AdESQC TL based" xmlns="http://dss.esig.europa.eu/validation/policy">
+<ConstraintsParameters Name="QES AES/QC AES TL based" xmlns="http://dss.esig.europa.eu/validation/policy">
   <Description>RIA customized validation policy
   </Description>
   <SignatureConstraints>

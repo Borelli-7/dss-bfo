@@ -205,7 +205,7 @@ By default, DSS provides a JAXB-based XML implementation of a validation policy 
 
 NOTE: The `dss-policy-jaxb` has to be explicitly added within the list of dependencies of your project starting from DSS `6.3`, if a support of XML Validation Policy is required.
 
-The default validation process in DSS is supplied with an AdES based validation policy, allowing a comprehensive validation of both advanced and qualified electronic signatures and seals (please see <<defaultXmlPolicy>> for more information). Should one need to use a customized validation policy, an instance of a `ValidationPolicy` class, containing the desired validation policy should be provided on validation.
+The default validation process in DSS is supplied with an AES based validation policy, allowing a comprehensive validation of both advanced and qualified electronic signatures and seals (please see <<defaultXmlPolicy>> for more information). Should one need to use a customized validation policy, an instance of a `ValidationPolicy` class, containing the desired validation policy should be provided on validation.
 
 The configuration can be provided to a `DocumentValidator`, as demonstrated below:
 
@@ -289,7 +289,13 @@ Cryptographic constraints define a list of acceptable cryptographic algorithms a
 [[defaultXmlPolicy]]
 ==== The default XML policy
 
-The default XML validation policy is present below.
+DSS provides, within its core code, a validation policy suitable for validating qualified electronic signatures (QES) and advanced electronic signatures (AES). This validation policy is loaded by default when a signature or certificate validation is initiated.
+
+The default validation policy aims to enforce best practices for electronic signature creation and validation; however, its scope may not be exhaustive. It supports the validation of ETSI advanced electronic signature and container formats (i.e. *AdES formats) as well as other popular signature profiles, such as PKCS#7.
+
+NOTE: DSS accepts no responsibility or liability whatsoever regarding the use of the provided validation policy. It is the responsibility of implementers to define a validation policy appropriate for their specific applicability framework.
+
+The default XML validation policy is shown below.
 
 .constraint.xml
 [source,xml]

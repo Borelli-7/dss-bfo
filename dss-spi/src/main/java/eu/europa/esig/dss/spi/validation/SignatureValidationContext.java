@@ -572,6 +572,11 @@ public class SignatureValidationContext implements ValidationContext {
 			return issuerCertificateToken;
 		}
 
+		// See DSS-3720
+		if (token instanceof CertificateToken && isSelfSigned(token)) {
+			return (CertificateToken) token;
+		}
+
 		// Find issuer candidates from a particular certificate source
 		Set<CertificateToken> candidates = Collections.emptySet();
 
@@ -1435,7 +1440,7 @@ public class SignatureValidationContext implements ValidationContext {
 		return isSelfSigned(certToken) || isTrustedAtTime(certToken, controlTime);
 	}
 
-	private boolean isSelfSigned(CertificateToken certToken) {
+	private boolean isSelfSigned(Token certToken) {
 		return certToken.isSelfSigned();
 	}
 

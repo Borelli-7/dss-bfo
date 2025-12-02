@@ -268,25 +268,32 @@ public class PdfBoxSignatureService extends AbstractPDFSignatureService {
 	private PDSignatureField findExistingSignatureField(final PDDocument pdDocument, final SignatureFieldParameters fieldParameters) {
 		String targetFieldId = fieldParameters.getFieldId();
 		if (Utils.isStringNotEmpty(targetFieldId)) {
-			PDAcroForm acroForm = pdDocument.getDocumentCatalog().getAcroForm();
-			if (acroForm != null) {
-				PDField field = acroForm.getField(targetFieldId);
-				if (field != null) {
-					if (field instanceof PDSignatureField) {
-						PDSignatureField signatureField = (PDSignatureField) field;
-						PDSignature signature = signatureField.getSignature();
-						if (signature != null) {
-							throw new IllegalArgumentException(String.format(
-									"The signature field '%s' can not be signed since its already signed.", targetFieldId));
-						}
-						return signatureField;
-					} else {
-						throw new IllegalArgumentException(String.format("The field '%s' is not a signature field!",
-								targetFieldId));
+			PDField field = getFieldWithId(pdDocument, targetFieldId);
+			if (field != null) {
+				if (field instanceof PDSignatureField) {
+					PDSignatureField signatureField = (PDSignatureField) field;
+					PDSignature signature = signatureField.getSignature();
+					if (signature != null) {
+						throw new IllegalArgumentException(String.format(
+								"The signature field '%s' can not be signed since its already signed.", targetFieldId));
 					}
+					return signatureField;
+				} else {
+					throw new IllegalArgumentException(String.format("The field '%s' is not a signature field!",
+							targetFieldId));
 				}
 			}
 			throw new IllegalArgumentException(String.format("The signature field '%s' does not exist.", targetFieldId));
+		}
+		return null;
+	}
+
+	private PDField getFieldWithId(final PDDocument pdDocument, final String fieldId) {
+		if (Utils.isStringNotEmpty(fieldId)) {
+			PDAcroForm acroForm = pdDocument.getDocumentCatalog().getAcroForm();
+			if (acroForm != null) {
+				return acroForm.getField(fieldId);
+			}
 		}
 		return null;
 	}
@@ -710,8 +717,14 @@ public class PdfBoxSignatureService extends AbstractPDFSignatureService {
 			}
 
 			PDSignatureField signatureField = new PDSignatureField(acroForm);
-			if (Utils.isStringNotBlank(parameters.getFieldId())) {
-				signatureField.setPartialName(parameters.getFieldId());
+			String targetFieldId = parameters.getFieldId();
+			if (Utils.isStringNotBlank(targetFieldId)) {
+				if (getFieldWithId(pdfDoc, targetFieldId) == null) {
+					signatureField.setPartialName(targetFieldId);
+				} else {
+					throw new IllegalArgumentException(String.format(
+							"The field '%s' already exists within the PDF document!", targetFieldId));
+				}
 			}
 
 			AnnotationBox annotationBox = getVisibleSignatureFieldBoxPosition(documentReader, parameters);

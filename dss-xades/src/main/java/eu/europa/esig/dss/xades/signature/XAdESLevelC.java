@@ -40,6 +40,8 @@ import org.bouncycastle.cert.ocsp.RespID;
 import org.w3c.dom.Element;
 
 import javax.xml.datatype.XMLGregorianCalendar;
+
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -291,7 +293,10 @@ public class XAdESLevelC extends XAdESLevelBaselineT {
 			final String thisUpdateAsXmlFormat = xmlGregorianCalendar.toXMLFormat();
 			DomUtils.addTextElement(documentDom, crlIdentifierDom, getXadesNamespace(),getCurrentXAdESElements().getElementIssueTime(), thisUpdateAsXmlFormat);
 
-			// DSSXMLUtils.addTextElement(documentDom, crlRefDom, XAdESNamespaces.XAdES, "xades:Number", ???);
+			BigInteger crlNumber = crlToken.getCRLNumber();
+			if (crlNumber != null) {
+				DomUtils.addTextElement(documentDom, crlIdentifierDom, getXadesNamespace(), getCurrentXAdESElements().getElementNumber(), crlNumber.toString());
+			}
 
 		}
 	}

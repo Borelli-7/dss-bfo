@@ -20,6 +20,9 @@
  */
 package eu.europa.esig.dss.xades.signature;
 
+import eu.europa.esig.dss.diagnostic.OrphanRevocationWrapper;
+import eu.europa.esig.dss.enumerations.RevocationType;
+import eu.europa.esig.dss.xades.definition.XAdESPath;
 import eu.europa.esig.dss.xml.utils.DomUtils;
 import eu.europa.esig.dss.diagnostic.CertificateRefWrapper;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
@@ -54,6 +57,7 @@ import eu.europa.esig.validationreport.jaxb.SARevIDListType;
 import eu.europa.esig.validationreport.jaxb.SignatureAttributesType;
 import org.junit.jupiter.api.BeforeEach;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -65,9 +69,10 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class XAdESLevelCTest extends AbstractXAdESTestSignature {
+public class XAdESLevelCTest extends AbstractXAdESTestSignature {
 
 	protected CertificateVerifier certificateVerifier;
 	protected XAdESSignatureParameters signatureParameters;
@@ -118,6 +123,25 @@ class XAdESLevelCTest extends AbstractXAdESTestSignature {
 
 		NodeList completeRevocationRefsList = DomUtils.getNodeList(signature, paths.getCompleteRevocationRefsPath());
 		assertEquals(1, completeRevocationRefsList.getLength());
+		validateCompleteRevocationRefsList(completeRevocationRefsList, paths);
+	}
+	
+	protected void validateCompleteRevocationRefsList(NodeList completeRevocationRefsList, XAdESPath paths) {
+		Node completeRevocationRefNode = completeRevocationRefsList.item(0);
+		NodeList crlRefs = DomUtils.getNodeList(completeRevocationRefNode, paths.getCurrentCRLRefsChildren());
+		assertEquals(1, crlRefs.getLength());
+		NodeList ocspRefs = DomUtils.getNodeList(completeRevocationRefNode, paths.getCurrentOCSPRefsChildren());
+		assertEquals(1, ocspRefs.getLength());
+
+		Element crlIdentifier = DomUtils.getElement(crlRefs.item(0), paths.getCurrentCRLRefCRLIdentifier());
+		assertNotNull(crlIdentifier);
+
+		Element crlIdentifierIssuer = DomUtils.getElement(crlRefs.item(0), paths.getCurrentCRLRefCRLIdentifierIssuer());
+		assertNotNull(crlIdentifierIssuer);
+		Element crlIdentifierIssueTime = DomUtils.getElement(crlRefs.item(0), paths.getCurrentCRLRefCRLIdentifierIssueTime());
+		assertNotNull(crlIdentifierIssueTime);
+		Element crlIdentifierNumber = DomUtils.getElement(crlRefs.item(0), paths.getCurrentCRLRefCRLIdentifierNumber());
+		assertNull(crlIdentifierNumber);
 	}
 
 	@Override
@@ -158,7 +182,6 @@ class XAdESLevelCTest extends AbstractXAdESTestSignature {
 				assertNotNull(crlRef.getDigest().getValue());
 			}
 		}
-
 	}
 
 	@Override
@@ -208,6 +231,57 @@ class XAdESLevelCTest extends AbstractXAdESTestSignature {
 			assertEquals(signatureParameters.getTokenReferencesDigestAlgorithm(),
 					revocationRefWrapper.getDigestAlgoAndValue().getDigestMethod());
 		}
+
+		checkRevocationReferences(diagnosticData);
+	}
+
+	protected void checkRevocationReferences(DiagnosticData diagnosticData) {
+		SignatureWrapper signature = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
+		FoundRevocationsProxy foundRevocations = signature.foundRevocations();
+		List<OrphanRevocationWrapper> revocations = foundRevocations.getOrphanRevocationData();
+
+		int crlRefCounter = 0;
+		int ocspRefCounter = 0;
+		for (OrphanRevocationWrapper revocation : revocations) {
+			if (RevocationType.CRL == revocation.getRevocationType()) {
+				List<RevocationRefWrapper> references = revocation.getReferences();
+				assertEquals(1, references.size());
+				RevocationRefWrapper crlRef = references.get(0);
+				assertNotNull(crlRef.getDigestAlgoAndValue());
+				assertNotNull(crlRef.getDigestAlgoAndValue().getDigestMethod());
+				assertTrue(Utils.isArrayNotEmpty(crlRef.getDigestAlgoAndValue().getDigestValue()));
+
+				assertNotNull(crlRef.getIssuer());
+				assertNotNull(crlRef.getIssueTime());
+				assertNull(crlRef.getNumber());
+
+				assertNull(crlRef.getProductionTime());
+				assertNull(crlRef.getResponderIdKey());
+				assertNull(crlRef.getResponderIdName());
+
+				++crlRefCounter;
+
+			} else if (RevocationType.OCSP == revocation.getRevocationType()) {
+				List<RevocationRefWrapper> references = revocation.getReferences();
+				assertEquals(1, references.size());
+				RevocationRefWrapper crlRef = references.get(0);
+				assertNotNull(crlRef.getDigestAlgoAndValue());
+				assertNotNull(crlRef.getDigestAlgoAndValue().getDigestMethod());
+				assertTrue(Utils.isArrayNotEmpty(crlRef.getDigestAlgoAndValue().getDigestValue()));
+
+				assertNotNull(crlRef.getProductionTime());
+				assertNotNull(crlRef.getResponderIdKey());
+				assertNull(crlRef.getResponderIdName());
+
+				assertNull(crlRef.getIssuer());
+				assertNull(crlRef.getIssueTime());
+				assertNull(crlRef.getNumber());
+
+				++ocspRefCounter;
+			}
+		}
+		assertEquals(1, crlRefCounter);
+		assertEquals(1, ocspRefCounter);
 	}
 
 	@Override

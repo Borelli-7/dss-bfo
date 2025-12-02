@@ -20,15 +20,14 @@
  */
 package eu.europa.esig.dss.xades.validation;
 
-import eu.europa.esig.dss.xml.utils.DomUtils;
 import eu.europa.esig.dss.model.Digest;
 import eu.europa.esig.dss.spi.DSSASN1Utils;
-import eu.europa.esig.dss.spi.DSSUtils;
-import eu.europa.esig.dss.spi.x509.SignerIdentifier;
 import eu.europa.esig.dss.spi.x509.CertificateRef;
+import eu.europa.esig.dss.spi.x509.SignerIdentifier;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.xades.DSSXMLUtils;
 import eu.europa.esig.dss.xades.definition.XAdESPath;
+import eu.europa.esig.dss.xml.utils.DomUtils;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +95,7 @@ public final class XAdESCertificateRefExtractionUtils {
 
 		final Element issuerNameEl = DomUtils.getElement(certRefElement, xadesPaths.getCurrentIssuerSerialIssuerNamePath());
 		if (issuerNameEl != null) {
-			issuerName = DSSUtils.getX500PrincipalOrNull(issuerNameEl.getTextContent());
+			issuerName = DSSASN1Utils.getX500PrincipalOrNull(issuerNameEl.getTextContent());
 		}
 
 		final Element serialNumberEl = DomUtils.getElement(certRefElement, xadesPaths.getCurrentIssuerSerialSerialNumberPath());

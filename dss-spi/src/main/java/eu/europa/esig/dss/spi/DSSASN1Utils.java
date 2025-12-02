@@ -22,6 +22,7 @@ package eu.europa.esig.dss.spi;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
+import eu.europa.esig.dss.enumerations.X520Attributes;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.Digest;
 import eu.europa.esig.dss.model.TimestampBinary;
@@ -583,6 +584,23 @@ public final class DSSASN1Utils {
 			throw new DSSException(String.format("Cannot extract X500Principal! Reason : %s", e.getMessage()), e);
 		}
 	}
+
+	/**
+	 * This method returns the {@code X500Principal} corresponding to the given string or {@code null} if the conversion
+	 * is not possible.
+	 *
+	 * @param x500PrincipalString
+	 *            a {@code String} representation of the {@code X500Principal}
+	 * @return {@code X500Principal} or null
+	 */
+	public static X500Principal getX500PrincipalOrNull(final String x500PrincipalString) {
+		try {
+			return new X500Principal(x500PrincipalString, X520Attributes.getUppercaseDescriptionForOids());
+		} catch (Exception e) {
+			LOG.warn("Unable to create an instance of X500Principal : {}", e.getMessage());
+			return null;
+		}
+	}
 	
 	/**
 	 * This method transforms token's issuer and serial number information into a
@@ -628,7 +646,7 @@ public final class DSSASN1Utils {
 	 * @return true if the two parameters contain the same key/values
 	 */
 	public static boolean x500PrincipalAreEquals(final X500Principal firstX500Principal, final X500Principal secondX500Principal) {
-		if ((firstX500Principal == null) || (secondX500Principal == null)) {
+		if (firstX500Principal == null || secondX500Principal == null) {
 			return false;
 		}
 		if (firstX500Principal.equals(secondX500Principal)) {
@@ -839,7 +857,7 @@ public final class DSSASN1Utils {
 			if (gnames != null) {
 				GeneralName[] names = gnames.getNames();
 				if (names.length == 1) {
-					signerIdentifier.setIssuerName(new X500Principal(names[0].getName().toASN1Primitive().getEncoded(ASN1Encoding.DER)));
+					signerIdentifier.setIssuerName(DSSASN1Utils.toX500Principal(X500Name.getInstance(names[0].getName())));
 				} else {
 					LOG.warn("More than one GeneralName");
 				}

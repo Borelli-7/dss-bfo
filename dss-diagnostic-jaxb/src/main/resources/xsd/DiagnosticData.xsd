@@ -1378,6 +1378,7 @@
 					<xs:element name="ProductionDate" type="xs:dateTime" minOccurs="0" /> <!-- Can be null in case of no SUCCESSFUL response of OCSP -->
 					<xs:element name="ThisUpdate" type="xs:dateTime" minOccurs="0" />
 					<xs:element name="NextUpdate" type="xs:dateTime" minOccurs="0" />
+					<xs:element name="CRLNumber" type="xs:integer" minOccurs="0" /> <!-- CRL -->
 					<xs:element name="ExpiredCertsOnCRL" type="xs:dateTime" minOccurs="0" /> <!-- CRL -->
 					<xs:element name="ArchiveCutOff" type="xs:dateTime" minOccurs="0" /> <!-- OCSP -->
 					<xs:element name="CertHashExtensionPresent" type="xs:boolean" minOccurs="0" /> <!-- OCSP -->
@@ -1446,6 +1447,9 @@
 			<xs:element name="DigestAlgoAndValue" type="DigestAlgoAndValue" minOccurs="0" />
 			<xs:element name="ProducedAt" type="xs:dateTime" minOccurs="0" /> <!-- OCSP -->
 			<xs:element name="ResponderId" type="SignerInfo" minOccurs="0" /> <!-- OCSP -->
+			<xs:element name="Issuer" type="xs:string" minOccurs="0" /> <!-- CRL -->
+			<xs:element name="IssueTime" type="xs:dateTime" minOccurs="0" /> <!-- CRL -->
+			<xs:element name="Number" type="xs:integer" minOccurs="0" /> <!-- CRL -->
 		</xs:sequence>
 	</xs:complexType>
 	

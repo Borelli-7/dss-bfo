@@ -1001,6 +1001,17 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 						}
 					}
 					assertTrue(signingCertFound);
+
+					assertNull(revocationWrapper.getCRLNumber());
+					assertNull(revocationWrapper.getExpiredCertsOnCRL());
+
+				} else if (RevocationType.CRL.equals(revocationWrapper.getRevocationType())) {
+					assertNull(revocationWrapper.getArchiveCutOff());
+					assertFalse(revocationWrapper.isCertHashExtensionPresent());
+					assertFalse(revocationWrapper.isCertHashExtensionMatch());
+
+				} else {
+					fail(String.format("Not supported revocation token type : %s", revocationWrapper.getRevocationType()));
 				}
 			}
 		}

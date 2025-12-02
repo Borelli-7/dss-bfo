@@ -1,7 +1,9 @@
 package eu.europa.esig.dss.xades.validation.dss3732;
 
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
+import eu.europa.esig.dss.diagnostic.RevocationWrapper;
 import eu.europa.esig.dss.diagnostic.TimestampWrapper;
+import eu.europa.esig.dss.enumerations.RevocationType;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.TimestampType;
 import eu.europa.esig.dss.model.DSSDocument;
@@ -9,9 +11,11 @@ import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.xades.validation.AbstractXAdESTestValidation;
 
 import java.io.File;
+import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class XAdESLevelLTA132EnvelopedNoObjectsTest extends AbstractXAdESTestValidation {
@@ -25,6 +29,27 @@ class XAdESLevelLTA132EnvelopedNoObjectsTest extends AbstractXAdESTestValidation
     protected void checkSignatureLevel(DiagnosticData diagnosticData) {
         assertEquals(SignatureLevel.XAdES_BASELINE_LTA, diagnosticData.getSignatureFormat(diagnosticData.getFirstSignatureId()));
         assertFalse(diagnosticData.isALevelTechnicallyValid(diagnosticData.getFirstSignatureId()));
+    }
+
+    @Override
+    protected void checkRevocationData(DiagnosticData diagnosticData) {
+        super.checkRevocationData(diagnosticData);
+
+        boolean crl5Found = false;
+        boolean crl7Found = false;
+        for (RevocationWrapper revocationWrapper : diagnosticData.getAllRevocationData()) {
+            if (RevocationType.CRL == revocationWrapper.getRevocationType()) {
+                BigInteger crlNumber = revocationWrapper.getCRLNumber();
+                assertNotNull(crlNumber);
+                if (5 == crlNumber.intValue()) {
+                    crl5Found = true;
+                } else if (7 == crlNumber.intValue()) {
+                    crl7Found = true;
+                }
+            }
+        }
+        assertTrue(crl5Found);
+        assertTrue(crl7Found);
     }
 
     @Override

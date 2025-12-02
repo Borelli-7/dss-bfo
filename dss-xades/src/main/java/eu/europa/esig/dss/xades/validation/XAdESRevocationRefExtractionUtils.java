@@ -20,20 +20,21 @@
  */
 package eu.europa.esig.dss.xades.validation;
 
-import eu.europa.esig.dss.xml.utils.DomUtils;
 import eu.europa.esig.dss.model.Digest;
-import eu.europa.esig.dss.spi.DSSUtils;
+import eu.europa.esig.dss.spi.DSSASN1Utils;
 import eu.europa.esig.dss.spi.x509.ResponderId;
 import eu.europa.esig.dss.spi.x509.revocation.crl.CRLRef;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRef;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.xades.DSSXMLUtils;
 import eu.europa.esig.dss.xades.definition.XAdESPath;
+import eu.europa.esig.dss.xml.utils.DomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import javax.security.auth.x500.X500Principal;
+import java.math.BigInteger;
 import java.util.Date;
 
 /**
@@ -89,7 +90,7 @@ public final class XAdESRevocationRefExtractionUtils {
 		if (currentOCSPRefResponderIDByName != null && currentOCSPRefResponderIDByKey != null) {
 			final Element responderIdByName = DomUtils.getElement(ocspRefElement, currentOCSPRefResponderIDByName);
 			if (responderIdByName != null) {
-				responderName = DSSUtils.getX500PrincipalOrNull(responderIdByName.getTextContent());
+				responderName = DSSASN1Utils.getX500PrincipalOrNull(responderIdByName.getTextContent());
 			}
 
 			final Element responderIdByKey = DomUtils.getElement(ocspRefElement, currentOCSPRefResponderIDByKey);
@@ -104,7 +105,7 @@ public final class XAdESRevocationRefExtractionUtils {
 		} else {
 			final Element responderIdElement = DomUtils.getElement(ocspRefElement, xadesPaths.getCurrentOCSPRefResponderID());
 			if (responderIdElement != null) {
-				responderName = DSSUtils.getX500PrincipalOrNull(responderIdElement.getTextContent());
+				responderName = DSSASN1Utils.getX500PrincipalOrNull(responderIdElement.getTextContent());
 			}
 		}
 
@@ -127,8 +128,52 @@ public final class XAdESRevocationRefExtractionUtils {
 			LOG.warn("Skipped CRLRef (missing DigestAlgAndValue)");
 			return null;
 		}
-		// TODO CRLIdentifier
-		return new CRLRef(digest);
+
+		X500Principal issuer = getCRLIssuer(xadesPaths, crlRefElement);
+		if (issuer == null) {
+			LOG.warn("Skipped CRLRef (missing CRLIdentifier / Issuer)");
+			return null;
+		}
+
+		Date issueTime = getCRLIssueTime(xadesPaths, crlRefElement);
+		if (issueTime == null) {
+			LOG.warn("Skipped CRLRef (missing CRLIdentifier / IssueTime)");
+			return null;
+		}
+
+		BigInteger crlNumber = getCRLNumber(xadesPaths, crlRefElement); // can be null
+		return new CRLRef(digest, issuer, issueTime, crlNumber);
+	}
+
+	private static X500Principal getCRLIssuer(final XAdESPath xadesPaths, final Element crlRefElement) {
+		X500Principal issuer = null;
+		final Element issuerEl = DomUtils.getElement(crlRefElement, xadesPaths.getCurrentCRLRefCRLIdentifierIssuer());
+		if (issuerEl != null) {
+			issuer = DSSASN1Utils.getX500PrincipalOrNull(issuerEl.getTextContent());
+		}
+		return issuer;
+	}
+
+	private static Date getCRLIssueTime(final XAdESPath xadesPaths, final Element crlRefElement) {
+		Date issueTime = null;
+		final Element issueTimeEl = DomUtils.getElement(crlRefElement, xadesPaths.getCurrentCRLRefCRLIdentifierIssueTime());
+		if (issueTimeEl != null) {
+			issueTime = DomUtils.getDate(issueTimeEl.getTextContent());
+		}
+		return issueTime;
+	}
+
+	private static BigInteger getCRLNumber(final XAdESPath xadesPaths, final Element crlRefElement) {
+		BigInteger number = null;
+		final Element numberEl = DomUtils.getElement(crlRefElement, xadesPaths.getCurrentCRLRefCRLIdentifierNumber());
+		if (numberEl != null) {
+			try {
+				number = new BigInteger(numberEl.getTextContent());
+			} catch (Exception e) {
+				LOG.warn("Unable to read CRL number : {}", e.getMessage(), e);
+			}
+		}
+		return number;
 	}
 
 }

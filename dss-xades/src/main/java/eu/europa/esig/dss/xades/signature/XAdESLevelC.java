@@ -293,7 +293,7 @@ public class XAdESLevelC extends XAdESLevelBaselineT {
 			final String thisUpdateAsXmlFormat = xmlGregorianCalendar.toXMLFormat();
 			DomUtils.addTextElement(documentDom, crlIdentifierDom, getXadesNamespace(),getCurrentXAdESElements().getElementIssueTime(), thisUpdateAsXmlFormat);
 
-			BigInteger crlNumber = crlToken.getCrlNumber();
+			BigInteger crlNumber = crlToken.getCRLNumber();
 			if (crlNumber != null) {
 				DomUtils.addTextElement(documentDom, crlIdentifierDom, getXadesNamespace(), getCurrentXAdESElements().getElementNumber(), crlNumber.toString());
 			}

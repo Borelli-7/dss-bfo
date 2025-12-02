@@ -86,6 +86,7 @@ public class CRLToken extends RevocationToken<CRL> {
 		this.thisUpdate = crlValidity.getThisUpdate();
 		this.productionDate = crlValidity.getThisUpdate(); // dates are equals in case of CRL
 		this.nextUpdate = crlValidity.getNextUpdate();
+		this.crlNumber = crlValidity.getCRLNumber();
 		this.expiredCertsOnCRL = crlValidity.getExpiredCertsOnCRL();
 
 		CertificateToken issuerToken = crlValidity.getIssuerToken();
@@ -158,18 +159,6 @@ public class CRLToken extends RevocationToken<CRL> {
 	 */
 	public CRLValidity getCrlValidity() {
 		return crlValidity;
-	}
-
-	/**
-	 * Returns the CRL Number extension value from the associated CRLValidity
-	 *
-	 * @return {@link BigInteger} CRL Number, or null if not present
-	 */
-	public BigInteger getCrlNumber() {
-		if (crlValidity != null) {
-			return crlValidity.getCrlNumber();
-		}
-		return null;
 	}
 
 	@Override

@@ -156,7 +156,7 @@ public abstract class AbstractCRLUtils {
 				ASN1Primitive primitive = ASN1Primitive.fromByteArray(octetString.getOctets());
 				if (primitive instanceof ASN1Integer) {
 					BigInteger crlNumber = ((ASN1Integer) primitive).getPositiveValue();
-					crlValidity.setCrlNumber(crlNumber);
+					crlValidity.setCRLNumber(crlNumber);
 				}
 			} catch (Exception e) {
 				LOG.warn("Unable to extract CRL Number extension : {}", e.getMessage(), e);

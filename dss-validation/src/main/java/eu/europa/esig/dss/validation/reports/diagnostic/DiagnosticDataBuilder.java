@@ -677,6 +677,7 @@ public abstract class DiagnosticDataBuilder {
 		xmlRevocation.setProductionDate(revocationToken.getProductionDate());
 		xmlRevocation.setThisUpdate(revocationToken.getThisUpdate());
 		xmlRevocation.setNextUpdate(revocationToken.getNextUpdate());
+		xmlRevocation.setCRLNumber(revocationToken.getCRLNumber());
 		xmlRevocation.setExpiredCertsOnCRL(revocationToken.getExpiredCertsOnCRL());
 		xmlRevocation.setArchiveCutOff(revocationToken.getArchiveCutOff());
 

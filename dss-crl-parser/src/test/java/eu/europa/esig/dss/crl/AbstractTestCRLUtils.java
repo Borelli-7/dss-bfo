@@ -532,7 +532,7 @@ public abstract class AbstractTestCRLUtils extends AbstractCRLParserTestUtils {
 
 			// Test that CRL Number extraction works (may be null if extension not present)
 			// This is acceptable - the method should not throw an exception
-			BigInteger crlNumber = validCRL.getCrlNumber();
+			BigInteger crlNumber = validCRL.getCRLNumber();
 			assertNotNull(crlNumber);
 			assertEquals(5, crlNumber.intValue());
 		}
@@ -548,7 +548,7 @@ public abstract class AbstractTestCRLUtils extends AbstractCRLParserTestUtils {
 			assertNotNull(validCRL);
 
 			// Test that getCrlNumber() method works on CRLValidity
-			BigInteger crlNumber = validCRL.getCrlNumber();
+			BigInteger crlNumber = validCRL.getCRLNumber();
 			assertNull(crlNumber);
 		}
 	}

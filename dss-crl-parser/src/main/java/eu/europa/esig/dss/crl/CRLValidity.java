@@ -190,7 +190,7 @@ public class CRLValidity implements Serializable {
 	 *
 	 * @return {@link BigInteger} CRL Number
 	 */
-	public BigInteger getCrlNumber() {
+	public BigInteger getCRLNumber() {
 		return crlNumber;
 	}
 
@@ -199,7 +199,7 @@ public class CRLValidity implements Serializable {
 	 *
 	 * @param crlNumber {@link BigInteger} CRL Number
 	 */
-	public void setCrlNumber(BigInteger crlNumber) {
+	public void setCRLNumber(BigInteger crlNumber) {
 		this.crlNumber = crlNumber;
 	}
 

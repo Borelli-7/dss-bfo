@@ -747,6 +747,15 @@ public abstract class DiagnosticDataBuilder {
 		xmlRevocationRef.getOrigins().addAll(origins);
 		if (crlRef.getDigest() != null) {
 			xmlRevocationRef.setDigestAlgoAndValue(getXmlDigestAlgoAndValue(crlRef.getDigest()));
+			if (crlRef.getCrlIssuer() != null) {
+				xmlRevocationRef.setIssuer(crlRef.getCrlIssuer().toString());
+			}
+			if (crlRef.getCrlIssueTime() != null) {
+				xmlRevocationRef.setIssueTime(crlRef.getCrlIssueTime());
+			}
+			if (crlRef.getCrlNumber() != null) {
+				xmlRevocationRef.setNumber(crlRef.getCrlNumber());
+			}
 		}
 		return xmlRevocationRef;
 	}

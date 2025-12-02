@@ -399,7 +399,7 @@ public class CertificateExtensionsUtils {
         try {
             // RFC4519Style is the default style used in BouncyCastle
             RDN[] rdns = RFC4519Style.INSTANCE.fromString(value);
-            X500Principal x500Principal = new X500Principal(DSSASN1Utils.getDEREncoded(new X500Name(rdns)));
+            X500Principal x500Principal = DSSASN1Utils.toX500Principal(new X500Name(rdns));
             return new X500PrincipalHelper(x500Principal).getRFC2253();
         } catch (Exception e) {
             LOG.warn("Unable to build RDN! Reason: {}", e.getMessage(), e);

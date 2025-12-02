@@ -20,8 +20,16 @@
  */
 package eu.europa.esig.dss.xades.signature;
 
+import eu.europa.esig.dss.diagnostic.DiagnosticData;
+import eu.europa.esig.dss.diagnostic.FoundRevocationsProxy;
+import eu.europa.esig.dss.diagnostic.OrphanRevocationWrapper;
+import eu.europa.esig.dss.diagnostic.RevocationRefWrapper;
+import eu.europa.esig.dss.diagnostic.SignatureWrapper;
+import eu.europa.esig.dss.enumerations.RevocationType;
 import eu.europa.esig.dss.pki.x509.revocation.crl.PKICRLSource;
 import eu.europa.esig.dss.spi.DSSASN1Utils;
+import eu.europa.esig.dss.spi.validation.CertificateVerifier;
+import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.xades.definition.XAdESPath;
 import eu.europa.esig.dss.xml.utils.DomUtils;
 import org.bouncycastle.asn1.ASN1Integer;
@@ -34,12 +42,22 @@ import org.w3c.dom.NodeList;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class XAdESLevelCWithCrlNumberTest extends XAdESLevelCTest {
+
+	@Override
+	protected CertificateVerifier getCompleteCertificateVerifier() {
+		CertificateVerifier certificateVerifier = super.getCompleteCertificateVerifier();
+		certificateVerifier.setCrlSource(pkiCRLSource());
+		return certificateVerifier;
+	}
 
 	@Override
 	protected PKICRLSource pkiCRLSource() {
@@ -81,6 +99,57 @@ class XAdESLevelCWithCrlNumberTest extends XAdESLevelCTest {
 		Element crlIdentifierNumber = DomUtils.getElement(crlRefs.item(0), paths.getCurrentCRLRefCRLIdentifierNumber());
 		assertNotNull(crlIdentifierNumber);
 		assertEquals("1235", crlIdentifierNumber.getTextContent());
+	}
+
+	@Override
+	protected void checkRevocationReferences(DiagnosticData diagnosticData) {
+		SignatureWrapper signature = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
+		FoundRevocationsProxy foundRevocations = signature.foundRevocations();
+		List<OrphanRevocationWrapper> revocations = foundRevocations.getOrphanRevocationData();
+
+		int crlRefCounter = 0;
+		int ocspRefCounter = 0;
+		for (OrphanRevocationWrapper revocation : revocations) {
+			if (RevocationType.CRL == revocation.getRevocationType()) {
+				List<RevocationRefWrapper> references = revocation.getReferences();
+				assertEquals(1, references.size());
+				RevocationRefWrapper crlRef = references.get(0);
+				assertNotNull(crlRef.getDigestAlgoAndValue());
+				assertNotNull(crlRef.getDigestAlgoAndValue().getDigestMethod());
+				assertTrue(Utils.isArrayNotEmpty(crlRef.getDigestAlgoAndValue().getDigestValue()));
+
+				assertNotNull(crlRef.getIssuer());
+				assertNotNull(crlRef.getIssueTime());
+				assertNotNull(crlRef.getNumber());
+				assertEquals("1235", crlRef.getNumber().toString());
+
+				assertNull(crlRef.getProductionTime());
+				assertNull(crlRef.getResponderIdKey());
+				assertNull(crlRef.getResponderIdName());
+
+				++crlRefCounter;
+
+			} else if (RevocationType.OCSP == revocation.getRevocationType()) {
+				List<RevocationRefWrapper> references = revocation.getReferences();
+				assertEquals(1, references.size());
+				RevocationRefWrapper crlRef = references.get(0);
+				assertNotNull(crlRef.getDigestAlgoAndValue());
+				assertNotNull(crlRef.getDigestAlgoAndValue().getDigestMethod());
+				assertTrue(Utils.isArrayNotEmpty(crlRef.getDigestAlgoAndValue().getDigestValue()));
+
+				assertNotNull(crlRef.getProductionTime());
+				assertNotNull(crlRef.getResponderIdKey());
+				assertNull(crlRef.getResponderIdName());
+
+				assertNull(crlRef.getIssuer());
+				assertNull(crlRef.getIssueTime());
+				assertNull(crlRef.getNumber());
+
+				++ocspRefCounter;
+			}
+		}
+		assertEquals(1, crlRefCounter);
+		assertEquals(1, ocspRefCounter);
 	}
 
 }

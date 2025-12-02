@@ -20,6 +20,8 @@
  */
 package eu.europa.esig.dss.xades.signature;
 
+import eu.europa.esig.dss.diagnostic.OrphanRevocationWrapper;
+import eu.europa.esig.dss.enumerations.RevocationType;
 import eu.europa.esig.dss.xades.definition.XAdESPath;
 import eu.europa.esig.dss.xml.utils.DomUtils;
 import eu.europa.esig.dss.diagnostic.CertificateRefWrapper;
@@ -229,6 +231,57 @@ public class XAdESLevelCTest extends AbstractXAdESTestSignature {
 			assertEquals(signatureParameters.getTokenReferencesDigestAlgorithm(),
 					revocationRefWrapper.getDigestAlgoAndValue().getDigestMethod());
 		}
+
+		checkRevocationReferences(diagnosticData);
+	}
+
+	protected void checkRevocationReferences(DiagnosticData diagnosticData) {
+		SignatureWrapper signature = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
+		FoundRevocationsProxy foundRevocations = signature.foundRevocations();
+		List<OrphanRevocationWrapper> revocations = foundRevocations.getOrphanRevocationData();
+
+		int crlRefCounter = 0;
+		int ocspRefCounter = 0;
+		for (OrphanRevocationWrapper revocation : revocations) {
+			if (RevocationType.CRL == revocation.getRevocationType()) {
+				List<RevocationRefWrapper> references = revocation.getReferences();
+				assertEquals(1, references.size());
+				RevocationRefWrapper crlRef = references.get(0);
+				assertNotNull(crlRef.getDigestAlgoAndValue());
+				assertNotNull(crlRef.getDigestAlgoAndValue().getDigestMethod());
+				assertTrue(Utils.isArrayNotEmpty(crlRef.getDigestAlgoAndValue().getDigestValue()));
+
+				assertNotNull(crlRef.getIssuer());
+				assertNotNull(crlRef.getIssueTime());
+				assertNull(crlRef.getNumber());
+
+				assertNull(crlRef.getProductionTime());
+				assertNull(crlRef.getResponderIdKey());
+				assertNull(crlRef.getResponderIdName());
+
+				++crlRefCounter;
+
+			} else if (RevocationType.OCSP == revocation.getRevocationType()) {
+				List<RevocationRefWrapper> references = revocation.getReferences();
+				assertEquals(1, references.size());
+				RevocationRefWrapper crlRef = references.get(0);
+				assertNotNull(crlRef.getDigestAlgoAndValue());
+				assertNotNull(crlRef.getDigestAlgoAndValue().getDigestMethod());
+				assertTrue(Utils.isArrayNotEmpty(crlRef.getDigestAlgoAndValue().getDigestValue()));
+
+				assertNotNull(crlRef.getProductionTime());
+				assertNotNull(crlRef.getResponderIdKey());
+				assertNull(crlRef.getResponderIdName());
+
+				assertNull(crlRef.getIssuer());
+				assertNull(crlRef.getIssueTime());
+				assertNull(crlRef.getNumber());
+
+				++ocspRefCounter;
+			}
+		}
+		assertEquals(1, crlRefCounter);
+		assertEquals(1, ocspRefCounter);
 	}
 
 	@Override

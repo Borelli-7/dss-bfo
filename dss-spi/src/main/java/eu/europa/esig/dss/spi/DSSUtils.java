@@ -24,7 +24,6 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.ObjectIdentifierQualifier;
 import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
-import eu.europa.esig.dss.enumerations.X520Attributes;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.Digest;
@@ -802,14 +801,11 @@ public final class DSSUtils {
 	 * @param x500PrincipalString
 	 *            a {@code String} representation of the {@code X500Principal}
 	 * @return {@code X500Principal} or null
+	 * @deprecated since DSS 6.4. Please use {@code DSSASN1Utils#getX500PrincipalOrNull} method instead.
 	 */
+	@Deprecated
 	public static X500Principal getX500PrincipalOrNull(final String x500PrincipalString) {
-		try {
-			return new X500Principal(x500PrincipalString, X520Attributes.getUppercaseDescriptionForOids());
-		} catch (Exception e) {
-			LOG.warn("Unable to create an instance of X500Principal : {}", e.getMessage());
-			return null;
-		} 
+		return DSSASN1Utils.getX500PrincipalOrNull(x500PrincipalString);
 	}
 
 	/**

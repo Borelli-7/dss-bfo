@@ -703,7 +703,10 @@ public final class DSSASN1Utils {
 		}
 
 		try {
-			return IETFUtils.valueToString(attributeValue);
+			/*
+			 * NOTE: trim whitespaces. See RFC 4518 "2.6.1. Insignificant Space Handling" for more detail.
+			 */
+			return IETFUtils.valueToString(attributeValue).trim();
 		} catch (Exception e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.warn("Unable to handle attribute of class '{}' : {}", attributeValue.getClass().getName(), e.getMessage());

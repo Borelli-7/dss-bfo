@@ -237,6 +237,8 @@ class DSSASN1UtilsTest {
 		String issuerName3 = "2.5.4.97=#0C0E4E545245452D3130373437303133,O=AS Sertifitseerimiskeskus,C=EE,CN=ESTEID-SK 2015";
 		String issuerName4 = "2.5.4.97=#0C0E4E545245452D3130373437303133,O=AS Sertifitseerimiskeskus,C=BE,CN=ESTEID-SK 2015";
 		String issuerName5 = "2.5.4.97=#0C0E4E545245452D3130373437303133,O=AS Sertifitseerimiskeskus,CN=ESTEID-SK 2015";
+		String issuerName6 = "CN=ESTEID-SK 2015,\n   2.5.4.97=#0C0E4E545245452D3130373437303133,\n   O=AS Sertifitseerimiskeskus,\n   C=EE\n   ";
+		String issuerName7 = "2.5.4.97=#0C0E4E545245452D3130373437303133,   \n   O=AS Sertifitseerimiskeskus,   \n   C=EE,   \n   CN=ESTEID-SK 2015   \n   ";
 		X500Principal x500Principal1 = DSSASN1Utils.getX500PrincipalOrNull(issuerName1);
 		assertNotNull(x500Principal1);
 		X500Principal x500Principal2 = DSSASN1Utils.getX500PrincipalOrNull(issuerName2);
@@ -247,11 +249,19 @@ class DSSASN1UtilsTest {
 		assertNotNull(x500Principal4);
 		X500Principal x500Principal5 = DSSASN1Utils.getX500PrincipalOrNull(issuerName5);
 		assertNotNull(x500Principal5);
+		X500Principal x500Principal6 = DSSASN1Utils.getX500PrincipalOrNull(issuerName6);
+		assertNotNull(x500Principal6);
+		X500Principal x500Principal7 = DSSASN1Utils.getX500PrincipalOrNull(issuerName7);
+		assertNotNull(x500Principal7);
         assertTrue(DSSASN1Utils.x500PrincipalAreEquals(x500Principal1, x500Principal2));
         assertTrue(DSSASN1Utils.x500PrincipalAreEquals(x500Principal1, x500Principal3));
         assertFalse(DSSASN1Utils.x500PrincipalAreEquals(x500Principal1, x500Principal4));
+		assertFalse(DSSASN1Utils.x500PrincipalAreEquals(x500Principal1, x500Principal5));
         assertFalse(DSSASN1Utils.x500PrincipalAreEquals(x500Principal5, x500Principal4));
 		assertFalse(DSSASN1Utils.x500PrincipalAreEquals(x500Principal4, x500Principal5));
+		assertTrue(DSSASN1Utils.x500PrincipalAreEquals(x500Principal1, x500Principal6));
+		assertTrue(DSSASN1Utils.x500PrincipalAreEquals(x500Principal1, x500Principal7));
+		assertTrue(DSSASN1Utils.x500PrincipalAreEquals(x500Principal6, x500Principal7));
 	}
 
 	@Test

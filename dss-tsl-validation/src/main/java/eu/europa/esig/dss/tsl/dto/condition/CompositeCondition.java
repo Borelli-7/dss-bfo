@@ -23,7 +23,7 @@ package eu.europa.esig.dss.tsl.dto.condition;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.model.tsl.Condition;
-import eu.europa.esig.trustedlist.enums.Assert;
+import eu.europa.esig.dss.enumerations.Assert;
 
 import java.util.ArrayList;
 import java.util.List;

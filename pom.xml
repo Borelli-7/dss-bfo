@@ -101,6 +101,7 @@
 		<module>specs-xmldsig</module>
 		<module>specs-xades</module>
 		<module>specs-trusted-list</module>
+		<module>specs-trusted-list-v211</module>
 		<module>specs-validation-report</module>
 		<module>specs-asic-manifest</module>
 		<module>specs-saml-assertion</module>
@@ -475,6 +476,11 @@
 			<dependency>
 				<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 				<artifactId>specs-trusted-list</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>eu.europa.ec.joinup.sd-dss</groupId>
+				<artifactId>specs-trusted-list-v211</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

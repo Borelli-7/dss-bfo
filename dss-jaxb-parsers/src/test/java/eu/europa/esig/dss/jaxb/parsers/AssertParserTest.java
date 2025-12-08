@@ -18,50 +18,36 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package eu.europa.esig.trustedlist.parsers;
+package eu.europa.esig.dss.jaxb.parsers;
 
-import eu.europa.esig.trustedlist.enums.Assert;
+import eu.europa.esig.dss.enumerations.Assert;
+import org.junit.jupiter.api.Test;
 
-/**
- * {@code Assert} parser
- */
-public final class AssertParser {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-	/**
-	 * Default constructor
-	 */
-	private AssertParser() {
-		// empty
-	}
+class AssertParserTest {
 
-	/**
-	 * Parses the string value and returns {@code Assert}
-	 *
-	 * @param v {@link String}
-	 * @return {@link Assert}, null if not able to parse
-	 */
-	public static Assert parse(String v) {
-		if (v != null) {
-			for (Assert a : Assert.values()) {
-				if (a.getValue().equals(v)) {
-					return a;
-				}
-			}
-		}
-		return null;
-	}
+    @Test
+    void testEnum() {
+        for (Assert a : Assert.values()) {
+            String string = AssertParser.print(a);
+            assertNotNull(string);
+            Assert parse = AssertParser.parse(string);
+            assertEquals(a, parse);
+        }
+    }
 
-	/**
-	 * Returns value of the {@code Assert}
-	 *
-	 * @param a {@link Assert}
-	 * @return {@link String} value
-	 */
-	public static String print(Assert a) {
-		if (a != null) {
-			return a.getValue();
-		}
-		return null;
-	}
+    @Test
+    void parseUnknown() {
+        assertNull(AssertParser.parse("bla"));
+    }
+
+    @Test
+    void nullValues() {
+        assertNull(AssertParser.parse(null));
+        assertNull(AssertParser.print(null));
+    }
 
 }

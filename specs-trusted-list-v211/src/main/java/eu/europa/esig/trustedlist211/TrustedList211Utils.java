@@ -18,10 +18,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package eu.europa.esig.trustedlist;
+package eu.europa.esig.trustedlist211;
 
 import eu.europa.esig.dss.jaxb.common.XSDAbstractUtils;
-import eu.europa.esig.trustedlist.jaxb.tsl.ObjectFactory;
+import eu.europa.esig.trustedlist211.jaxb.tsl.ObjectFactory;
 import eu.europa.esig.xades.XAdESUtils;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -36,6 +36,9 @@ import java.util.List;
  *
  */
 public final class TrustedList211Utils extends XSDAbstractUtils {
+
+    /** The Object Factory to use */
+    public static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
 
     /** The Trusted List TS 119 612 v2.1.1 XSD schema location */
     public static final String TRUSTED_LIST_211_SCHEMA_LOCATION = "/xsd/ts_119612v020101_xsd.xsd";
@@ -73,8 +76,8 @@ public final class TrustedList211Utils extends XSDAbstractUtils {
             jc = JAXBContext.newInstance(ObjectFactory.class, eu.europa.esig.xmldsig.jaxb.ObjectFactory.class,
                     eu.europa.esig.xades.jaxb.xades132.ObjectFactory.class,
                     eu.europa.esig.xades.jaxb.xades141.ObjectFactory.class,
-                    eu.europa.esig.trustedlist.jaxb.tslx.ObjectFactory.class,
-                    eu.europa.esig.trustedlist.jaxb.ecc.ObjectFactory.class);
+                    eu.europa.esig.trustedlist211.jaxb.tslx.ObjectFactory.class,
+                    eu.europa.esig.trustedlist211.jaxb.ecc.ObjectFactory.class);
         }
         return jc;
     }
@@ -82,9 +85,9 @@ public final class TrustedList211Utils extends XSDAbstractUtils {
     @Override
     public List<Source> getXSDSources() {
         List<Source> xsdSources = XAdESUtils.getInstance().getXSDSources();
-        xsdSources.add(new StreamSource(TrustedListUtils.class.getResourceAsStream(TRUSTED_LIST_211_SCHEMA_LOCATION)));
-        xsdSources.add(new StreamSource(TrustedListUtils.class.getResourceAsStream(TRUSTED_LIST_SIE_SCHEMA_LOCATION)));
-        xsdSources.add(new StreamSource(TrustedListUtils.class.getResourceAsStream(TRUSTED_LIST_ADDITIONALTYPES_SCHEMA_LOCATION)));
+        xsdSources.add(new StreamSource(TrustedList211Utils.class.getResourceAsStream(TRUSTED_LIST_211_SCHEMA_LOCATION)));
+        xsdSources.add(new StreamSource(TrustedList211Utils.class.getResourceAsStream(TRUSTED_LIST_SIE_SCHEMA_LOCATION)));
+        xsdSources.add(new StreamSource(TrustedList211Utils.class.getResourceAsStream(TRUSTED_LIST_ADDITIONALTYPES_SCHEMA_LOCATION)));
         return xsdSources;
     }
 

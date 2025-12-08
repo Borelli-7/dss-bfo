@@ -68,7 +68,7 @@ import eu.europa.esig.dss.xades.tsl.TrustedListV5SignatureParametersBuilder;
 import eu.europa.esig.dss.xml.common.definition.DSSNamespace;
 import eu.europa.esig.dss.xml.common.definition.xmldsig.XMLDSigNamespace;
 import eu.europa.esig.dss.xml.utils.DomUtils;
-import eu.europa.esig.trustedlist.enums.Assert;
+import eu.europa.esig.dss.enumerations.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;

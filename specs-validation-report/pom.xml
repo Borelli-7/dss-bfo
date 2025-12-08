@@ -26,7 +26,7 @@
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
-			<artifactId>specs-trusted-list</artifactId>
+			<artifactId>specs-trusted-list-v211</artifactId>
 		</dependency>
 
 		<dependency>

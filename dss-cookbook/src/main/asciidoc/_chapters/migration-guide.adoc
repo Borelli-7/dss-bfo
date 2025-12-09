@@ -257,6 +257,20 @@ import eu.europa.esig.dss.enumerations.Assert;
 import eu.europa.esig.dss.jaxb.parsers.AssertParser;
 ----
 
+a|Trusted List v2.1.1 utils           a|
+[source,java]
+----
+import eu.europa.esig.trustedlist.TrustedList211Utils;
+import eu.europa.esig.trustedlist.TrustedList211Facade;
+----
+                                                                     a|
+
+[source,java]
+----
+import eu.europa.esig.trustedlist211.TrustedList211Utils;
+import eu.europa.esig.trustedlist211.TrustedList211Facade;
+----
+
 |===
 
 [cols="2,5,5"]

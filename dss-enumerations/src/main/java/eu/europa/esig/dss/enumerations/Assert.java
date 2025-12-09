@@ -18,36 +18,43 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package eu.europa.esig.trustedlist.parsers;
+package eu.europa.esig.dss.enumerations;
 
-import eu.europa.esig.trustedlist.enums.Assert;
-import org.junit.jupiter.api.Test;
+/**
+ * Trusted List assert list
+ *
+ * See TS 119 612
+ */
+public enum Assert {
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+	/** if all of the assertion shall be met */
+	ALL("all"),
 
-class AssertParserTest {
+	/** if at least one of the assertion shall be met */
+	AT_LEAST_ONE("atLeastOne"),
 
-    @Test
-    void testEnum() {
-        for (Assert a : Assert.values()) {
-            String string = AssertParser.print(a);
-            assertNotNull(string);
-            Assert parse = AssertParser.parse(string);
-            assertEquals(a, parse);
-        }
-    }
+	/** if all of the assertion shall be met */
+	NONE("none");
 
-    @Test
-    void parseUnknown() {
-        assertNull(AssertParser.parse("bla"));
-    }
+	/** The value corresponding to the XSD */
+	private final String value;
 
-    @Test
-    void nullValues() {
-        assertNull(AssertParser.parse(null));
-        assertNull(AssertParser.print(null));
-    }
+	/**
+	 * Default constructor
+	 *
+	 * @param value {@link String}
+	 */
+	Assert(String value) {
+		this.value = value;
+	}
+
+	/**
+	 * Gets the value of the enumeration, corresponding to the one defined in XSD
+	 *
+	 * @return {@link String}
+	 */
+	public String getValue() {
+		return value;
+	}
 
 }

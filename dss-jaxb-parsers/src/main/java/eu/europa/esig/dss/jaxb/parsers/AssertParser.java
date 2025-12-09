@@ -18,43 +18,50 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package eu.europa.esig.trustedlist.enums;
+package eu.europa.esig.dss.jaxb.parsers;
+
+import eu.europa.esig.dss.enumerations.Assert;
 
 /**
- * Trusted List assert list
- *
- * See TS 119 612
+ * {@code Assert} parser
  */
-public enum Assert {
-
-	/** if all of the assertion shall be met */
-	ALL("all"),
-
-	/** if at least one of the assertion shall be met */
-	AT_LEAST_ONE("atLeastOne"),
-
-	/** if all of the assertion shall be met */
-	NONE("none");
-
-	/** The value corresponding to the XSD */
-	private final String value;
+public final class AssertParser {
 
 	/**
 	 * Default constructor
-	 *
-	 * @param value {@link String}
 	 */
-	Assert(String value) {
-		this.value = value;
+	private AssertParser() {
+		// empty
 	}
 
 	/**
-	 * Gets the value of the enumeration, corresponding to the one defined in XSD
+	 * Parses the string value and returns {@code Assert}
 	 *
-	 * @return {@link String}
+	 * @param v {@link String}
+	 * @return {@link Assert}, null if not able to parse
 	 */
-	public String getValue() {
-		return value;
+	public static Assert parse(String v) {
+		if (v != null) {
+			for (Assert a : Assert.values()) {
+				if (a.getValue().equals(v)) {
+					return a;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns value of the {@code Assert}
+	 *
+	 * @param a {@link Assert}
+	 * @return {@link String} value
+	 */
+	public static String print(Assert a) {
+		if (a != null) {
+			return a.getValue();
+		}
+		return null;
 	}
 
 }

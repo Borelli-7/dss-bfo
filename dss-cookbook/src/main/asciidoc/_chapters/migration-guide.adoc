@@ -243,6 +243,20 @@ import eu.europa.esig.dss.spi.x509.revocation.crl.CRLRef;
 CRLRef crlRef = new CRLRef(digest, crlIssuer, crlIssuedTime, crlNumber);
 ----
 
+a|Trusted List criteria extensions           a|
+[source,java]
+----
+import eu.europa.esig.trustedlist.enums.Assert;
+import eu.europa.esig.trustedlist.parsers.AssertParser;
+----
+                                                                     a|
+
+[source,java]
+----
+import eu.europa.esig.dss.enumerations.Assert;
+import eu.europa.esig.dss.jaxb.parsers.AssertParser;
+----
+
 |===
 
 [cols="2,5,5"]

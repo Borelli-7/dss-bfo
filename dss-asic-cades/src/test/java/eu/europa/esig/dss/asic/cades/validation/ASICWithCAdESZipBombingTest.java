@@ -160,10 +160,13 @@ class ASICWithCAdESZipBombingTest extends AbstractASiCWithCAdESTestValidation {
     }
 
     static DSSDocument copy(DSSDocument document) {
+        assertNotNull(document, "Document to copy is null!");
         if (document instanceof InMemoryDocument) {
-            return new InMemoryDocument(((InMemoryDocument) document).getBytes());
+            return new InMemoryDocument(((InMemoryDocument) document).getBytes(), document.getName());
+        } else if (document instanceof FileDocument) {
+            return new FileDocument(((FileDocument) document).getFile());
         }
-        fail("Illegal state!");
+        fail(String.format("Illegal state! Class '%s' is not supported in this method.", document.getClass().getSimpleName()));
         return null;
     }
 

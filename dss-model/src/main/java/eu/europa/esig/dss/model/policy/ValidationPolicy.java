@@ -299,16 +299,6 @@ public interface ValidationPolicy {
 	LevelRule getCertificateCAConstraint(Context context, SubContext subContext);
 
 	/**
-	 * Returns certificate IssuerName constraint
-	 *
-	 * @param context {@link Context}
-	 * @param subContext {@link SubContext}
-	 * @return {@code LevelRule} if IssuerName for a given context element is present in the constraint file,
-	 *         null otherwise.
-	 */
-	LevelRule getCertificateIssuerNameConstraint(Context context, SubContext subContext);
-
-	/**
 	 * Returns certificate MaxPathLength constraint
 	 *
 	 * @param context {@link Context}
@@ -357,6 +347,26 @@ public interface ValidationPolicy {
 	 *         null otherwise.
 	 */
 	LevelRule getCertificateNameConstraintsConstraint(Context context, SubContext subContext);
+
+	/**
+	 * Returns certificate AuthorityKeyIdentifierPresent constraint
+	 *
+	 * @param context {@link Context}
+	 * @param subContext {@link SubContext}
+	 * @return {@code LevelRule} if AuthorityKeyIdentifierPresent for a given context element is present in the constraint file,
+	 *         null otherwise.
+	 */
+	LevelRule getCertificateAuthorityKeyIdentifierPresentConstraint(Context context, SubContext subContext);
+
+	/**
+	 * Returns certificate SubjectKeyIdentifierPresent constraint
+	 *
+	 * @param context {@link Context}
+	 * @param subContext {@link SubContext}
+	 * @return {@code LevelRule} if SubjectKeyIdentifierPresent for a given context element is present in the constraint file,
+	 *         null otherwise.
+	 */
+	LevelRule getCertificateSubjectKeyIdentifierPresentConstraint(Context context, SubContext subContext);
 
 	/**
 	 * Returns certificate NoRevAvail constraint
@@ -1376,6 +1386,16 @@ public interface ValidationPolicy {
 	 *                                 in the constraint file, null otherwise.
 	 */
 	MultiValuesRule getCertificateOrganizationUnitConstraint(Context context, SubContext subContext);
+
+	/**
+	 * Returns certificate IssuerName constraint
+	 *
+	 * @param context {@link Context}
+	 * @param subContext {@link SubContext}
+	 * @return {@code LevelRule} if IssuerName for a given context element is present in the constraint file,
+	 *         null otherwise.
+	 */
+	LevelRule getCertificateIssuerNameConstraint(Context context, SubContext subContext);
 
 	/**
 	 * Returns CertificateSurname constraint if present in the policy, null otherwise

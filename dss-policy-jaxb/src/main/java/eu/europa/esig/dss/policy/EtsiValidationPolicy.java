@@ -542,15 +542,6 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 	}
 
 	@Override
-	public LevelRule getCertificateIssuerNameConstraint(Context context, SubContext subContext) {
-		CertificateConstraints certificateConstraints = getCertificateConstraints(context, subContext);
-		if (certificateConstraints != null) {
-			return toLevelRule(certificateConstraints.getIssuerName());
-		}
-		return null;
-	}
-
-	@Override
 	public LevelRule getCertificateMaxPathLengthConstraint(Context context, SubContext subContext) {
 		CertificateConstraints certificateConstraints = getCertificateConstraints(context, subContext);
 		if (certificateConstraints != null) {
@@ -596,6 +587,24 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 	}
 
 	@Override
+	public LevelRule getCertificateAuthorityKeyIdentifierPresentConstraint(Context context, SubContext subContext) {
+		CertificateConstraints certificateConstraints = getCertificateConstraints(context, subContext);
+		if (certificateConstraints != null) {
+			return toLevelRule(certificateConstraints.getAuthorityKeyIdentifierPresent());
+		}
+		return null;
+	}
+
+	@Override
+	public LevelRule getCertificateSubjectKeyIdentifierPresentConstraint(Context context, SubContext subContext) {
+		CertificateConstraints certificateConstraints = getCertificateConstraints(context, subContext);
+		if (certificateConstraints != null) {
+			return toLevelRule(certificateConstraints.getSubjectKeyIdentifierPresent());
+		}
+		return null;
+	}
+
+	@Override
 	public LevelRule getCertificateNoRevAvailConstraint(Context context, SubContext subContext) {
 		CertificateConstraints certificateConstraints = getCertificateConstraints(context, subContext);
 		if (certificateConstraints != null) {
@@ -618,6 +627,15 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 		CertificateConstraints certificateConstraints = getCertificateConstraints(context, subContext);
 		if (certificateConstraints != null) {
 			return toRule(certificateConstraints.getForbiddenExtensions());
+		}
+		return null;
+	}
+
+	@Override
+	public LevelRule getCertificateIssuerNameConstraint(Context context, SubContext subContext) {
+		CertificateConstraints certificateConstraints = getCertificateConstraints(context, subContext);
+		if (certificateConstraints != null) {
+			return toLevelRule(certificateConstraints.getIssuerName());
 		}
 		return null;
 	}

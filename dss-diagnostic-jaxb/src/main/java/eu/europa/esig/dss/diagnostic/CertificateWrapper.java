@@ -21,6 +21,7 @@
 package eu.europa.esig.dss.diagnostic;
 
 import eu.europa.esig.dss.diagnostic.jaxb.XmlAuthorityInformationAccess;
+import eu.europa.esig.dss.diagnostic.jaxb.XmlAuthorityKeyIdentifier;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlBasicConstraints;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlBasicSignature;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlCRLDistributionPoints;
@@ -800,6 +801,37 @@ public class CertificateWrapper extends AbstractTokenProxy {
 
 	private XmlAuthorityInformationAccess getXmlAuthorityInformationAccess() {
 		return getCertificateExtensionForOid(CertificateExtensionEnum.AUTHORITY_INFORMATION_ACCESS.getOid(), XmlAuthorityInformationAccess.class);
+	}
+
+	/**
+	 * Returns the Authority Key Identifier certificate extension's value, when present
+	 *
+	 * @return byte array representing the Authority Key Identifier
+	 */
+	public byte[] getAuthorityKeyIdentifier() {
+		XmlAuthorityKeyIdentifier xmlAuthorityKeyIdentifier = getXmlAuthorityKeyIdentifier();
+		if (xmlAuthorityKeyIdentifier != null) {
+			return xmlAuthorityKeyIdentifier.getKeyIdentifier();
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the Authority Key Identifier certificate extension's value,
+	 * which is a combination of authorityCertIssuer and authorityCertSerialNumber fields, when present
+	 *
+	 * @return byte array representing the Authority Key Identifier's issuer serial
+	 */
+	public byte[] getAuthorityKeyIdentifierIssuerSerial() {
+		XmlAuthorityKeyIdentifier xmlAuthorityKeyIdentifier = getXmlAuthorityKeyIdentifier();
+		if (xmlAuthorityKeyIdentifier != null) {
+			return xmlAuthorityKeyIdentifier.getAuthorityCertIssuerSerial();
+		}
+		return null;
+	}
+
+	private XmlAuthorityKeyIdentifier getXmlAuthorityKeyIdentifier() {
+		return getCertificateExtensionForOid(CertificateExtensionEnum.AUTHORITY_KEY_IDENTIFIER.getOid(), XmlAuthorityKeyIdentifier.class);
 	}
 
 	/**

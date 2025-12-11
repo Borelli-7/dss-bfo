@@ -281,11 +281,6 @@ public class ValidationPolicyWithCryptographicSuite implements ValidationPolicy 
     }
 
     @Override
-    public LevelRule getCertificateIssuerNameConstraint(Context context, SubContext subContext) {
-        return validationPolicy.getCertificateIssuerNameConstraint(context, subContext);
-    }
-
-    @Override
     public LevelRule getCertificateMaxPathLengthConstraint(Context context, SubContext subContext) {
         return validationPolicy.getCertificateMaxPathLengthConstraint(context, subContext);
     }
@@ -308,6 +303,16 @@ public class ValidationPolicyWithCryptographicSuite implements ValidationPolicy 
     @Override
     public LevelRule getCertificateNameConstraintsConstraint(Context context, SubContext subContext) {
         return validationPolicy.getCertificateNameConstraintsConstraint(context, subContext);
+    }
+
+    @Override
+    public LevelRule getCertificateAuthorityKeyIdentifierPresentConstraint(Context context, SubContext subContext) {
+        return validationPolicy.getCertificateAuthorityKeyIdentifierPresentConstraint(context, subContext);
+    }
+
+    @Override
+    public LevelRule getCertificateSubjectKeyIdentifierPresentConstraint(Context context, SubContext subContext) {
+        return validationPolicy.getCertificateSubjectKeyIdentifierPresentConstraint(context, subContext);
     }
 
     @Override
@@ -869,6 +874,11 @@ public class ValidationPolicyWithCryptographicSuite implements ValidationPolicy 
     @Override
     public MultiValuesRule getCertificateOrganizationUnitConstraint(Context context, SubContext subContext) {
         return validationPolicy.getCertificateOrganizationUnitConstraint(context, subContext);
+    }
+
+    @Override
+    public LevelRule getCertificateIssuerNameConstraint(Context context, SubContext subContext) {
+        return validationPolicy.getCertificateIssuerNameConstraint(context, subContext);
     }
 
     @Override

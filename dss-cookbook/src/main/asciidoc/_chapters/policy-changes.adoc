@@ -26,6 +26,25 @@ a|[source,xml]
 </SignedAttributes>
 ----
 
+|Authority Key Identifier and Subject Key Identifier checks                          |
+----
+Not present
+----
+a|[source,xml]
+----
+<SigningCertificate>
+    ...
+    <AuthorityKeyIdentifierPresent Level="WARN" />
+    ...
+</SigningCertificate>
+<CACertificate>
+    ...
+    <AuthorityKeyIdentifierPresent Level="WARN" />
+	<SubjectKeyIdentifierPresent Level="FAIL" />
+    ...
+</CACertificate>
+----
+
 |===
 
 [cols="2,5,5"]

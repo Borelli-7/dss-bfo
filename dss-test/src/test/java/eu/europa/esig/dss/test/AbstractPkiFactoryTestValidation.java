@@ -1768,7 +1768,8 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 				assertTrue(Utils.isCollectionEmpty(simpleReport.getAdESValidationErrors(sigId)));
 
 				if (!createdWithTrustAnchor(simpleReport.getCertificateChain(sigId))
-						&& !timestampedWithTrustAnchor(simpleReport.getSignatureTimestamps(sigId))) {
+						&& !timestampedWithTrustAnchor(simpleReport.getSignatureTimestamps(sigId))
+						&& !preservedByERWithTrustAnchor(simpleReport.getSignatureEvidenceRecords(sigId))) {
 					assertNotNull(simpleReport.getExtensionPeriodMax(sigId));
 				}
 				++numberOfValidSignatures;
@@ -1847,6 +1848,13 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 	private boolean timestampedWithTrustAnchor(List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> xmlTimestampList) {
 		if (Utils.isCollectionNotEmpty(xmlTimestampList)) {
 			return xmlTimestampList.stream().anyMatch(t -> createdWithTrustAnchor(t.getCertificateChain()));
+		}
+		return false;
+	}
+
+	private boolean preservedByERWithTrustAnchor(List<eu.europa.esig.dss.simplereport.jaxb.XmlEvidenceRecord> xmlEvidenceRecordList) {
+		if (Utils.isCollectionNotEmpty(xmlEvidenceRecordList)) {
+			return xmlEvidenceRecordList.stream().anyMatch(er -> timestampedWithTrustAnchor(er.getTimestamps().getTimestamp()));
 		}
 		return false;
 	}

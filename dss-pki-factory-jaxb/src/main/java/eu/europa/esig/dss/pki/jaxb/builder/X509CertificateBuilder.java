@@ -43,6 +43,7 @@ import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CertificatePolicies;
 import org.bouncycastle.asn1.x509.DistributionPoint;
@@ -63,9 +64,12 @@ import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -78,6 +82,8 @@ import java.util.Objects;
  *
  */
 public class X509CertificateBuilder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(X509CertificateBuilder.class);
 
     /** The certificate's subject DN */
     private X500Name subjectName;
@@ -97,7 +103,11 @@ public class X509CertificateBuilder {
     /** The certificate's issuer DN */
     private X500Name issuerName;
 
+    /** Key pair of the certificate issuer */
+    private KeyPair issuerKeyPair;
+
     /** Key used to sign the certificate */
+    @Deprecated
     private PrivateKey issuerKey;
 
     /** SignatureAlgorithm used to sign this certificate */
@@ -173,11 +183,15 @@ public class X509CertificateBuilder {
      * @param issuerPrivateKey {@link PrivateKey} of the issuer certificate to sign the certificate
      * @param signatureAlgorithm {@link SignatureAlgorithm} to be used on signature creation
      * @return {@link X509CertificateBuilder} this
+     * @deprecated since DSS 6.4. Please use {@code #issuer(X500Name issuerName, KeyPair issuerKeyPair, SignatureAlgorithm signatureAlgorithm)}
+     *             method instead
      */
+    @Deprecated
     public X509CertificateBuilder issuer(X500Name issuerName, PrivateKey issuerPrivateKey, SignatureAlgorithm signatureAlgorithm) {
         Objects.requireNonNull(issuerName, "IssuerName cannot be null!");
-        Objects.requireNonNull(serialNumber, "SerialNumber cannot be null!");
-        Objects.requireNonNull(publicKey, "PublicKey cannot be null!");
+        Objects.requireNonNull(issuerPrivateKey, "issuerPrivateKey cannot be null!");
+        Objects.requireNonNull(signatureAlgorithm, "SignatureAlgorithm cannot be null!");
+
         this.issuerName = issuerName;
         this.issuerKey = issuerPrivateKey;
         this.signatureAlgorithm = signatureAlgorithm;
@@ -185,16 +199,53 @@ public class X509CertificateBuilder {
     }
 
     /**
-     * Sets mandatory information about the certificate's issuer to sign the created certificate with a CertificateToken of the issuer
+     * Sets mandatory information about the certificate's issuer to sign the created certificate
+     *
+     * @param issuerName {@link X500Name} representing a DN issuer name of the certificate to be created
+     * @param issuerKeyPair {@link KeyPair} of the issuer certificate
+     * @param signatureAlgorithm {@link SignatureAlgorithm} to be used on signature creation
+     * @return {@link X509CertificateBuilder} this
+     */
+    public X509CertificateBuilder issuer(X500Name issuerName, KeyPair issuerKeyPair, SignatureAlgorithm signatureAlgorithm) {
+        Objects.requireNonNull(issuerName, "IssuerName cannot be null!");
+        Objects.requireNonNull(issuerKeyPair, "issuerKeyPair cannot be null!");
+        Objects.requireNonNull(signatureAlgorithm, "SignatureAlgorithm cannot be null!");
+
+        this.issuerName = issuerName;
+        this.issuerKeyPair = issuerKeyPair;
+        this.signatureAlgorithm = signatureAlgorithm;
+        return this;
+    }
+
+    /**
+     * Sets mandatory information about the certificate's issuer to sign the created certificate
+     * with a CertificateToken of the issuer
      *
      * @param issuerCertificate {@link CertificateToken} representing a certificate token of the issuer
      * @param issuerPrivateKey {@link PrivateKey} of the issuer certificate to sign the certificate
      * @param signatureAlgorithm {@link SignatureAlgorithm} to be used on signature creation
      * @return {@link X509CertificateBuilder} this
+     * @deprecated since DSS 6.4. Please use {@code #issuer(CertificateToken issuerCertificate, KeyPair issuerKeyPair, SignatureAlgorithm signatureAlgorithm)}
+     *             method instead
      */
+    @Deprecated
     public X509CertificateBuilder issuer(CertificateToken issuerCertificate, PrivateKey issuerPrivateKey, SignatureAlgorithm signatureAlgorithm) {
         Objects.requireNonNull(issuerCertificate, "CertificateToken cannot be null!");
         return issuer(DSSASN1Utils.getX509CertificateHolder(issuerCertificate).getSubject(), issuerPrivateKey, signatureAlgorithm);
+    }
+
+    /**
+     * Sets mandatory information about the certificate's issuer to sign the created certificate
+     * with a CertificateToken of the issuer
+     *
+     * @param issuerCertificate {@link CertificateToken} representing a certificate token of the issuer
+     * @param issuerKeyPair {@link KeyPair} of the issuer certificate
+     * @param signatureAlgorithm {@link SignatureAlgorithm} to be used on signature creation
+     * @return {@link X509CertificateBuilder} this
+     */
+    public X509CertificateBuilder issuer(CertificateToken issuerCertificate, KeyPair issuerKeyPair, SignatureAlgorithm signatureAlgorithm) {
+        Objects.requireNonNull(issuerCertificate, "CertificateToken cannot be null!");
+        return issuer(DSSASN1Utils.getX509CertificateHolder(issuerCertificate).getSubject(), issuerKeyPair, signatureAlgorithm);
     }
 
     /**
@@ -365,10 +416,21 @@ public class X509CertificateBuilder {
         Objects.requireNonNull(serialNumber, "SerialNumber shall be defined!");
         Objects.requireNonNull(publicKey, "PublicKey shall be defined!");
         Objects.requireNonNull(issuerName, "IssuerName shall be defined!");
-        Objects.requireNonNull(issuerKey, "Issuer's private key shall be defined!");
         Objects.requireNonNull(signatureAlgorithm, "SignatureAlgorithm shall be defined!");
+        if (issuerKey == null && issuerKeyPair == null) {
+            // TODO : change to Objects.requireNonNull(issuerKeyPair, "Issuer's key pair shall be defined!");
+            throw new NullPointerException("Either issuer's private key or issuer's key pair shall be defined!");
+        }
 
-        ContentSigner rootSigner = new JcaContentSignerBuilder(signatureAlgorithm.getJCEId()).build(issuerKey);
+        // TODO: simplify in 6.4
+        ContentSigner rootSigner;
+        if (issuerKey != null) {
+            rootSigner = new JcaContentSignerBuilder(signatureAlgorithm.getJCEId()).build(issuerKey);
+        } else if (issuerKeyPair != null) {
+            rootSigner = new JcaContentSignerBuilder(signatureAlgorithm.getJCEId()).build(issuerKeyPair.getPrivate());
+        } else {
+            throw new IllegalStateException("Either issuer's private key or issuer's key pair shall be defined!");
+        }
 
         SubjectPublicKeyInfo membersKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
 
@@ -401,6 +463,8 @@ public class X509CertificateBuilder {
         if (ocspUrl != null || caIssuersUrl != null) {
             addAIAExtension(certBuilder);
         }
+
+        addAKI(certBuilder);
 
         addSKI(certBuilder);
 
@@ -573,6 +637,15 @@ public class X509CertificateBuilder {
         DistributionPoint distp = new DistributionPoint(dpn, null, null);
 
         certBuilder.addExtension(Extension.cRLDistributionPoints, false, new DERSequence(distp));
+    }
+
+    private void addAKI(X509v3CertificateBuilder certBuilder) throws CertIOException {
+        if (issuerKeyPair != null) {
+            byte[] skiValue = DSSASN1Utils.computeSkiFromCertPublicKey(issuerKeyPair.getPublic());
+            certBuilder.addExtension(Extension.authorityKeyIdentifier, false, new AuthorityKeyIdentifier(skiValue));
+        } else {
+            LOG.warn("Issuer KeyPair was not provided! Unable to compute Authority Key Identifier certificate extension!");
+        }
     }
 
     private void addSKI(X509v3CertificateBuilder certBuilder) throws CertIOException {

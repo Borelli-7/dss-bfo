@@ -271,6 +271,32 @@ import eu.europa.esig.trustedlist211.TrustedList211Utils;
 import eu.europa.esig.trustedlist211.TrustedList211Facade;
 ----
 
+a|JAXB PKI Factory `X509CertificateBuilder`                          a|
+[source,java]
+----
+import eu.europa.esig.dss.pki.jaxb.builder.X509CertificateBuilder;
+import java.security.PrivateKey;
+
+final X509CertificateBuilder certBuilder = new X509CertificateBuilder();
+...
+PrivateKey issuerPrivateKey = ...
+certBuilder.issuer(issuerX500Name, issuerPrivateKey, signatureAlgo);
+...
+----
+                                                                     a|
+
+[source,java]
+----
+import eu.europa.esig.dss.pki.jaxb.builder.X509CertificateBuilder;
+import java.security.KeyPair;
+
+final X509CertificateBuilder certBuilder = new X509CertificateBuilder();
+...
+KeyPair issuerKeyPair = ...
+certBuilder.issuer(issuerX500Name, issuerKeyPair, signatureAlgo);
+...
+----
+
 |===
 
 [cols="2,5,5"]

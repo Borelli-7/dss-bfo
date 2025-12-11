@@ -242,7 +242,7 @@ public class JAXBPKILoader {
                         "[EncryptionAlgo: %s, DigestAlgo: %s, Pss: %s]", EncryptionAlgorithm.forKey(issuerKeyPair.getPrivate()), digestAlgo, pss));
             }
 
-            certBuilder.issuer(issuerX500Name, issuerKeyPair.getPrivate(), signatureAlgo)
+            certBuilder.issuer(issuerX500Name, issuerKeyPair, signatureAlgo)
                     .notBefore(convert(certificateType.getNotBefore())).notAfter(convert(certificateType.getNotAfter()))
                     .caIssuers(getCAIssuersUrl(certificateType.getCaIssuers()))
                     .crl(getCrlUrl(certificateType.getCrl()))

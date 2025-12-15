@@ -7,17 +7,14 @@
     </parent>
 
     <artifactId>specs-lote-json</artifactId>
-    <name>JSON Schema for the List of Trusted Entities</name>
+    <name>JSON ETSI List Of Trusted Entities Model</name>
+    <description>JSON Schema for the ETSI TS 119 602 List of Trusted Entities</description>
 
     <properties>
         <module-name>jpms_specs_lote_json</module-name>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
-            <artifactId>dss-model</artifactId>
-        </dependency>
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>dss-json-common</artifactId>
@@ -35,25 +32,6 @@
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>jdk19-plus</id>
-            <activation>
-                <jdk>[9,13)</jdk>
-            </activation>
-            <properties>
-                <!-- specs-xmldsig\target\generated-sources\xjc\eu\europa\esig\xmldsig\jaxb\package-info.java:8: error: unknown tag: jakarta.xml.bind.annotation.XmlSchema -->
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-            </properties>
-        </profile>
-    </profiles>
 
 </project>

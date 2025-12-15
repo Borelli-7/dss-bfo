@@ -309,6 +309,7 @@ specs-trusted-list-v211:: ETSI TS 119 612 XSD schema for parsing Trusted Lists c
 specs-validation-report:: ETSI TS 119 102-2 XSD schema for the Validation report.
 specs-asic-manifest:: ETSI EN 319 162 schema for ASiCManifest.
 specs-saml-assertion:: OASIS schema for SAML Assertions.
+specs-lote-xml:: ETSI TS 119 602 XML schema for List of Trusted Entities (<<R33>>).
 
 '''
 dss-diagnostic-jaxb:: JAXB model of the diagnostic data.
@@ -321,6 +322,7 @@ dss-simple-certificate-report-jaxb:: JAXB model of the simple report for certifi
 dss-json-common:: Utils for working with JSON-based content.
 specs-jws:: JSON Schemas based on the RFC 7515 specifications (<<R22>>).
 specs-jades:: ETSI TS 119 182-1 JSON Schemas for JAdES (<<R05>>).
+specs-lote-json:: ETSI TS 119 602 JSON schema for List of Trusted Entities (<<R33>>).
 
 ===== Utils modules
 

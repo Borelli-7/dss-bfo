@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>specs-jws</artifactId>
-	<name>JWS Schema Module</name>
+	<name>JWS Schema Model</name>
 	<description>Generated sources from JWS JSON schema</description>
 
 	<properties>

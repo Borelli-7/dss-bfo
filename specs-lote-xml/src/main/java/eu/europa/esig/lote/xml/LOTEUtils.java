@@ -10,6 +10,10 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.util.List;
 
+/**
+ * ETSI TS 119 602 List of Trusted Entities XML Utils
+ *
+ */
 public class LOTEUtils extends XSDAbstractUtils {
 
     /** The Object Factory to use */
@@ -33,7 +37,7 @@ public class LOTEUtils extends XSDAbstractUtils {
     }
 
     /**
-     * Returns instance of {@code XMLLoteUtils}
+     * Returns instance of {@code LOTEUtils}
      *
      * @return {@link LOTEUtils}
      */
@@ -48,8 +52,6 @@ public class LOTEUtils extends XSDAbstractUtils {
     public JAXBContext getJAXBContext() throws JAXBException {
         if (jc == null) {
             jc = JAXBContext.newInstance(ObjectFactory.class, eu.europa.esig.xmldsig.jaxb.ObjectFactory.class,
-                    eu.europa.esig.xades.jaxb.xades132.ObjectFactory.class,
-                    eu.europa.esig.xades.jaxb.xades141.ObjectFactory.class,
                     eu.europa.esig.lote.jaxb.sie.ObjectFactory.class,
                     eu.europa.esig.lote.jaxb.tie.ObjectFactory.class);
         }

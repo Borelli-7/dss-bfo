@@ -29,71 +29,71 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ListOfTrustedEntitiesJsonUtilsTest {
+class LOTEJsonUtilsTest {
 
     @Test
     void validTest() {
-        InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/valid.json");
+        InputStream is = LOTEJsonUtilsTest.class.getResourceAsStream("/valid.json");
         JsonObjectWrapper jsonObject = new JSONParser().parse(is);
 
         assertNotNull(jsonObject);
 
-        List<String> errors = ListOfTrustedEntitiesJsonUtils.getInstance().validateAgainstSchema(jsonObject);
+        List<String> errors = LOTEJsonUtils.getInstance().validateAgainstSchema(jsonObject);
         assertTrue(errors.isEmpty(), errors.toString());
     }
 
     @Test
     void validTestFull() {
-        InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/valid-full.json");
+        InputStream is = LOTEJsonUtilsTest.class.getResourceAsStream("/valid-full.json");
         JsonObjectWrapper jsonObject = new JSONParser().parse(is);
 
         assertNotNull(jsonObject);
 
-        List<String> errors = ListOfTrustedEntitiesJsonUtils.getInstance().validateAgainstSchema(jsonObject);
+        List<String> errors = LOTEJsonUtils.getInstance().validateAgainstSchema(jsonObject);
         assertTrue(errors.isEmpty(), errors.toString());
     }
 
     @Test
     void mockPID() {
-        InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/Mock_PID_Provider_List_v0.0.1-fixed.json");
+        InputStream is = LOTEJsonUtilsTest.class.getResourceAsStream("/Mock_PID_Provider_List_v0.0.1-fixed.json");
         JsonObjectWrapper jsonObject = new JSONParser().parse(is);
 
         assertNotNull(jsonObject);
 
-        List<String> errors = ListOfTrustedEntitiesJsonUtils.getInstance().validateAgainstSchema(jsonObject);
+        List<String> errors = LOTEJsonUtils.getInstance().validateAgainstSchema(jsonObject);
         assertTrue(errors.isEmpty(), errors.toString());
     }
 
     @Test
     void validTestEmptyTE() {
-        InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/valid-emptyTE.json");
+        InputStream is = LOTEJsonUtilsTest.class.getResourceAsStream("/valid-emptyTE.json");
         JsonObjectWrapper jsonObject = new JSONParser().parse(is);
 
         assertNotNull(jsonObject);
 
-        List<String> errors = ListOfTrustedEntitiesJsonUtils.getInstance().validateAgainstSchema(jsonObject);
+        List<String> errors = LOTEJsonUtils.getInstance().validateAgainstSchema(jsonObject);
         assertTrue(errors.isEmpty(), errors.toString());
     }
 
     @Test
     void invalidTest() {
-        InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/invalid.json");
+        InputStream is = LOTEJsonUtilsTest.class.getResourceAsStream("/invalid.json");
         JsonObjectWrapper jsonObject = new JSONParser().parse(is);
 
         assertNotNull(jsonObject);
 
-        List<String> errors = ListOfTrustedEntitiesJsonUtils.getInstance().validateAgainstSchema(jsonObject);
+        List<String> errors = LOTEJsonUtils.getInstance().validateAgainstSchema(jsonObject);
         assertFalse(errors.isEmpty(), errors.toString());
     }
 
     @Test
     void emptySchemeExtensionsTest() {
-        InputStream is = ListOfTrustedEntitiesJsonUtilsTest.class.getResourceAsStream("/empty-only-schema-extensions.json");
+        InputStream is = LOTEJsonUtilsTest.class.getResourceAsStream("/empty-only-schema-extensions.json");
         JsonObjectWrapper jsonObject = new JSONParser().parse(is);
 
         assertNotNull(jsonObject);
 
-        List<String> errors = ListOfTrustedEntitiesJsonUtils.getInstance().validateAgainstSchema(jsonObject);
+        List<String> errors = LOTEJsonUtils.getInstance().validateAgainstSchema(jsonObject);
         assertFalse(errors.isEmpty(), errors.toString());
     }
 

@@ -8,7 +8,8 @@
     </parent>
 
     <artifactId>specs-lote-xml</artifactId>
-    <name>XML Schema for the List of Trusted Entities</name>
+    <name>JAXB ETSI List of Trusted Entities Model</name>
+    <description>XML Schema for the ETSI TS 119 602 List of Trusted Entities</description>
 
     <properties>
         <module-name>jpms_specs_lote_xml</module-name>
@@ -18,10 +19,6 @@
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>specs-xmldsig</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
-            <artifactId>specs-xades</artifactId>
         </dependency>
 
         <dependency>
@@ -37,12 +34,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -64,9 +55,9 @@
                 <configuration>
                     <schemaDirectory>src/main/resources/xsd</schemaDirectory>
                     <schemaIncludes>
+<!--                        <schemaInclude>19602_xsd_v0.0.6a.xsd</schemaInclude>-->
                         <schemaInclude>19602_xsd_schema_sie_v0.0.6.xsd</schemaInclude>
                         <schemaInclude>19602_xsd_schema_tie_v0.0.6.xsd</schemaInclude>
-                        <schemaInclude>19602_xsd_v0.0.6a.xsd</schemaInclude>
                     </schemaIncludes>
                     <catalog>src/main/resources/xsd/catalog.cat</catalog>
                     <bindingIncludes>

@@ -10,6 +10,10 @@ import org.xml.sax.SAXException;
 import javax.xml.validation.Schema;
 import java.io.IOException;
 
+/**
+ * Performs marshalling/unmarshalling operation for a List of Trusted Entities XML
+ *
+ */
 public class LOTEFacade extends AbstractJaxbFacade<ListOfTrustedEntitiesType> {
 
     /** TL utils */

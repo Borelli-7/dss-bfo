@@ -790,6 +790,10 @@ public class XmlTrustServiceProviderBuilder {
         if (Utils.isCollectionNotEmpty(qcCClegislations)) {
             originalQcStatements.setQcCClegislation(new ArrayList<>(qcCClegislations));
         }
+        List<String> qcQSCDlegislations = qcStatements.getQcQSCDlegislation();
+        if (Utils.isCollectionNotEmpty(qcQSCDlegislations)) {
+            originalQcStatements.setQcQSCDlegislation(new ArrayList<>(qcQSCDlegislations));
+        }
         List<XmlOID> otherOIDs = qcStatements.getOtherOIDs();
         if (Utils.isCollectionNotEmpty(otherOIDs)) {
             originalQcStatements.setOtherOIDs(new ArrayList<>(otherOIDs));

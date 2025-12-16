@@ -1190,6 +1190,24 @@ public class EtsiValidationPolicy implements ValidationPolicy {
 	}
 
 	@Override
+	public MultiValuesRule getCertificateQcQSCDLegislationConstraint(Context context, SubContext subContext) {
+		CertificateConstraints certificateConstraints = getCertificateConstraints(context, subContext);
+		if (certificateConstraints != null) {
+			return toRule(certificateConstraints.getQcQSCDLegislation());
+		}
+		return null;
+	}
+
+	@Override
+	public MultiValuesRule getCertificateQcIdentificationMethodConstraint(Context context, SubContext subContext) {
+		CertificateConstraints certificateConstraints = getCertificateConstraints(context, subContext);
+		if (certificateConstraints != null) {
+			return toRule(certificateConstraints.getQcIdentificationMethod());
+		}
+		return null;
+	}
+
+	@Override
 	public LevelRule getSigningCertificateRecognitionConstraint(Context context) {
 		CertificateConstraints certificateConstraints = getSigningCertificateByContext(context);
 		if (certificateConstraints != null) {

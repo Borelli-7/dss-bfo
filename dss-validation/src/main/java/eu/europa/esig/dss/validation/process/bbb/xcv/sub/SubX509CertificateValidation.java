@@ -78,6 +78,8 @@ import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateQcCCL
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateQcComplianceCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateQcEuLimitValueCurrencyCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateQcEuPDSLocationCheck;
+import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateQcIdentificationMethodCheck;
+import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateQcQSCDLegislationCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateQcSSCDCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateQcTypeCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateRevocationSelectorResultCheck;
@@ -266,6 +268,10 @@ public class SubX509CertificateValidation extends Chain<XmlSubXCV> {
 		item = item.setNextItem(certificatePS2DQcCompetentAuthorityName(currentCertificate, subContext));
 
 		item = item.setNextItem(certificatePS2DQcCompetentAuthorityId(currentCertificate, subContext));
+
+		item = item.setNextItem(certificateQcQCSDLegislation(currentCertificate, subContext));
+
+		item = item.setNextItem(certificateQcIdentificationMethod(currentCertificate, subContext));
 
 		item = item.setNextItem(certificateSignatureValid(currentCertificate, subContext));
 
@@ -697,6 +703,16 @@ public class SubX509CertificateValidation extends Chain<XmlSubXCV> {
 	private ChainItem<XmlSubXCV> certificatePS2DQcCompetentAuthorityId(CertificateWrapper certificate, SubContext subContext) {
 		MultiValuesRule constraint = validationPolicy.getCertificatePS2DQcCompetentAuthorityIdConstraint(context, subContext);
 		return new CertificatePS2DQcCompetentAuthorityIdCheck(i18nProvider, result, certificate, constraint);
+	}
+
+	private ChainItem<XmlSubXCV> certificateQcQCSDLegislation(CertificateWrapper certificate, SubContext subContext) {
+		MultiValuesRule constraint = validationPolicy.getCertificateQcQSCDLegislationConstraint(context, subContext);
+		return new CertificateQcQSCDLegislationCheck(i18nProvider, result, certificate, constraint);
+	}
+
+	private ChainItem<XmlSubXCV> certificateQcIdentificationMethod(CertificateWrapper certificate, SubContext subContext) {
+		MultiValuesRule constraint = validationPolicy.getCertificateQcIdentificationMethodConstraint(context, subContext);
+		return new CertificateQcIdentificationMethodCheck(i18nProvider, result, certificate, constraint);
 	}
 
 	private ChainItem<XmlSubXCV> certificateCryptographic() {

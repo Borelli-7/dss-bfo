@@ -551,6 +551,16 @@ public class ValidationPolicyWithCryptographicSuite implements ValidationPolicy 
     }
 
     @Override
+    public MultiValuesRule getCertificateQcQSCDLegislationConstraint(Context context, SubContext subContext) {
+        return validationPolicy.getCertificateQcQSCDLegislationConstraint(context, subContext);
+    }
+
+    @Override
+    public MultiValuesRule getCertificateQcIdentificationMethodConstraint(Context context, SubContext subContext) {
+        return validationPolicy.getCertificateQcIdentificationMethodConstraint(context, subContext);
+    }
+
+    @Override
     public LevelRule getSigningCertificateRecognitionConstraint(Context context) {
         return validationPolicy.getSigningCertificateRecognitionConstraint(context);
     }

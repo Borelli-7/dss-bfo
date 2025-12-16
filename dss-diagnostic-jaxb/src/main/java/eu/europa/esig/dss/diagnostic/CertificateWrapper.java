@@ -59,6 +59,7 @@ import eu.europa.esig.dss.enumerations.CertificateExtensionEnum;
 import eu.europa.esig.dss.enumerations.CertificateSourceType;
 import eu.europa.esig.dss.enumerations.ExtendedKeyUsage;
 import eu.europa.esig.dss.enumerations.KeyUsageBit;
+import eu.europa.esig.dss.enumerations.QCIdentMethod;
 import eu.europa.esig.dss.enumerations.QCType;
 import eu.europa.esig.dss.enumerations.SemanticsIdentifier;
 
@@ -1029,6 +1030,32 @@ public class CertificateWrapper extends AbstractTokenProxy {
 			if (xmlOID != null) {
 				return SemanticsIdentifier.fromOid(xmlOID.getValue());
 			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns a list of QcQSCDlegislation country codes (present inside id-etsi-qcs-QcQSCDlegislation extension)
+	 *
+	 * @return a list of {@link String}s
+	 */
+	public List<String> getQcQSCDLegislation() {
+		XmlQcStatements xmlQcStatements = getXmlQcStatements();
+		if (xmlQcStatements != null && xmlQcStatements.getQcQSCDlegislation() != null) {
+			return xmlQcStatements.getQcQSCDlegislation();
+		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Returns a QCIdentMethod (present inside id-etsi-qcs-QcIdentMethod extension)
+	 *
+	 * @return {@link QCIdentMethod}
+	 */
+	public QCIdentMethod getQcIdentMethod() {
+		XmlQcStatements xmlQcStatements = getXmlQcStatements();
+		if (xmlQcStatements != null && xmlQcStatements.getQcIdentMethod() != null) {
+			return QCIdentMethod.fromOid(xmlQcStatements.getQcIdentMethod().getValue());
 		}
 		return null;
 	}

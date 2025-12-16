@@ -740,7 +740,7 @@ public interface ValidationPolicy {
 	/**
 	 * Indicates the country or set of countries under the legislation of which the certificate is issued as a
 	 * qualified certificate is present.
-	 *
+	 * <p>
 	 * NOTE: in order to verify the EU compliance, the value shall be empty (no QcCCLegislation is allowed)
 	 *
 	 * @param context {@link Context}
@@ -806,6 +806,27 @@ public interface ValidationPolicy {
 	 * @return {@code MultiValuesRule} the set of acceptable QC PS2D ids
 	 */
 	MultiValuesRule getCertificatePS2DQcCompetentAuthorityIdConstraint(Context context, SubContext subContext);
+
+	/**
+	 * Indicates the country or set of countries under the legislation of which the corresponding
+	 * signature creation device has a qualified status.
+	 *
+	 * @param context {@link Context}
+	 * @param subContext {@link SubContext}
+	 * @return {@code MultiValuesRule} the country or set of countries under the legislation of which the corresponding
+	 *  	 signature creation device has a qualified status
+	 */
+	MultiValuesRule getCertificateQcQSCDLegislationConstraint(Context context, SubContext subContext);
+
+	/**
+	 * Indicates the verification method used for issuance of the certificate according to eIDAS Article 24
+	 *
+	 * @param context {@link Context}
+	 * @param subContext {@link SubContext}
+	 * @return {@code MultiValuesRule} the verification method used for issuance of the certificate
+	 * 		 according to eIDAS Article 24
+	 */
+	MultiValuesRule getCertificateQcIdentificationMethodConstraint(Context context, SubContext subContext);
 
 	/**
 	 * Indicates if signing-certificate has been identified.

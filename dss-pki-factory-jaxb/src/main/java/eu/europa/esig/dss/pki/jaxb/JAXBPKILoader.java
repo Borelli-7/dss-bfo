@@ -252,7 +252,8 @@ public class JAXBPKILoader {
                     .subjectAlternativeNames(certificateType.getSubjectAlternativeNames() != null ? certificateType.getSubjectAlternativeNames().getGeneralName() : Collections.emptyList())
                     .qcStatements(certificateType.getQcStatementIds() != null ? certificateType.getQcStatementIds().getQcStatement() : Collections.emptyList())
                     .qcTypes(certificateType.getQcTypes() != null ? certificateType.getQcTypes().getQcType() : Collections.emptyList())
-                    .qcCClegislations(certificateType.getQcCClegislation() != null ? certificateType.getQcCClegislation().getCountryName() : Collections.emptyList());
+                    .qcCClegislations(certificateType.getQcCClegislation() != null ? certificateType.getQcCClegislation().getCountryName() : Collections.emptyList())
+                    .qcQSCDlegislations(certificateType.getQcQSCDlegislation() != null ? certificateType.getQcQSCDlegislation().getCountryName() : Collections.emptyList());
 
             if (certificateType.getCa() != null) {
                 certBuilder.ca(true);

@@ -146,6 +146,9 @@ public class X509CertificateBuilder {
     /** List of QcCClegislations */
     private List<String> qcCClegislations;
 
+    /** List of QcQSCDlegislations */
+    private List<String> qcQSCDlegislations;
+
     /** Whether the ocsp-no-check extension should be present */
     private boolean ocspNoCheck;
 
@@ -328,13 +331,24 @@ public class X509CertificateBuilder {
     }
 
     /**
-     * Sets the QcCCLegislation Ids
+     * Sets the QcCClegislation Ids
      *
-     * @param qcCClegislations a list of {@link String} qcCCLegislation identifiers
+     * @param qcCClegislations a list of {@link String} qcCClegislation identifiers
      * @return {@link X509CertificateBuilder} this
      */
     public X509CertificateBuilder qcCClegislations(List<String> qcCClegislations) {
         this.qcCClegislations = qcCClegislations;
+        return this;
+    }
+
+    /**
+     * Sets the QcQSCDLegislation Ids
+     *
+     * @param qcQSCDlegislations a list of {@link String} qcQSCDlegislation identifiers
+     * @return {@link X509CertificateBuilder} this
+     */
+    public X509CertificateBuilder qcQSCDlegislations(List<String> qcQSCDlegislations) {
+        this.qcQSCDlegislations = qcQSCDlegislations;
         return this;
     }
 
@@ -448,7 +462,7 @@ public class X509CertificateBuilder {
             addSubjectAlternativeNames(certBuilder);
         }
 
-        if (qcStatements != null || qcTypes != null || qcCClegislations != null) {
+        if (qcStatements != null || qcTypes != null || qcCClegislations != null || qcQSCDlegislations != null) {
             addQCStatementIds(certBuilder);
         }
 
@@ -533,7 +547,8 @@ public class X509CertificateBuilder {
     }
 
     private void addQCStatementIds(X509v3CertificateBuilder certBuilder) throws CertIOException {
-        if (Utils.isCollectionNotEmpty(qcStatements) || Utils.isCollectionNotEmpty(qcTypes) || Utils.isCollectionNotEmpty(qcCClegislations)) {
+        if (Utils.isCollectionNotEmpty(qcStatements) || Utils.isCollectionNotEmpty(qcTypes)
+                || Utils.isCollectionNotEmpty(qcCClegislations) || Utils.isCollectionNotEmpty(qcQSCDlegislations)) {
             certBuilder.addExtension(Extension.qCStatements, false, getQCStatementsIds());
         }
     }
@@ -569,6 +584,17 @@ public class X509CertificateBuilder {
             QCStatement qcCClegislation = new QCStatement(OID.id_etsi_qcs_QcCClegislation, new DERSequence(cclegislationVector));
 
             vector.add(qcCClegislation);
+        }
+
+        // QC QSCDlegislation
+        if (Utils.isCollectionNotEmpty(qcQSCDlegislations)) {
+            ASN1EncodableVector qscdlegislationVector = new ASN1EncodableVector();
+            for (String qcCClegislation : qcCClegislations) {
+                qscdlegislationVector.add(new DERPrintableString(qcCClegislation));
+            }
+
+            QCStatement qcQSCDlegislation = new QCStatement(OID.id_etsi_qcs_QcQSCDlegislation, new DERSequence(qscdlegislationVector));
+            vector.add(qcQSCDlegislation);
         }
 
         return new DERSequence(vector);

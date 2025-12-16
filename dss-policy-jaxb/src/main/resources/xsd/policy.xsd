@@ -1035,6 +1035,16 @@
 					<xsd:documentation>Checks if the certificate's PSD2QcType Id of competent authority is in the acceptable values list</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
+			<xsd:element name="QcQSCDLegislation" type="MultiValuesConstraint" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Checks that the private key related to the certified public key resides in an SCD recognized as qualified within a defined legal framework from an identified country, or set of countries. Shall be empty for EU qualified certificates.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="QcIdentificationMethod" type="MultiValuesConstraint" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Checks the identification method used for the certificate issuance, according to eIDAS Article 24</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
 			<xsd:element name="UsePseudonym" type="LevelConstraint" minOccurs="0">
 				<xsd:annotation>
 					<xsd:documentation>Checks if the certificate use a pseudonym</xsd:documentation>

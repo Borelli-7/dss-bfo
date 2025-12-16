@@ -22,7 +22,6 @@ package eu.europa.esig.dss.xades.definition.xades132;
 
 import eu.europa.esig.dss.xades.definition.XAdESNamespace;
 import eu.europa.esig.dss.xades.definition.XAdESPath;
-import eu.europa.esig.dss.xades.definition.xades122.XAdES122Element;
 import eu.europa.esig.dss.xades.definition.xades141.XAdES141Element;
 import eu.europa.esig.dss.xades.definition.xadesen.XAdESEvidencerecordNamespaceElement;
 import eu.europa.esig.dss.xml.common.definition.AbstractPath;

@@ -165,7 +165,7 @@ public class JAdESLevelBaselineT extends JAdESExtensionBuilder implements JAdESL
 
 			JAdESEtsiUHeader etsiUHeader = jadesSignature.getEtsiUHeader();
 			etsiUHeader.addComponent(JAdESHeaderParameterNames.SIG_TST, tstContainer,
-					params.isBase64UrlEncodedEtsiUComponents());
+					Utils.isTrue(params.isBase64UrlEncodedEtsiUComponents()));
 		}
 	}
 

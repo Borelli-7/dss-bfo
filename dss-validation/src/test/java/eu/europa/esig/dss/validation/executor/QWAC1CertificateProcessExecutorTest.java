@@ -971,6 +971,7 @@ class QWAC1CertificateProcessExecutorTest extends AbstractTestValidationExecutor
         return om;
     }
 
+    @Override
     protected EtsiValidationPolicy loadDefaultPolicy() throws Exception {
         return (EtsiValidationPolicy) ValidationPolicyLoader.fromValidationPolicy(QWAC_VALIDATION_POLICY_LOCATION).create();
     }

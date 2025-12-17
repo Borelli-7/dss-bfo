@@ -63,7 +63,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-public class QWACValidatorTest {
+class QWACValidatorTest {
 
     @Test
     void testOnline() throws Exception {

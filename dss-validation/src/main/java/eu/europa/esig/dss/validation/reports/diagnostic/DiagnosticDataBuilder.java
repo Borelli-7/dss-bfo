@@ -573,43 +573,39 @@ public abstract class DiagnosticDataBuilder {
 
 	private XmlTrustedList getXmlTrustedList(TLInfo tlInfo) {
 		String id = tlInfo.getDSSIdAsString();
-		XmlTrustedList result = xmlTrustedListsMap.get(id);
-		if (result == null) {
-			result = new XmlTrustedList();
-			if (tlInfo instanceof LOTLInfo) {
-				result.setLOTL(true);
-			}
-			result.setId(identifierProvider.getIdAsString(tlInfo));
-			result.setUrl(tlInfo.getUrl());
-			if (tlInfo.getParent() != null) {
-				result.setParent(getXmlTrustedList(tlInfo.getParent()));
-			}
-			ParsingInfoRecord parsingCacheInfo = tlInfo.getParsingCacheInfo();
-			if (parsingCacheInfo != null) {
-				if (parsingCacheInfo.getTSLType() != null) {
-					result.setTSLType(parsingCacheInfo.getTSLType().getUri());
-				}
-				result.setCountryCode(parsingCacheInfo.getTerritory());
-				result.setIssueDate(parsingCacheInfo.getIssueDate());
-				result.setNextUpdate(parsingCacheInfo.getNextUpdateDate());
-				result.setSequenceNumber(parsingCacheInfo.getSequenceNumber());
-				result.setVersion(parsingCacheInfo.getVersion());
-				result.setStructuralValidation(getXmlStructuralValidation(parsingCacheInfo.getStructureValidationMessages()));
-			}
-			DownloadInfoRecord downloadCacheInfo = tlInfo.getDownloadCacheInfo();
-			if (downloadCacheInfo != null) {
-				result.setLastLoading(downloadCacheInfo.getLastSuccessSynchronizationTime());
-			}
-			ValidationInfoRecord validationCacheInfo = tlInfo.getValidationCacheInfo();
-			if (validationCacheInfo != null) {
-				result.setWellSigned(validationCacheInfo.isValid());
-			}
-			if (tlInfo.getOtherTSLPointer() != null && tlInfo.getOtherTSLPointer().getMra() != null) {
-				result.setMra(true);
-			}
-			tlInfoMap.put(id, tlInfo);
-			xmlTrustedListsMap.put(id, result);
+		XmlTrustedList result = xmlTrustedListsMap.computeIfAbsent(id, v -> new XmlTrustedList());
+		if (tlInfo instanceof LOTLInfo) {
+			result.setLOTL(true);
 		}
+		result.setId(identifierProvider.getIdAsString(tlInfo));
+		result.setUrl(tlInfo.getUrl());
+		if (tlInfo.getParent() != null) {
+			result.setParent(getXmlTrustedList(tlInfo.getParent()));
+		}
+		ParsingInfoRecord parsingCacheInfo = tlInfo.getParsingCacheInfo();
+		if (parsingCacheInfo != null) {
+			if (parsingCacheInfo.getTSLType() != null) {
+				result.setTSLType(parsingCacheInfo.getTSLType().getUri());
+			}
+			result.setCountryCode(parsingCacheInfo.getTerritory());
+			result.setIssueDate(parsingCacheInfo.getIssueDate());
+			result.setNextUpdate(parsingCacheInfo.getNextUpdateDate());
+			result.setSequenceNumber(parsingCacheInfo.getSequenceNumber());
+			result.setVersion(parsingCacheInfo.getVersion());
+			result.setStructuralValidation(getXmlStructuralValidation(parsingCacheInfo.getStructureValidationMessages()));
+		}
+		DownloadInfoRecord downloadCacheInfo = tlInfo.getDownloadCacheInfo();
+		if (downloadCacheInfo != null) {
+			result.setLastLoading(downloadCacheInfo.getLastSuccessSynchronizationTime());
+		}
+		ValidationInfoRecord validationCacheInfo = tlInfo.getValidationCacheInfo();
+		if (validationCacheInfo != null) {
+			result.setWellSigned(validationCacheInfo.isValid());
+		}
+		if (tlInfo.getOtherTSLPointer() != null && tlInfo.getOtherTSLPointer().getMra() != null) {
+			result.setMra(true);
+		}
+		tlInfoMap.put(id, tlInfo);
 		return result;
 	}
 

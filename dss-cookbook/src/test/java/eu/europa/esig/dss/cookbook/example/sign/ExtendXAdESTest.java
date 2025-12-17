@@ -350,6 +350,8 @@ class ExtendXAdESTest extends CookbookTools {
 				new XAdESSignatureParameters(), new CAdESSignatureParameters(), otherSignatureParameters);
 		// end::demoDocExtenderExtendManyParams[]
 
+		testFinalDocument(extendedDocumentWithParams);
+
 	}
 
 	void validationDataEncapsulationStrategy() {

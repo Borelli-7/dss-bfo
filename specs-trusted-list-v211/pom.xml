@@ -106,6 +106,25 @@
                             </target>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>fix-jaxb-javadoc</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <replaceregexp
+                                        match="\{@link byte\[\]\}"
+                                        replace="{@code byte[]}"
+                                        flags="g">
+                                    <fileset dir="${project.build.directory}/generated-sources/xjc">
+                                        <include name="**/*.java"/>
+                                    </fileset>
+                                </replaceregexp>
+                            </target>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

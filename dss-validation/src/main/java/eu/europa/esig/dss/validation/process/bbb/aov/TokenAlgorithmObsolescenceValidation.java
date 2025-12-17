@@ -100,6 +100,8 @@ public abstract class TokenAlgorithmObsolescenceValidation<T extends TokenProxy>
      * Builds a chain of crypto checks to be executed on a signature's certificate chain
      *
      * @param item {@link ChainItem} to chain new checks to
+     * @param signingCertificate {@link CertificateWrapper} end-entity certificate of the certificate chain
+     * @param certificateChain a list of {@link CertificateWrapper} representing the certificate chain
      * @return {@link ChainItem}
      */
     protected ChainItem<XmlAOV> buildCertificateChainValidationChain(

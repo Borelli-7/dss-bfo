@@ -58,6 +58,7 @@ import java.util.Objects;
  * This class contains common configuration and methods for a
  * {@code eu.europa.esig.dss.model.x509.CertificateToken} validation.
  *
+ * @param <R> {@code AbstractReports}
  * @param <PE> {@code ProcessExecutor}
  */
 public abstract class AbstractCertificateValidator<R extends AbstractReports, PE extends ProcessExecutor<R>> implements ProcessExecutorProvider<PE> {

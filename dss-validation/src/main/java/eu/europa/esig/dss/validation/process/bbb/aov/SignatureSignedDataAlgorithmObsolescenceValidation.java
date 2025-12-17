@@ -40,6 +40,7 @@ public class SignatureSignedDataAlgorithmObsolescenceValidation extends DigestAl
      *
      * @param i18nProvider     the access to translations
      * @param token            instance of {@link SignatureWrapper} to be processed
+     * @param context          {@link Context}
      * @param validationDate   {@link Date} validation time
      * @param validationPolicy {@link ValidationPolicy} to be used during the validation
      */

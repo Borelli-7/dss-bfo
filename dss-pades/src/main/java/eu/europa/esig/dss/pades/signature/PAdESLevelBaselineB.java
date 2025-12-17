@@ -40,6 +40,8 @@ public class PAdESLevelBaselineB extends CAdESLevelBaselineB {
 
 	/**
 	 * Default constructor
+	 *
+	 * @param messageDigest {@link DSSMessageDigest}
 	 */
 	public PAdESLevelBaselineB(final DSSMessageDigest messageDigest) {
 		this.messageDigest = messageDigest;

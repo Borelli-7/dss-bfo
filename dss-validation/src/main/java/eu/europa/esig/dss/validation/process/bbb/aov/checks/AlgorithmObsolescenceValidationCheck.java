@@ -82,6 +82,7 @@ public class AlgorithmObsolescenceValidationCheck<T extends XmlConstraintsConclu
      * @param aovResult {@link XmlAOV}
      * @param validationDate {@link Date}
      * @param position {@link MessageTag}
+     * @param blockType {@link XmlBlockType}
      * @param tokenId {@link String} identifier of the token to be validated
      */
     public AlgorithmObsolescenceValidationCheck(I18nProvider i18nProvider, T result, XmlAOV aovResult,

@@ -32,6 +32,7 @@ import eu.europa.esig.dss.validation.process.ChainItem;
 /**
  * Checks if a claimed signing time is within the signing-certificate's validity range
  *
+ * @param <T> {@code XmlConstraintsConclusion}
  */
 public class SigningTimeInCertificateValidityRangeCheck<T extends XmlConstraintsConclusion> extends ChainItem<T> {
 

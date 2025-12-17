@@ -46,6 +46,14 @@ public abstract class DSSSecurityFactory<I, O> {
     private static final Logger LOG = LoggerFactory.getLogger(DSSSecurityFactory.class);
 
     /**
+     * Default constructor
+     *
+     */
+    protected DSSSecurityFactory() {
+        // empty
+    }
+
+    /**
      * This method implements the main logic to load a given token.
      * It will first try to generate the output result using a main security provider from {@code DSSSecurityProvider}, 
      * and only in case of failure will try to use alternative security providers until the first success.

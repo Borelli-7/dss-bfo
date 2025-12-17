@@ -43,6 +43,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class executes qualification determination process for a TLS/SSL Certificate Binding signature
+ *
+ */
 public class TLSBindingSignatureQualificationBlock extends SignatureQualificationBlock {
 
     /** Map of Basic Building Blocks */

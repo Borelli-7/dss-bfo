@@ -78,6 +78,7 @@ public class ExtendDocumentDTO implements Serializable {
 	 * Constructor with a target signature augmentation profile and signature parameters definitions
 	 *
 	 * @param toExtendDocument {@link RemoteDocument}
+	 * @param signatureProfile {@link SignatureProfile}
 	 * @param parameters {@link RemoteSignatureParameters}
 	 */
 	public ExtendDocumentDTO(RemoteDocument toExtendDocument, SignatureProfile signatureProfile, RemoteSignatureParameters parameters) {

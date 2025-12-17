@@ -316,6 +316,7 @@ public class CAdESLevelBaselineB {
 	/**
 	 * This method creates a set of CommitmentQualifiers.
 	 * <p>
+	 * {@code
 	 * CommitmentTypeQualifier ::= SEQUENCE {
 	 *  commitmentQualifierId COMMITMENT-QUALIFIER.&id,
 	 *  qualifier COMMITMENT-QUALIFIER.&Qualifier OPTIONAL
@@ -326,6 +327,7 @@ public class CAdESLevelBaselineB {
 	 * WITH SYNTAX {
 	 *  COMMITMENT-QUALIFIER-ID &id
 	 *  [COMMITMENT-TYPE &Qualifier] }
+	 * }
 	 *
 	 * @param commitmentType {@link CommitmentType}
 	 * @return {@link ASN1Sequence}

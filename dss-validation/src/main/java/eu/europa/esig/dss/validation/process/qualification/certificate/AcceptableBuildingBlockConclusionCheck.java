@@ -32,6 +32,7 @@ import eu.europa.esig.dss.validation.process.ChainItem;
 /**
  * Verifies whether the BasicBuildingBlock's validation succeeded
  *
+ * @param <T> {@code XmlConstraintsConclusion}
  */
 public class AcceptableBuildingBlockConclusionCheck<T extends XmlConstraintsConclusion> extends ChainItem<T> {
 

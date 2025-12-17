@@ -73,7 +73,8 @@ public class TLSCertificateSupportedByQWAC2ValidationProcessBlock extends Chain<
      * @param i18nProvider the access to translations
      * @param diagnosticData {@link DiagnosticData} containing the validation information data
      * @param tlsCertificate {@link CertificateWrapper} representing a TLS certificate to be validated
-     * @param tlsCertificateBasicValidationConclusion {@link XmlConclusion}
+     * @param tlsCertificateBasicValidationConclusion {@link XmlConclusion} of the TLS/SSL certificate validation process
+     * @param bindingSignatureBasicValidationConclusion {@link XmlConclusion} of the TLS/SSL certificate binding signature validation process
      * @param bindingCertificateProfile {@link QWACProfile}
      * @param websiteUrl {@link String}
      */

@@ -69,7 +69,7 @@ public class CMSSignerInfoGeneratorBuilder {
      * Sets the signing-certificate of the signer
      *
      * @param signingCertificate {@link CertificateToken}
-     * return this {@link CMSSignerInfoGeneratorBuilder}
+     * @return this {@link CMSSignerInfoGeneratorBuilder}
      */
     public CMSSignerInfoGeneratorBuilder setSigningCertificate(CertificateToken signingCertificate) {
         this.signingCertificate = signingCertificate;
@@ -80,7 +80,7 @@ public class CMSSignerInfoGeneratorBuilder {
      * Sets the Digest Algorithm to be used on message-digest computation
      *
      * @param digestAlgorithm {@link DigestAlgorithm}
-     * return this {@link CMSSignerInfoGeneratorBuilder}
+     * @return this {@link CMSSignerInfoGeneratorBuilder}
      */
     public CMSSignerInfoGeneratorBuilder setDigestAlgorithm(DigestAlgorithm digestAlgorithm) {
         this.digestAlgorithm = digestAlgorithm;
@@ -91,7 +91,7 @@ public class CMSSignerInfoGeneratorBuilder {
      * Sets the signed attributes
      *
      * @param signedAttributes {@link AttributeTable}
-     * return this {@link CMSSignerInfoGeneratorBuilder}
+     * @return this {@link CMSSignerInfoGeneratorBuilder}
      */
     public CMSSignerInfoGeneratorBuilder setSignedAttributes(AttributeTable signedAttributes) {
         this.signedAttributes = signedAttributes;
@@ -102,7 +102,7 @@ public class CMSSignerInfoGeneratorBuilder {
      * Sets the unsigned attributes
      *
      * @param unsignedAttributes {@link AttributeTable}
-     * return this {@link CMSSignerInfoGeneratorBuilder}
+     * @return this {@link CMSSignerInfoGeneratorBuilder}
      */
     public CMSSignerInfoGeneratorBuilder setUnsignedAttributes(AttributeTable unsignedAttributes) {
         this.unsignedAttributes = unsignedAttributes;

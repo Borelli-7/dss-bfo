@@ -49,6 +49,8 @@ public class ResponseEnvelope {
 
     /**
      * Constructor with response message body provided
+     *
+     * @param responseBody byte array containing the message body
      */
     public ResponseEnvelope(byte[] responseBody) {
         this.responseBody = responseBody;

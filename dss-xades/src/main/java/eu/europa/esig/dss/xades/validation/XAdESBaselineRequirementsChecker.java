@@ -436,20 +436,22 @@ public class XAdESBaselineRequirementsChecker extends BaselineRequirementsChecke
 
     @Override
     public boolean hasExtendedCProfile() {
+        Element signatureElement = signature.getSignatureElement();
+        XAdESPath xadesPaths = signature.getXAdESPaths();
+
+        // NOTE: at least complete-certificate-references shall be present for all self-signed certificates
+        // CompleteCertificateRefs/CompleteCertificateRefsV2 (Cardinality == 1)
+        int completeCertificateRefsNumberOfOccurrences = getNumberOfOccurrences(signatureElement, xadesPaths.getCompleteCertificateRefsPath()) +
+                getNumberOfOccurrences(signatureElement, xadesPaths.getCompleteCertificateRefsV2Path());
+        if (completeCertificateRefsNumberOfOccurrences > 1 || (completeCertificateRefsNumberOfOccurrences == 0)) {
+            LOG.debug("CompleteCertificateRefs(V2) shall be present for XAdES-C signature (cardinality == 1)!");
+            return false;
+        }
+
         ListCertificateSource certificateSources = getCertificateSourcesExceptLastArchiveTimestamp();
         boolean certificateFound = certificateSources.getNumberOfCertificates() > 0;
         boolean allSelfSigned = certificateFound && certificateSources.isAllSelfSigned();
 
-        Element signatureElement = signature.getSignatureElement();
-        XAdESPath xadesPaths = signature.getXAdESPaths();
-
-        // CompleteCertificateRefs/CompleteCertificateRefsV2 (Cardinality == 1)
-        int completeCertificateRefsNumberOfOccurrences = getNumberOfOccurrences(signatureElement, xadesPaths.getCompleteCertificateRefsPath()) +
-                getNumberOfOccurrences(signatureElement, xadesPaths.getCompleteCertificateRefsV2Path());
-        if (completeCertificateRefsNumberOfOccurrences > 1 || (!allSelfSigned && completeCertificateRefsNumberOfOccurrences == 0)) {
-            LOG.debug("CompleteCertificateRefs(V2) shall be present for XAdES-C signature (cardinality == 1)!");
-            return false;
-        }
         // CompleteRevocationRefs (Cardinality == 1)
         int completeRevocationRefsNumberOfOccurrences = getNumberOfOccurrences(signatureElement, xadesPaths.getCompleteRevocationRefsPath());
         if (completeRevocationRefsNumberOfOccurrences > 1 || (!allSelfSigned && completeRevocationRefsNumberOfOccurrences == 0)) {

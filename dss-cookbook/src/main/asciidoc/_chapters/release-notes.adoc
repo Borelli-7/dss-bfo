@@ -143,6 +143,12 @@ Bug fixes :
                                             * DiagnosticData misses certificate references when custom TokeIdentifierProvider is used;
                                             * CXF OpenAPI generates wrong JSON schema (webApplication).
 
+|v6.1.1          |March 2025               a|Main new features / improvements :
+
+                                            * Trusted List v6 support (ETSI TS 119 612 v2.3.1);
+                                            * Updated dependencies (BouncyCastle, VeraPdf, FOP, logback);
+                                            * Fixed expired unit tests.
+
 |v6.1              |September 2024          a|Main new features / improvements :
 
                                             * ASN.1 Evidence Records (RFC 4998) support;
@@ -185,6 +191,17 @@ Bug fixes :
                                             * CertificateValues/RevocationValues have invalid format in ETSI Validation Report;
                                             * JAXBPKILoader : invalid behavior for multiple cross certificates.
 
+|v6.0.1          |March 2025               a|Main new features / improvements :
+
+                                            * Trusted List v6 support (ETSI TS 119 612 v2.3.1);
+                                            * Updated dependencies (BouncyCastle, VeraPdf, FOP, logback);
+                                            * Fixed expired unit tests.
+
+Bug fixes :
+
+                                            * Possible memory leak during XAdES signature creation;
+                                            * CertificateValues/RevocationValues incorrect format in ETSI Validation Report.
+
 |v6.0             |December 2023            a|Main new features / improvements :
 
                                             * Transition from `javax.\*` to `jakarta.*` namespaces;
@@ -194,6 +211,17 @@ Bug fixes :
 Bug fixes :
 
                                             * KeyEntityTSPSource : add null safe processing.
+
+|v5.13.1          |March 2025               a|Main new features / improvements :
+
+                                            * Trusted List v6 support (ETSI TS 119 612 v2.3.1);
+                                            * Updated dependencies (BouncyCastle, VeraPdf, FOP, logback);
+                                            * Fixed expired unit tests.
+
+Bug fixes :
+
+                                            * Possible memory leak during XAdES signature creation;
+                                            * CertificateValues/RevocationValues incorrect format in ETSI Validation Report.
 
 |v5.13             |December 2023           a|Main new features / improvements :
 

@@ -219,8 +219,8 @@ Download links for the DSS Standalone Application:
 ** https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/downloads/dss-app-minimal-windows-x64.zip[Minimal ZIP (application + .bat file)];
 ** https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/downloads/dss-app-complete-windows-x64.zip[Complete ZIP (application + .bat file + OpenJDK + JavaFX SDK)].
 * Linux:
-** https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/downloads/dss-app-minimal-linux.tar.gz[Minimal ZIP (application + .sh file)];
-** https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/downloads/dss-app-complete-linux.tar.gz[Complete ZIP (application + .sh file + OpenJDK + JavaFX SDK)].
+** https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/downloads/dss-app-minimal-linux.tar.gz[Minimal TAR.GZ (application + .sh file)];
+** https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/downloads/dss-app-complete-linux.tar.gz[Complete TAR.GZ (application + .sh file + OpenJDK + JavaFX SDK)].
 
 ===== Maven build instructions
 

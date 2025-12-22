@@ -95,31 +95,6 @@ public class PdfSigDictWrapper implements PdfSignatureDictionary {
 	}
 
 	/**
-	 * Default constructor
-	 *
-	 * @param dictionary {@link PdfDict}
-	 * @deprecated since DSS 6.3. Please use {@code new PdfSigDictWrapperFactory(sigFieldDictionary)#create} instead
-	 */
-	@Deprecated
-	public PdfSigDictWrapper(PdfDict dictionary) {
-		PdfSigDictWrapper wrapper = new PdfSigDictWrapperFactory(dictionary).create();
-		this.dictionary = wrapper.dictionary;
-		this.signerName = wrapper.signerName;
-		this.contactInfo = wrapper.contactInfo;
-		this.reason = wrapper.reason;
-		this.location = wrapper.location;
-		this.signingDate = wrapper.signingDate;
-		this.type = wrapper.type;
-		this.filter = wrapper.filter;
-		this.subFilter = wrapper.subFilter;
-		this.contents = wrapper.contents;
-		this.byteRange = wrapper.byteRange;
-		this.docMDP = wrapper.docMDP;
-		this.fieldMDP = wrapper.fieldMDP;
-		this.cms = wrapper.cms;
-	}
-
-	/**
 	 * Sets the signature field dictionary
 	 *
 	 * @param dictionary {@link PdfDict}

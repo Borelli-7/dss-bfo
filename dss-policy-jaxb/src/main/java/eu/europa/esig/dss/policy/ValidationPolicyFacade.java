@@ -40,15 +40,6 @@ import java.util.Objects;
  */
 public class ValidationPolicyFacade extends AbstractJaxbFacade<ConstraintsParameters> {
 
-	/** The default validation policy path */
-	private static final String DEFAULT_VALIDATION_POLICY_LOCATION = "/policy/constraint.xml";
-
-	/** The path for default certificate validation policy */
-	private static final String CERTIFICATE_VALIDATION_POLICY_LOCATION = "/policy/certificate-constraint.xml";
-
-	/** The path for a LOTL/TL validation policy */
-	private static final String TRUSTED_LIST_VALIDATION_POLICY_LOCATION = "/policy/tsl-constraint.xml";
-
 	/**
 	 * Default constructor
 	 */
@@ -78,56 +69,6 @@ public class ValidationPolicyFacade extends AbstractJaxbFacade<ConstraintsParame
 	@Override
 	protected JAXBElement<ConstraintsParameters> wrap(ConstraintsParameters jaxbObject) {
 		return ValidationPolicyXmlDefiner.OBJECT_FACTORY.createConstraintsParameters(jaxbObject);
-	}
-
-	/**
-	 * Gets the default validation policy
-	 *
-	 * @return {@link ValidationPolicy}
-	 * @throws JAXBException if {@link JAXBException} occurs
-	 * @throws XMLStreamException if {@link XMLStreamException} occurs
-	 * @throws IOException if {@link IOException} occurs
-	 * @throws SAXException if {@link SAXException} occurs
-	 * @deprecated since DSS 6.3. To be removed. Please use {@code new EtsiValidationPolicyFactory#loadDefaultValidationPolicy} method.
-	 */
-	@Deprecated
-	public ValidationPolicy getDefaultValidationPolicy() throws JAXBException, XMLStreamException, IOException,
-			SAXException {
-		return loadDefault();
-	}
-
-	/**
-	 * Gets the default policy for certificate validation
-	 *
-	 * @return {@link ValidationPolicy}
-	 * @throws JAXBException if {@link JAXBException} occurs
-	 * @throws XMLStreamException if {@link XMLStreamException} occurs
-	 * @throws IOException if {@link IOException} occurs
-	 * @throws SAXException if {@link SAXException} occurs
-	 * @deprecated since DSS 6.3. To be removed. Please use {@code getValidationPolicy(String path)} method explicitly.
-	 */
-	@Deprecated
-	public ValidationPolicy getCertificateValidationPolicy() throws JAXBException, XMLStreamException, IOException, SAXException {
-		try (InputStream is = ValidationPolicyFacade.class.getResourceAsStream(CERTIFICATE_VALIDATION_POLICY_LOCATION)) {
-			return getValidationPolicy(is);
-		}
-	}
-
-	/**
-	 * Gets the validation policy for LOTL/TL
-	 *
-	 * @return {@link ValidationPolicy}
-	 * @throws JAXBException if {@link JAXBException} occurs
-	 * @throws XMLStreamException if {@link XMLStreamException} occurs
-	 * @throws IOException if {@link IOException} occurs
-	 * @throws SAXException if {@link SAXException} occurs
-	 * @deprecated since DSS 6.3. To be removed. Please use {@code getValidationPolicy(String path)} method explicitly.
-	 */
-	@Deprecated
-	public ValidationPolicy getTrustedListValidationPolicy() throws JAXBException, XMLStreamException, IOException, SAXException {
-		try (InputStream is = ValidationPolicyFacade.class.getResourceAsStream(TRUSTED_LIST_VALIDATION_POLICY_LOCATION)) {
-			return getValidationPolicy(is);
-		}
 	}
 
 	/**
@@ -174,12 +115,6 @@ public class ValidationPolicyFacade extends AbstractJaxbFacade<ConstraintsParame
 	public ValidationPolicy getValidationPolicy(File file) throws JAXBException, XMLStreamException, IOException, SAXException {
 		Objects.requireNonNull(file, "The provided validation policy is null");
 		return new EtsiValidationPolicy(unmarshall(file));
-	}
-
-	private ValidationPolicy loadDefault() throws JAXBException, XMLStreamException, IOException, SAXException {
-		try (InputStream defaultIs = ValidationPolicyFacade.class.getResourceAsStream(DEFAULT_VALIDATION_POLICY_LOCATION)) {
-			return getValidationPolicy(defaultIs);
-		}
 	}
 
 }

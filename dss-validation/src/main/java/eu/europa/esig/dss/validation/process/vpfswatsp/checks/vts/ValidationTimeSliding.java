@@ -20,10 +20,11 @@
  */
 package eu.europa.esig.dss.validation.process.vpfswatsp.checks.vts;
 
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCRS;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlCryptographicValidation;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlRFC;
-import eu.europa.esig.dss.detailedreport.jaxb.XmlSAV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlVTS;
 import eu.europa.esig.dss.diagnostic.CertificateRevocationWrapper;
 import eu.europa.esig.dss.diagnostic.CertificateWrapper;
@@ -43,8 +44,8 @@ import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.validation.process.Chain;
 import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
-import eu.europa.esig.dss.validation.process.bbb.sav.CertificateAcceptanceValidation;
-import eu.europa.esig.dss.validation.process.bbb.sav.RevocationAcceptanceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.CertificateAlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.RevocationDataAlgorithmObsolescenceValidation;
 import eu.europa.esig.dss.validation.process.bbb.xcv.crs.CertificateRevocationSelector;
 import eu.europa.esig.dss.validation.process.bbb.xcv.rfc.RevocationFreshnessChecker;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.RevocationDataRequiredCheck;
@@ -282,15 +283,17 @@ public class ValidationTimeSliding extends Chain<XmlVTS> {
 				 */
                 Date cryptoNotAfterDate = null;
                 
-                XmlSAV certificateSAV = getCertificateCryptographicAcceptanceResult(certificate, controlTime);
-				if (!isValidConclusion(certificateSAV.getConclusion())) {
-					cryptoNotAfterDate = getCryptographicAlgorithmExpirationDateOrNull(certificateSAV);
-                }
+                XmlAOV certificateAOV = getCertificateAlgorithmObsolescenceResult(certificate, controlTime, subContext);
+				if (!isValidConclusion(certificateAOV.getConclusion())) {
+					XmlCryptographicValidation cryptographicValidation = ValidationProcessUtils.getFailCryptographicValidation(certificateAOV);
+					cryptoNotAfterDate = cryptographicValidation != null ? cryptographicValidation.getNotAfter() : null;
+				}
 
 				if (latestCompliantRevocation != null) {
-					XmlSAV revocationSAV = getRevocationCryptographicAcceptanceResult(latestCompliantRevocation, controlTime);
-					if (!isValidConclusion(revocationSAV.getConclusion())) {
-						Date revCryptoNotAfter = getCryptographicAlgorithmExpirationDateOrNull(revocationSAV);
+					XmlAOV revocationAOV = getRevocationDataAlgorithmObsolescenceResult(latestCompliantRevocation, controlTime);
+					if (!isValidConclusion(revocationAOV.getConclusion())) {
+						XmlCryptographicValidation cryptographicValidation = ValidationProcessUtils.getFailCryptographicValidation(revocationAOV);
+						Date revCryptoNotAfter = cryptographicValidation != null ? cryptographicValidation.getNotAfter() : null;
 						if (cryptoNotAfterDate == null ||
 								(revCryptoNotAfter != null && revCryptoNotAfter.before(cryptoNotAfterDate))) {
 							cryptoNotAfterDate = revCryptoNotAfter;
@@ -344,13 +347,6 @@ public class ValidationTimeSliding extends Chain<XmlVTS> {
 		return certificate.equals(trustedCertificate);
 	}
 
-	private Date getCryptographicAlgorithmExpirationDateOrNull(XmlSAV sav) {
-		if (sav.getCryptographicValidation() != null && sav.getCryptographicValidation().getAlgorithm() != null) {
-			return sav.getCryptographicValidation().getNotAfter();
-		}
-		return null;
-	}
-
 	private ChainItem<XmlVTS> sunsetDateCheck(CertificateWrapper trustedCertificate) {
 		return new SunsetDateCheck(i18nProvider, result, trustedCertificate, getFailLevelRule());
 	}
@@ -371,14 +367,16 @@ public class ValidationTimeSliding extends Chain<XmlVTS> {
 		return new ControlTimeCheck(i18nProvider, result, controlTime, getFailLevelRule());
 	}
 	
-    private XmlSAV getCertificateCryptographicAcceptanceResult(CertificateWrapper certificateWrapper, Date controlTime) {
-		CertificateAcceptanceValidation cav = new CertificateAcceptanceValidation(i18nProvider, controlTime, certificateWrapper, policy);
-        return cav.execute();
+    private XmlAOV getCertificateAlgorithmObsolescenceResult(CertificateWrapper certificateWrapper, Date controlTime, SubContext subContext) {
+		CertificateAlgorithmObsolescenceValidation aov = new CertificateAlgorithmObsolescenceValidation(
+				i18nProvider, certificateWrapper, context, subContext, controlTime, policy);
+        return aov.execute();
     }
     
-    private XmlSAV getRevocationCryptographicAcceptanceResult(RevocationWrapper revocationWrapper, Date controlTime) {
-        RevocationAcceptanceValidation rav = new RevocationAcceptanceValidation(i18nProvider, controlTime, revocationWrapper, policy);
-        return rav.execute();
+    private XmlAOV getRevocationDataAlgorithmObsolescenceResult(RevocationWrapper revocationWrapper, Date controlTime) {
+		RevocationDataAlgorithmObsolescenceValidation aov = new RevocationDataAlgorithmObsolescenceValidation(
+				i18nProvider, revocationWrapper, controlTime, policy);
+		return aov.execute();
     }
 
 }

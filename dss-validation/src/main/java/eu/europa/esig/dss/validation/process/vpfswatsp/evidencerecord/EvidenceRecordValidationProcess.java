@@ -20,12 +20,10 @@
  */
 package eu.europa.esig.dss.validation.process.vpfswatsp.evidencerecord;
 
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
-import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
-import eu.europa.esig.dss.detailedreport.jaxb.XmlCryptographicValidation;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlProofOfExistence;
-import eu.europa.esig.dss.detailedreport.jaxb.XmlSAV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlTimestamp;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessArchivalDataTimestamp;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessEvidenceRecord;
@@ -33,23 +31,26 @@ import eu.europa.esig.dss.diagnostic.DiagnosticData;
 import eu.europa.esig.dss.diagnostic.EvidenceRecordWrapper;
 import eu.europa.esig.dss.diagnostic.TimestampWrapper;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestMatcher;
+import eu.europa.esig.dss.enumerations.Context;
 import eu.europa.esig.dss.enumerations.DigestMatcherType;
 import eu.europa.esig.dss.enumerations.EvidenceRecordOrigin;
 import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.LevelRule;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.validation.process.Chain;
 import eu.europa.esig.dss.validation.process.ChainItem;
+import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
+import eu.europa.esig.dss.validation.process.bbb.aov.AlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.EvidenceRecordAlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.checks.AlgorithmObsolescenceValidationCheck;
 import eu.europa.esig.dss.validation.process.bbb.cv.checks.AtLeastOneReferenceDataObjectFoundCheck;
 import eu.europa.esig.dss.validation.process.bbb.cv.checks.ReferenceDataExistenceCheck;
 import eu.europa.esig.dss.validation.process.bbb.cv.checks.ReferenceDataGroupCheck;
 import eu.europa.esig.dss.validation.process.bbb.cv.checks.ReferenceDataIntactCheck;
-import eu.europa.esig.dss.validation.process.bbb.sav.cc.DigestMatcherListCryptographicChainBuilder;
 import eu.europa.esig.dss.validation.process.vpfswatsp.checks.TimestampValidationCheck;
 import eu.europa.esig.dss.validation.process.vpfswatsp.evidencerecord.checks.EvidenceRecordSignedAndTimestampedFilesCoveredCheck;
 import eu.europa.esig.dss.validation.process.vpfswatsp.evidencerecord.checks.EvidenceRecordSignedFilesCoveredCheck;
@@ -187,8 +188,8 @@ public class EvidenceRecordValidationProcess extends Chain<XmlValidationProcessE
             item = item.setNextItem(signedAndTimestampedFilesCoveredCheck());
         }
 
-        // Initialize null cryptographic validation
-        XmlCryptographicValidation cryptographicValidation = null;
+        // Algorithm Obsolescence Validation to be included
+        XmlAOV xmlAOV = null;
 
         /*
          * i) Before validating a time-stamp the process shall extract POEs (as per clause 5.6.2.3) of the
@@ -196,6 +197,7 @@ public class EvidenceRecordValidationProcess extends Chain<XmlValidationProcessE
          * extracted POEs.
          */
         XmlProofOfExistence lowestPOE = toXmlProofOfExistence(currentTime);
+        boolean tstChainValid = true;
 
         List<TimestampWrapper> timestampsList = evidenceRecord.getTimestampList();
         if (Utils.isCollectionNotEmpty(timestampsList)) {
@@ -225,15 +227,16 @@ public class EvidenceRecordValidationProcess extends Chain<XmlValidationProcessE
                      */
                     XmlConclusion timestampConclusion = timestampValidation.getConclusion();
                     if (Indication.INDETERMINATE == timestampConclusion.getIndication() &&
-                            (SubIndication.CRYPTO_CONSTRAINTS_FAILURE == timestampConclusion.getSubIndication() || SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE == timestampConclusion.getSubIndication())) {
-                        XmlSAV sav = bbbTsp.getSAV();
-                        if ((cryptographicValidation == null || cryptographicValidation.isSecure()) && sav != null) {
-                            cryptographicValidation = sav.getCryptographicValidation();
+                            (SubIndication.CRYPTO_CONSTRAINTS_FAILURE == timestampConclusion.getSubIndication() ||
+                                    SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE == timestampConclusion.getSubIndication())) {
+                        XmlAOV tstAOV = bbbTsp.getAOV();
+                        if (xmlAOV == null || (isValid(xmlAOV) && tstAOV != null && !isValid(tstAOV))) {
+                            xmlAOV = tstAOV;
                         }
                     }
 
                     if (!isValid(timestampValidation)) {
-                        result.setConclusion(timestampValidation.getConclusion());
+                        tstChainValid = false;
                         break;
                     }
                 }
@@ -243,7 +246,7 @@ public class EvidenceRecordValidationProcess extends Chain<XmlValidationProcessE
              * c) If step b) found the ER to be valid, the process shall add a POE for every object covered by the ER at
              * signing time value of the initial archive time-stamp.
              */
-            if (result.getConclusion() == null) {
+            if (tstChainValid) {
                 // when valid, conclusion is not yet set
                 lowestPOE = toXmlProofOfExistence(timestampsList.get(0));
             }
@@ -253,19 +256,18 @@ public class EvidenceRecordValidationProcess extends Chain<XmlValidationProcessE
 
         // Validate cryptographic constraints of DigestMatchers
         if (Utils.isCollectionNotEmpty(digestMatchers)) {
-            CryptographicSuite cryptographicSuite = policy.getEvidenceRecordCryptographicConstraint();
+            AlgorithmObsolescenceValidation<?> algorithmObsolescenceValidation =
+                    new EvidenceRecordAlgorithmObsolescenceValidation(i18nProvider, evidenceRecord, lowestPOE.getTime(), policy);
+            XmlAOV erAOV = algorithmObsolescenceValidation.execute();
 
-            DigestMatcherListCryptographicChainBuilder<XmlValidationProcessEvidenceRecord> digestMatcherCCBuilder =
-                    new DigestMatcherListCryptographicChainBuilder<>(i18nProvider, result, digestMatchers, lowestPOE.getTime(), cryptographicSuite);
-            item = digestMatcherCCBuilder.build(item);
+            item = item.setNextItem(algorithmsObsolescenceValidation(erAOV, lowestPOE.getTime()));
 
-            XmlCC failedCC = digestMatcherCCBuilder.getConcernedCC();
-            if (failedCC != null && (cryptographicValidation == null || (cryptographicValidation.isSecure() && !isValid(failedCC)))) {
-                cryptographicValidation = getCryptographicValidation(failedCC, lowestPOE.getTime());
+            if (xmlAOV == null || (isValid(xmlAOV) && erAOV != null && !isValid(erAOV))) {
+                xmlAOV = erAOV;
             }
         }
 
-        result.setCryptographicValidation(cryptographicValidation);
+        result.setAOV(xmlAOV);
 
     }
 
@@ -305,6 +307,11 @@ public class EvidenceRecordValidationProcess extends Chain<XmlValidationProcessE
                 timestampValidationResult, getFailLevelRule());
     }
 
+    private ChainItem<XmlValidationProcessEvidenceRecord> algorithmsObsolescenceValidation(XmlAOV aovResult, Date lowestPOETime) {
+        MessageTag position = ValidationProcessUtils.getCryptoPosition(Context.EVIDENCE_RECORD);
+        return new AlgorithmObsolescenceValidationCheck<>(i18nProvider, result, aovResult, lowestPOETime, position, evidenceRecord.getId());
+    }
+
     private XmlValidationProcessArchivalDataTimestamp getTimestampValidation(TimestampWrapper newestTimestamp) {
         for (XmlTimestamp xmlTimestamp : xmlTimestamps) {
             if (Utils.areStringsEqual(xmlTimestamp.getId(), newestTimestamp.getId())) {
@@ -324,16 +331,6 @@ public class EvidenceRecordValidationProcess extends Chain<XmlValidationProcessE
         XmlProofOfExistence xmlPoe = toXmlProofOfExistence(timestampWrapper.getProductionTime());
         xmlPoe.setTimestampId(timestampWrapper.getId());
         return xmlPoe;
-    }
-
-    private XmlCryptographicValidation getCryptographicValidation(XmlCC ccResult, Date validationTime) {
-        XmlCryptographicValidation cryptographicValidation = new XmlCryptographicValidation();
-        cryptographicValidation.setAlgorithm(ccResult.getVerifiedAlgorithm());
-        cryptographicValidation.setNotAfter(ccResult.getNotAfter());
-        cryptographicValidation.setSecure(isValid(ccResult));
-        cryptographicValidation.setValidationTime(validationTime);
-        cryptographicValidation.setConcernedMaterial(evidenceRecord.getId());
-        return cryptographicValidation;
     }
 
     private boolean coversSignatureOrTimestampOrEvidenceRecord(EvidenceRecordWrapper evidenceRecord) {

@@ -88,7 +88,7 @@ public abstract class AbstractPAdESWithEvidenceRecordTestValidation extends Abst
                             sigNameFound = true;
                         }
                     } else if (SignatureScopeType.FULL == evidenceRecordScope.getScope()) {
-                        if (Utils.isStringEmpty(signature.getFilename()) && "Full document".equals(evidenceRecordScope.getName())
+                        if (Utils.isStringEmpty(signature.getFilename()) && "Full document".equals(evidenceRecordScope.getDescription())
                                 || signature.getFilename().equals(evidenceRecordScope.getName())) {
                             sigNameFound = true;
                         }
@@ -154,7 +154,7 @@ public abstract class AbstractPAdESWithEvidenceRecordTestValidation extends Abst
                                     sigNameFound = true;
                                 }
                             } else if (SignatureScopeType.FULL == evidenceRecordScope.getScope()) {
-                                if (Utils.isStringEmpty(signature.getFilename()) && "Full document".equals(evidenceRecordScope.getName())
+                                if (Utils.isStringEmpty(signature.getFilename()) && "Full document".equals(evidenceRecordScope.getDescription())
                                         || signature.getFilename().equals(evidenceRecordScope.getName())) {
                                     sigNameFound = true;
                                 }

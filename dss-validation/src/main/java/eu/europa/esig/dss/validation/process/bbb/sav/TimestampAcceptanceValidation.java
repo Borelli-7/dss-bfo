@@ -20,6 +20,7 @@
  */
 package eu.europa.esig.dss.validation.process.bbb.sav;
 
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlSAV;
 import eu.europa.esig.dss.diagnostic.TimestampWrapper;
 import eu.europa.esig.dss.enumerations.Context;
@@ -47,11 +48,12 @@ public class TimestampAcceptanceValidation extends AbstractAcceptanceValidation<
 	 * @param i18nProvider {@link I18nProvider}
 	 * @param currentTime {@link Date} validation time
 	 * @param timestamp {@link TimestampWrapper}
+	 * @param aov {@link XmlAOV}
 	 * @param validationPolicy {@link ValidationPolicy}
 	 */
 	public TimestampAcceptanceValidation(I18nProvider i18nProvider, Date currentTime, TimestampWrapper timestamp,
-										 ValidationPolicy validationPolicy) {
-		super(i18nProvider, timestamp, currentTime, Context.TIMESTAMP, validationPolicy);
+										 XmlAOV aov, ValidationPolicy validationPolicy) {
+		super(i18nProvider, timestamp, currentTime, Context.TIMESTAMP, aov, validationPolicy);
 	}
     
 	@Override
@@ -86,8 +88,6 @@ public class TimestampAcceptanceValidation extends AbstractAcceptanceValidation<
 		}
 
 		item = cryptographic(item);
-
-		item = cryptographicSignedAttributes(item);
 	}
 
 	private ChainItem<XmlSAV> tsaGeneralNamePresent() {

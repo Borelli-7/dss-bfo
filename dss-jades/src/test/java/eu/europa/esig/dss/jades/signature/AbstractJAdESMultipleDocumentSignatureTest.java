@@ -22,10 +22,13 @@ package eu.europa.esig.dss.jades.signature;
 
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
 import eu.europa.esig.dss.diagnostic.SignatureWrapper;
+import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestMatcher;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
+import eu.europa.esig.dss.enumerations.DigestMatcherType;
 import eu.europa.esig.dss.enumerations.JWSSerializationType;
 import eu.europa.esig.dss.enumerations.MimeType;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
+import eu.europa.esig.dss.enumerations.SigDMechanism;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.jades.DSSJsonUtils;
 import eu.europa.esig.dss.jades.HTTPHeader;
@@ -53,6 +56,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -103,6 +107,28 @@ public abstract class AbstractJAdESMultipleDocumentSignatureTest extends Abstrac
 				fail(e);
 			}
 			
+		}
+	}
+
+	@Override
+	protected void checkDigestMatchers(DiagnosticData diagnosticData) {
+		super.checkDigestMatchers(diagnosticData);
+
+		for (SignatureWrapper signatureWrapper : diagnosticData.getSignatures()) {
+			for (XmlDigestMatcher xmlDigestMatcher : signatureWrapper.getDigestMatchers()) {
+				if (DigestMatcherType.JWS_SIGNING_INPUT_DIGEST == xmlDigestMatcher.getType() && SigDMechanism.OBJECT_ID_BY_URI == getSignatureParameters().getSigDMechanism()) {
+					assertTrue(Utils.isCollectionNotEmpty(xmlDigestMatcher.getDataObjectReferences()));
+				} else {
+					assertFalse(Utils.isCollectionNotEmpty(xmlDigestMatcher.getDataObjectReferences()));
+				}
+			}
+		}
+	}
+
+	@Override
+	protected void checkJWSSerializationType(DiagnosticData diagnosticData) {
+		for (SignatureWrapper signatureWrapper : diagnosticData.getSignatures()) {
+			assertEquals(getSignatureParameters().getJwsSerializationType(), signatureWrapper.getJWSSerializationType());
 		}
 	}
 

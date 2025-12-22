@@ -99,8 +99,7 @@ public class ExtendedKeyUsageCheck extends AbstractMultiValuesCheckItem<XmlSubXC
 			return buildXmlMessage(MessageTag.BBB_XCV_ISCGEKU_ANS_CERT);
 		} else {
 			return buildXmlMessage(MessageTag.BBB_XCV_ISCGEKU_ANS,
-					ValidationProcessUtils.getSubContextPosition(subContext),
-					ValidationProcessUtils.getContextPosition(context));
+					ValidationProcessUtils.getSubContextPosition(context, subContext));
 		}
 	}
 

@@ -21,6 +21,7 @@
 package eu.europa.esig.dss.xades.signature;
 
 import eu.europa.esig.dss.enumerations.SignaturePackaging;
+import eu.europa.esig.dss.enumerations.SigningOperation;
 import eu.europa.esig.dss.evidencerecord.EvidenceRecordIncorporationService;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.SignaturePolicyStore;
@@ -30,14 +31,13 @@ import eu.europa.esig.dss.signature.AbstractSignatureService;
 import eu.europa.esig.dss.signature.CounterSignatureService;
 import eu.europa.esig.dss.signature.MultipleDocumentsSignatureService;
 import eu.europa.esig.dss.signature.SignatureExtension;
-import eu.europa.esig.dss.enumerations.SigningOperation;
 import eu.europa.esig.dss.spi.validation.CertificateVerifier;
 import eu.europa.esig.dss.spi.x509.tsp.TimestampToken;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.xades.DSSXMLUtils;
-import eu.europa.esig.dss.xades.SignatureProfile;
 import eu.europa.esig.dss.xades.XAdESProfileParameters;
 import eu.europa.esig.dss.xades.XAdESSignatureParameters;
+import eu.europa.esig.dss.xades.XAdESSignatureProfile;
 import eu.europa.esig.dss.xades.XAdESTimestampParameters;
 import eu.europa.esig.dss.xades.evidencerecord.EmbeddedEvidenceRecordBuilder;
 import eu.europa.esig.dss.xades.evidencerecord.XAdESEvidenceRecordIncorporationParameters;
@@ -96,11 +96,20 @@ public class XAdESService extends AbstractSignatureService<XAdESSignatureParamet
 	@Override
 	public ToBeSigned getDataToSign(final DSSDocument toSignDocument, final XAdESSignatureParameters parameters) {
 		Objects.requireNonNull(toSignDocument, "toSignDocument cannot be null!");
+		return getDataToSign(Collections.singletonList(toSignDocument), parameters);
+	}
+
+	@Override
+	public ToBeSigned getDataToSign(List<DSSDocument> toSignDocuments, XAdESSignatureParameters parameters) {
+		Objects.requireNonNull(toSignDocuments, "toSignDocuments cannot be null!");
 		Objects.requireNonNull(parameters, "SignatureParameters cannot be null!");
 		
 		assertSigningCertificateValid(parameters);
+		assertMultiDocumentsAllowed(toSignDocuments, parameters);
+		assertDocumentsValid(toSignDocuments);
+
 		final XAdESLevelBaselineB levelBaselineB = new XAdESLevelBaselineB(certificateVerifier);
-		final byte[] dataToSign = levelBaselineB.getDataToSign(toSignDocument, parameters);
+		final byte[] dataToSign = levelBaselineB.getDataToSign(toSignDocuments, parameters);
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Data to sign: ");
 			LOG.trace(new String(dataToSign));
@@ -110,41 +119,37 @@ public class XAdESService extends AbstractSignatureService<XAdESSignatureParamet
 	}
 
 	@Override
-	public ToBeSigned getDataToSign(List<DSSDocument> toSignDocuments, XAdESSignatureParameters parameters) {
-		Objects.requireNonNull(toSignDocuments, "toSignDocuments cannot be null!");
-		Objects.requireNonNull(parameters, "SignatureParameters cannot be null!");
-
-		assertMultiDocumentsAllowed(parameters);
-		assertDocumentsValid(toSignDocuments);
-		parameters.getContext().setDetachedContents(toSignDocuments);
-		return getDataToSign(toSignDocuments.get(0), parameters);
+	public DSSDocument signDocument(final DSSDocument toSignDocument, final XAdESSignatureParameters parameters, SignatureValue signatureValue) {
+		Objects.requireNonNull(toSignDocument, "toSignDocument is not defined!");
+		return signDocument(Collections.singletonList(toSignDocument), parameters, signatureValue);
 	}
 
 	@Override
-	public DSSDocument signDocument(final DSSDocument toSignDocument, final XAdESSignatureParameters parameters, SignatureValue signatureValue)
-	{
-		Objects.requireNonNull(toSignDocument, "toSignDocument is not defined!");
+	public DSSDocument signDocument(List<DSSDocument> toSignDocuments, XAdESSignatureParameters parameters,
+			SignatureValue signatureValue) {
+		Objects.requireNonNull(toSignDocuments, "toSignDocuments are not defined!");
 		Objects.requireNonNull(parameters, "SignatureParameters cannot be null!");
 		Objects.requireNonNull(parameters.getSignatureLevel(), "SignatureLevel must be defined!");
 		Objects.requireNonNull(signatureValue, "SignatureValue cannot be null!");
 		
 		assertSigningCertificateValid(parameters);
+		assertMultiDocumentsAllowed(toSignDocuments, parameters);
+		assertDocumentsValid(toSignDocuments);
+
 		parameters.getContext().setOperationKind(SigningOperation.SIGN);
-		SignatureProfile profile;
+		XAdESSignatureProfile profile;
 		final XAdESProfileParameters context = parameters.getContext();
 		if (context.getProfile() != null) {
 			profile = context.getProfile();
 		} else {
 			profile = new XAdESLevelBaselineB(certificateVerifier);
 		}
-		
-		DSSDocument result = profile.signDocument(toSignDocument, parameters, signatureValue.getValue());
+
+		DSSDocument result = profile.signDocument(toSignDocuments, parameters, signatureValue.getValue());
 		final SignatureExtension<XAdESSignatureParameters> extension = getExtensionProfile(parameters);
 		if (extension != null) {
-			if (SignaturePackaging.DETACHED.equals(parameters.getSignaturePackaging()) && Utils.isCollectionEmpty(parameters.getDetachedContents())) {
-				List<DSSDocument> detachedContents = new ArrayList<>();
-				detachedContents.add(toSignDocument);
-				parameters.getContext().setDetachedContents(detachedContents);
+			if (SignaturePackaging.DETACHED.equals(parameters.getSignaturePackaging())) {
+				parameters.getContext().setDetachedContents(toSignDocuments);
 			}
 			result = extension.extendSignatures(result, parameters);
 		}
@@ -152,22 +157,8 @@ public class XAdESService extends AbstractSignatureService<XAdESSignatureParamet
 		// The internal parameters (e.g. deterministic Id) are reset between two consecutive signing operations.
 		// It prevents sharing two signatures the same cached data.
 		parameters.reinit();
-		result.setName(getFinalFileName(toSignDocument, SigningOperation.SIGN, parameters.getSignatureLevel()));
+		result.setName(getFinalFileName(toSignDocuments.get(0), SigningOperation.SIGN, parameters.getSignatureLevel()));
 		return result;
-	}
-
-	@Override
-	public DSSDocument signDocument(List<DSSDocument> toSignDocuments, XAdESSignatureParameters parameters,
-			SignatureValue signatureValue) {
-		Objects.requireNonNull(toSignDocuments, "toSignDocuments cannot be null!");
-		Objects.requireNonNull(parameters, "SignatureParameters cannot be null!");
-		Objects.requireNonNull(parameters.getSignatureLevel(), "SignatureLevel must be defined!");
-		Objects.requireNonNull(signatureValue, "SignatureValue cannot be null!");
-
-		assertMultiDocumentsAllowed(parameters);
-		assertDocumentsValid(toSignDocuments);
-		parameters.getContext().setDetachedContents(toSignDocuments);
-		return signDocument(toSignDocuments.get(0), parameters, signatureValue);
 	}
 
 	@Override
@@ -239,19 +230,28 @@ public class XAdESService extends AbstractSignatureService<XAdESSignatureParamet
 	/**
 	 * Only DETACHED and ENVELOPING signatures are allowed
 	 * 
+	 * @param toSignDocuments a list of {@link DSSDocument}s to be signed
 	 * @param parameters {@link XAdESSignatureParameters}
 	 */
-	private void assertMultiDocumentsAllowed(XAdESSignatureParameters parameters) {
+	private void assertMultiDocumentsAllowed(List<DSSDocument> toSignDocuments, XAdESSignatureParameters parameters) {
 		Objects.requireNonNull(parameters.getSignaturePackaging(), "SignaturePackaging shall be defined!");
-		SignaturePackaging signaturePackaging = parameters.getSignaturePackaging();
-		if (signaturePackaging == null || SignaturePackaging.ENVELOPED == signaturePackaging) {
-			throw new IllegalArgumentException("Not supported operation (only DETACHED or ENVELOPING are allowed)");
+
+		if (Utils.collectionSize(toSignDocuments) == 0) {
+			throw new IllegalArgumentException("The documents to sign must be provided!");
+
+		} else if (Utils.collectionSize(toSignDocuments) > 1) {
+			SignaturePackaging signaturePackaging = parameters.getSignaturePackaging();
+			if (signaturePackaging == null || SignaturePackaging.ENVELOPED == signaturePackaging) {
+				throw new IllegalArgumentException("Not supported operation (only DETACHED or ENVELOPING are allowed)");
+			}
 		}
 	}
 
 	private void assertDocumentsValid(List<DSSDocument> toSignDocuments) {
 		List<String> documentNames = new ArrayList<>();
 		for (DSSDocument document : toSignDocuments) {
+			Objects.requireNonNull(document, "Document to sign cannot be null!");
+
 			if (toSignDocuments.size() > 1 && Utils.isStringBlank(document.getName())) {
 				throw new IllegalArgumentException("All documents in the list to be signed shall have names!");
 			}

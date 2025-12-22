@@ -152,7 +152,8 @@ public class XAdESSignature extends DefaultAdvancedSignature {
 		DSSXMLUtils.registerXAdESNamespaces();
 
 		//
-		// Set the default JCE algorithms
+		// Set the default JCE algorithms.
+		// NOTE: The primary security provider is used, as Apache Santuario re-uses the instance within its code.
 		//
 		JCEMapper.setProviderId(DSSSecurityProvider.getSecurityProviderName());
 		JCEMapper.registerDefaultAlgorithms();
@@ -897,17 +898,6 @@ public class XAdESSignature extends DefaultAdvancedSignature {
 						validation.setType(DigestMatcherType.XPOINTER);
 						// found is checked in the reference validation
 						
-					} else if (DSSXMLUtils.isCounterSignature(reference, xadesPath)) {
-						validation.setType(DigestMatcherType.COUNTER_SIGNATURE);
-						// found is checked in the reference validation
-						XAdESSignature masterSignature = (XAdESSignature) getMasterSignature();
-						if (masterSignature != null) {
-							referenceValidations.add(getCounterSignatureReferenceValidation(reference, masterSignature));
-						} else {
-							LOG.warn("Master signature is not found! " +
-									"Unable to verify counter signed SignatureValue for detached signatures.");
-						}
-						
 					} else if (isElementReference && DSSXMLUtils.isKeyInfoReference(reference,
 							currentSantuarioSignature.getElement())) {
 						validation.setType(DigestMatcherType.KEY_INFO);
@@ -930,6 +920,11 @@ public class XAdESSignature extends DefaultAdvancedSignature {
 							validation.getDependentValidations().addAll(getManifestReferences(manifestElement));
 						}
 						
+					} else if (DSSXMLUtils.isCounterSignatureReference(reference, this)) {
+						validation.setType(DigestMatcherType.COUNTER_SIGNATURE);
+						// found is checked in the reference validation
+						XAdESSignature masterSignature = (XAdESSignature) getMasterSignature();
+						referenceValidations.add(getCounterSignatureReferenceValidation(reference, masterSignature));
 					}
 					
 					if (found && !isDuplicated) {
@@ -964,6 +959,10 @@ public class XAdESSignature extends DefaultAdvancedSignature {
 			
 			if (referenceValidations.size() < santuarioReferences.size()) {
 				LOG.warn("Not all references were validated!");
+			}
+
+			if (isCounterSignature()) {
+				ensureCounterSignatureReferenceFound(referenceValidations);
 			}
 			
 		}
@@ -1005,6 +1004,17 @@ public class XAdESSignature extends DefaultAdvancedSignature {
 		}
 
 		return referenceValidation;
+	}
+
+	private void ensureCounterSignatureReferenceFound(List<ReferenceValidation> referenceValidations) {
+		if (referenceValidations.stream().noneMatch(r -> DigestMatcherType.COUNTER_SIGNED_SIGNATURE_VALUE == r.getType())) {
+			LOG.warn("No Reference covering the master signature's SignatureValue has been found!");
+			ReferenceValidation referenceValidation = new ReferenceValidation();
+			referenceValidation.setType(DigestMatcherType.COUNTER_SIGNED_SIGNATURE_VALUE);
+			referenceValidation.setFound(getMasterSignature() != null);
+			referenceValidation.setIntact(false);
+			referenceValidations.add(referenceValidation);
+		}
 	}
 
 	/**

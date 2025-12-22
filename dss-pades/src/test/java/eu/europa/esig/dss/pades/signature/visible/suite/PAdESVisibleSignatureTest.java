@@ -113,7 +113,7 @@ class PAdESVisibleSignatureTest extends PKIFactoryAccess {
 
 		signatureParameters.setImageParameters(imageParameters);
 
-		Exception exception = assertThrows(AlertException.class, () -> signAndValidate());
+		Exception exception = assertThrows(AlertException.class, this::signAndValidate);
 		assertTrue(exception.getMessage().contains("The new signature field position is outside the page dimensions!"));
 
 		fieldParameters.setWidth(400);

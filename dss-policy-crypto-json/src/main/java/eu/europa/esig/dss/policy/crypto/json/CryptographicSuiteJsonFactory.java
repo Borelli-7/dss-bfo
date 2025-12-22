@@ -21,8 +21,8 @@
 package eu.europa.esig.dss.policy.crypto.json;
 
 import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
-import eu.europa.esig.dss.model.policy.CryptographicSuiteFactory;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteCatalogue;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteFactory;
 import eu.europa.esig.json.JSONParser;
 import eu.europa.esig.json.JsonObjectWrapper;
 
@@ -56,17 +56,17 @@ public class CryptographicSuiteJsonFactory implements CryptographicSuiteFactory 
     }
 
     @Override
-    public CryptographicSuite loadDefaultCryptographicSuite() {
+    public CryptographicSuiteCatalogue loadDefaultCryptographicSuite() {
         return loadCryptographicSuite(CryptographicSuiteJsonFactory.class.getResourceAsStream(DEFAULT_CRYPTOGRAPHIC_SUITES_LOCATION));
     }
 
     @Override
-    public CryptographicSuite loadCryptographicSuite(DSSDocument cryptographicSuiteDocument) {
+    public CryptographicSuiteCatalogue loadCryptographicSuite(DSSDocument cryptographicSuiteDocument) {
         return loadCryptographicSuite(cryptographicSuiteDocument.openStream());
     }
 
     @Override
-    public CryptographicSuite loadCryptographicSuite(InputStream cryptographicSuiteInputStream) {
+    public CryptographicSuiteCatalogue loadCryptographicSuite(InputStream cryptographicSuiteInputStream) {
         try (InputStream is = cryptographicSuiteInputStream) {
             JsonObjectWrapper jsonObject = new JSONParser().parse(is);
             if (jsonObject == null) {
@@ -78,7 +78,7 @@ public class CryptographicSuiteJsonFactory implements CryptographicSuiteFactory 
                 throw new IllegalArgumentException(String.format("The root element of JSON shall be a JSON object of '%s' type!",
                         CryptographicSuiteJsonConstraints.SECURITY_SUITABILITY_POLICY));
             }
-            return new CryptographicSuiteJsonWrapper(securitySuitabilityPolicyType);
+            return new CryptographicSuiteJsonCatalogue(securitySuitabilityPolicyType);
         } catch (Exception e) {
             throw new UnsupportedOperationException(
                     String.format("Unable to load the default policy document. Reason : %s", e.getMessage()), e);

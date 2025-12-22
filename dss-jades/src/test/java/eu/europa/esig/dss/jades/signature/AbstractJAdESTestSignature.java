@@ -25,12 +25,15 @@ import eu.europa.esig.dss.diagnostic.DiagnosticData;
 import eu.europa.esig.dss.diagnostic.FoundCertificatesProxy;
 import eu.europa.esig.dss.diagnostic.RelatedCertificateWrapper;
 import eu.europa.esig.dss.diagnostic.SignatureWrapper;
+import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestMatcher;
 import eu.europa.esig.dss.enumerations.CertificateRefOrigin;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
+import eu.europa.esig.dss.enumerations.DigestMatcherType;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.JWSSerializationType;
 import eu.europa.esig.dss.enumerations.MimeType;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
+import eu.europa.esig.dss.enumerations.SigDMechanism;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.jades.DSSJsonUtils;
 import eu.europa.esig.dss.jades.HTTPHeader;
@@ -43,10 +46,10 @@ import eu.europa.esig.dss.jades.validation.JWS;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.spi.DSSASN1Utils;
 import eu.europa.esig.dss.spi.DSSUtils;
+import eu.europa.esig.dss.spi.SignatureCertificateSource;
+import eu.europa.esig.dss.spi.signature.AdvancedSignature;
 import eu.europa.esig.dss.test.signature.AbstractPkiFactoryTestDocumentSignatureService;
 import eu.europa.esig.dss.utils.Utils;
-import eu.europa.esig.dss.spi.signature.AdvancedSignature;
-import eu.europa.esig.dss.spi.SignatureCertificateSource;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.validationreport.jaxb.SignatureIdentifierType;
@@ -95,7 +98,7 @@ public abstract class AbstractJAdESTestSignature
 		super.checkAdvancedSignatures(signatures);
 		
 		for (AdvancedSignature signature : signatures) {
-			assertTrue(signature instanceof JAdESSignature);
+            assertInstanceOf(JAdESSignature.class, signature);
 			JAdESSignature jadesSignature = (JAdESSignature) signature;
 
 			JWS jws = jadesSignature.getJws();
@@ -106,14 +109,15 @@ public abstract class AbstractJAdESTestSignature
 			} else {
 				assertTrue(Utils.isCollectionNotEmpty(etsiU));
 
-				if (getSignatureParameters().isBase64UrlEncodedEtsiUComponents()) {
+				Boolean isBase64UrlEncodedEtsiU = getSignatureParameters().isBase64UrlEncodedEtsiUComponents();
+				if (isBase64UrlEncodedEtsiU == null || isBase64UrlEncodedEtsiU) {
 					for (Object item : etsiU) {
-						assertTrue(item instanceof String);
+                        assertInstanceOf(String.class, item);
 						assertTrue(DSSJsonUtils.isBase64UrlEncoded((String) item));
 					}
 				} else {
 					for (Object item : etsiU) {
-						assertTrue(item instanceof Map);
+                        assertInstanceOf(Map.class, item);
 						assertEquals(1, ((Map<?, ?>) item).size());
 					}
 				}
@@ -167,6 +171,21 @@ public abstract class AbstractJAdESTestSignature
 					default:
 						fail(String.format("DigestAlgorithm '%s' is not supported for JWS with ECDSA!",
 								signatureWrapper.getDigestAlgorithm()));
+				}
+			}
+		}
+	}
+
+	@Override
+	protected void checkDigestMatchers(DiagnosticData diagnosticData) {
+		super.checkDigestMatchers(diagnosticData);
+
+		for (SignatureWrapper signatureWrapper : diagnosticData.getSignatures()) {
+			for (XmlDigestMatcher xmlDigestMatcher : signatureWrapper.getDigestMatchers()) {
+				if (DigestMatcherType.JWS_SIGNING_INPUT_DIGEST == xmlDigestMatcher.getType() && SigDMechanism.OBJECT_ID_BY_URI == getSignatureParameters().getSigDMechanism()) {
+					assertTrue(Utils.isCollectionNotEmpty(xmlDigestMatcher.getDataObjectReferences()));
+				} else {
+					assertFalse(Utils.isCollectionNotEmpty(xmlDigestMatcher.getDataObjectReferences()));
 				}
 			}
 		}
@@ -267,8 +286,31 @@ public abstract class AbstractJAdESTestSignature
 		super.checkMimeType(diagnosticData);
 
 		SignatureWrapper signature = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
-		assertNotNull(signature.getSignatureType());
-		assertEquals(getExpectedMime(), MimeType.fromMimeTypeString(signature.getSignatureType()));
+		if (getSignatureParameters().isIncludeSignatureType()) {
+			assertNotNull(signature.getSignatureType());
+			assertEquals(getExpectedMime(), MimeType.fromMimeTypeString(signature.getSignatureType()));
+		} else {
+			assertNull(signature.getSignatureType());
+		}
+	}
+
+	@Override
+	protected void checkJWSSerializationType(DiagnosticData diagnosticData) {
+		for (SignatureWrapper signatureWrapper : diagnosticData.getSignatures()) {
+			assertEquals(getSignatureParameters().getJwsSerializationType(), signatureWrapper.getJWSSerializationType());
+		}
+	}
+
+	@Override
+	protected void checkExpirationDate(DiagnosticData diagnosticData) {
+		super.checkExpirationDate(diagnosticData);
+
+		SignatureWrapper signature = diagnosticData.getSignatureById(diagnosticData.getFirstSignatureId());
+		if (getSignatureParameters().getExpirationTime() != null) {
+			assertNotNull(signature.getExpirationTime());
+		} else {
+			assertNull(signature.getExpirationTime());
+		}
 	}
 
 	@Override

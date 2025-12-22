@@ -989,7 +989,7 @@ public final class ASiCUtils {
 			entry.setUri(document.getName());
 			entry.setMimeType(document.getMimeType());
 			entry.setFound(true);
-			entry.setDocumentName(document.getName());
+			entry.setDocument(document);
 			entries.add(entry);
 		}
 		return entries;

@@ -52,7 +52,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -176,12 +176,10 @@ class ValidationPolicyWithCryptographicSuiteTest {
         assertNull(policy.getContentTimeStampConstraint(Context.SIGNATURE));
         assertNull(policy.getContentTimeStampMessageImprintConstraint(Context.SIGNATURE));
 
-        ValueConstraint valueConstraint = new ValueConstraint();
-        valueConstraint.setLevel(Level.FAIL);
+        signedAttr.setContentType(multi);
+        signedAttr.setContentHints(multi);
+        signedAttr.setContentIdentifier(multi);
 
-        signedAttr.setContentType(valueConstraint);
-        signedAttr.setContentHints(valueConstraint);
-        signedAttr.setContentIdentifier(valueConstraint);
         signedAttr.setContentTimeStamp(level);
         signedAttr.setContentTimeStampMessageImprint(level);
 
@@ -208,7 +206,7 @@ class ValidationPolicyWithCryptographicSuiteTest {
         assertEquals(Level.FAIL, policy.getSigningCertificateRefersCertificateChainConstraint(Context.SIGNATURE).getLevel());
         assertEquals(Level.FAIL, policy.getReferencesToAllCertificateChainPresentConstraint(Context.SIGNATURE).getLevel());
         assertEquals(Level.FAIL, policy.getSigningCertificateDigestAlgorithmConstraint(Context.SIGNATURE).getLevel());
-        assertEquals(Level.FAIL, policy.getSigningDurationRule(Context.SIGNATURE).getLevel());
+        assertEquals(Level.FAIL, policy.getSigningTimeConstraint(Context.SIGNATURE).getLevel());
         assertEquals(Level.FAIL, policy.getMessageDigestOrSignedPropertiesConstraint(Context.SIGNATURE).getLevel());
         assertEquals(Level.FAIL, policy.getEllipticCurveKeySizeConstraint(Context.SIGNATURE).getLevel());
         assertEquals(Level.FAIL, policy.getSignerLocationConstraint(Context.SIGNATURE).getLevel());
@@ -502,7 +500,7 @@ class ValidationPolicyWithCryptographicSuiteTest {
 
         // Initially all should be null
         assertNull(policy.getBestSignatureTimeBeforeExpirationDateOfSigningCertificateConstraint());
-        assertNull(policy.getRevocationTimeAgainstBestSignatureDurationRule());
+        assertNull(policy.getRevocationTimeAgainstBestSignatureTimeConstraint());
         assertNull(policy.getTimestampCoherenceConstraint());
         assertNull(policy.getTimestampDelayConstraint());
         assertNull(policy.getTimestampValidConstraint());
@@ -524,7 +522,7 @@ class ValidationPolicyWithCryptographicSuiteTest {
         timestampConstraints.setTimestampDelay(timeLevel);
 
         assertEquals(Level.FAIL, policy.getBestSignatureTimeBeforeExpirationDateOfSigningCertificateConstraint().getLevel());
-        assertEquals(Level.FAIL, policy.getRevocationTimeAgainstBestSignatureDurationRule().getLevel());
+        assertEquals(Level.FAIL, policy.getRevocationTimeAgainstBestSignatureTimeConstraint().getLevel());
         assertEquals(Level.FAIL, policy.getTimestampCoherenceConstraint().getLevel());
         assertEquals(Level.FAIL, policy.getTimestampValidConstraint().getLevel());
         assertEquals(Level.FAIL, policy.getTimestampTSAGeneralNamePresent().getLevel());
@@ -644,13 +642,13 @@ class ValidationPolicyWithCryptographicSuiteTest {
 
         for (Context context : Context.values()) {
             if (Context.EVIDENCE_RECORD != context) {
-                assertEquals(Collections.emptyList(), policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms());
+                assertEquals(Collections.emptySet(), policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms().keySet());
                 for (SubContext subContext : SubContext.values()) {
-                    assertEquals(Collections.emptyList(), policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms());
+                    assertEquals(Collections.emptySet(), policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms().keySet());
                 }
             }
         }
-        assertEquals(Collections.emptyList(), policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms());
+        assertEquals(Collections.emptySet(), policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
 
         // default crypto suite
         CryptographicConstraint defaultCrypto = new CryptographicConstraint();
@@ -663,16 +661,16 @@ class ValidationPolicyWithCryptographicSuiteTest {
 
         constraintsParameters.setCryptographic(defaultCrypto);
 
-        List<DigestAlgorithm> sha1List = Collections.singletonList(DigestAlgorithm.SHA1);
+        Set<DigestAlgorithm> sha1List = Collections.singleton(DigestAlgorithm.SHA1);
         for (Context context : Context.values()) {
             if (Context.EVIDENCE_RECORD != context) {
-                assertEquals(sha1List, policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms());
+                assertEquals(sha1List, policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms().keySet());
                 for (SubContext subContext : SubContext.values()) {
-                    assertEquals(sha1List, policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms());
+                    assertEquals(sha1List, policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms().keySet());
                 }
             }
         }
-        assertEquals(sha1List, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms());
+        assertEquals(sha1List, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
 
         // default crypto suite
         CryptographicConstraint altCrypto = new CryptographicConstraint();
@@ -686,16 +684,16 @@ class ValidationPolicyWithCryptographicSuiteTest {
         CryptographicSuite altCryptoSuite = new CryptographicConstraintWrapper(altCrypto);
         policy.setCryptographicSuite(altCryptoSuite);
 
-        List<DigestAlgorithm> sha256List = Collections.singletonList(DigestAlgorithm.SHA256);
+        Set<DigestAlgorithm> sha256List = Collections.singleton(DigestAlgorithm.SHA256);
         for (Context context : Context.values()) {
             if (Context.EVIDENCE_RECORD != context) {
-                assertEquals(sha256List, policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms());
+                assertEquals(sha256List, policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms().keySet());
                 for (SubContext subContext : SubContext.values()) {
-                    assertEquals(sha256List, policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms());
+                    assertEquals(sha256List, policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms().keySet());
                 }
             }
         }
-        assertEquals(sha256List, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms());
+        assertEquals(sha256List, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
 
         for (Context context : Context.values()) {
             policy = new ValidationPolicyWithCryptographicSuite(etsiValidationPolicy);
@@ -704,20 +702,20 @@ class ValidationPolicyWithCryptographicSuiteTest {
             for (Context currentContext : Context.values()) {
                 if (Context.EVIDENCE_RECORD == currentContext) {
                     if (context == currentContext) {
-                        assertEquals(sha256List, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms());
+                        assertEquals(sha256List, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
                     } else {
-                        assertEquals(sha1List, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms());
+                        assertEquals(sha1List, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
                     }
 
                 } else {
                     if (context == currentContext) {
-                        assertEquals(sha256List, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms());
-                        assertEquals(sha256List, policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms());
-                        assertEquals(sha256List, policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms());
+                        assertEquals(sha256List, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(sha256List, policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(sha256List, policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
                     } else {
-                        assertEquals(sha1List, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms());
-                        assertEquals(sha1List, policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms());
-                        assertEquals(sha1List, policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms());
+                        assertEquals(sha1List, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(sha1List, policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(sha1List, policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
                     }
                 }
             }
@@ -733,11 +731,11 @@ class ValidationPolicyWithCryptographicSuiteTest {
                         if (Context.EVIDENCE_RECORD != currentContext) {
                             for (SubContext currentSubContext : SubContext.values()) {
                                 if (context == currentContext && subContext == currentSubContext) {
-                                    assertEquals(sha1List, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms());
-                                    assertEquals(sha256List, policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms());
+                                    assertEquals(sha1List, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                                    assertEquals(sha256List, policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms().keySet());
                                 } else {
-                                    assertEquals(sha1List, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms());
-                                    assertEquals(sha1List, policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms());
+                                    assertEquals(sha1List, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                                    assertEquals(sha1List, policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms().keySet());
                                 }
                             }
                         }

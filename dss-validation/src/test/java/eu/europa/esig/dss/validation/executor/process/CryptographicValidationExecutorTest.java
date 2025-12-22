@@ -21,6 +21,7 @@
 package eu.europa.esig.dss.validation.executor.process;
 
 import eu.europa.esig.dss.detailedreport.DetailedReport;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraint;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCryptographicValidation;
@@ -43,6 +44,7 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureQualification;
 import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.i18n.MessageTag;
@@ -57,6 +59,7 @@ import eu.europa.esig.dss.policy.jaxb.SignatureConstraints;
 import eu.europa.esig.dss.policy.jaxb.SignedAttributesConstraints;
 import eu.europa.esig.dss.simplereport.SimpleReport;
 import eu.europa.esig.dss.validation.executor.signature.DefaultSignatureProcessExecutor;
+import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
 import eu.europa.esig.dss.validation.reports.Reports;
 import org.junit.jupiter.api.Test;
 
@@ -138,10 +141,11 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         List<String> revocationIds = detailedReport.getRevocationIds();
         for (String revocationId : revocationIds) {
             XmlBasicBuildingBlocks bbb = detailedReport.getBasicBuildingBlockById(revocationId);
-            XmlSAV sav = bbb.getSAV();
-            XmlCryptographicValidation cryptographicValidation = sav.getCryptographicValidation();
-            if (!cryptographicValidation.isSecure()) {
+            XmlAOV aov = bbb.getAOV();
+            XmlCryptographicValidation cryptographicValidation = aov.getSignatureCryptographicValidation();
+            if (Indication.INDETERMINATE == cryptographicValidation.getConclusion().getIndication()) {
                 foundWeakAlgo = true;
+                assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, cryptographicValidation.getConclusion().getSubIndication());
                 assertTrue(validationDate.after(cryptographicValidation.getNotAfter()));
             }
         }
@@ -508,8 +512,15 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         XmlBasicBuildingBlocks signatureBBB = detailedReport.getBasicBuildingBlockById(detailedReport.getFirstSignatureId());
         XmlSAV sav = signatureBBB.getSAV();
         assertEquals(1, sav.getConclusion().getErrors().size());
+        assertEquals(Indication.INDETERMINATE, sav.getConclusion().getIndication());
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, sav.getConclusion().getSubIndication());
 
-        XmlCryptographicValidation cryptographicValidation = sav.getCryptographicValidation();
+        XmlAOV aov = signatureBBB.getAOV();
+        assertEquals(1, aov.getConclusion().getErrors().size());
+        assertEquals(Indication.INDETERMINATE, aov.getConclusion().getIndication());
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, aov.getConclusion().getSubIndication());
+
+        XmlCryptographicValidation cryptographicValidation = aov.getDigestMatchersValidation();
         assertEquals(DigestAlgorithm.SHA1, DigestAlgorithm.forXML(cryptographicValidation.getAlgorithm().getUri()));
 
         List<Message> errors = simpleReport.getAdESValidationErrors(simpleReport.getFirstSignatureId());
@@ -544,8 +555,15 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         XmlBasicBuildingBlocks signatureBBB = detailedReport.getBasicBuildingBlockById(xmlTimestamp.getId());
         XmlSAV sav = signatureBBB.getSAV();
         assertEquals(1, sav.getConclusion().getErrors().size());
+        assertEquals(Indication.INDETERMINATE, sav.getConclusion().getIndication());
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, sav.getConclusion().getSubIndication());
 
-        XmlCryptographicValidation cryptographicValidation = sav.getCryptographicValidation();
+        XmlAOV aov = signatureBBB.getAOV();
+        assertEquals(1, aov.getConclusion().getErrors().size());
+        assertEquals(Indication.INDETERMINATE, aov.getConclusion().getIndication());
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, aov.getConclusion().getSubIndication());
+
+        XmlCryptographicValidation cryptographicValidation = aov.getDigestMatchersValidation();
         assertEquals(DigestAlgorithm.SHA1, DigestAlgorithm.forXML(cryptographicValidation.getAlgorithm().getUri()));
 
         List<Message> errors = simpleReport.getAdESValidationErrors(simpleReport.getFirstSignatureId());
@@ -644,7 +662,7 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
 
         assertTrue(checkMessageValuePresence(simpleReport.getAdESValidationErrors(simpleReport.getFirstSignatureId()),
                 i18nProvider.getMessage(MessageTag.ASCCM_AR_ANS_AKSNR,
-                        EncryptionAlgorithm.DSA.getName(), "1024", MessageTag.ACCM_POS_SIG_SIG)));
+                        SignatureAlgorithm.DSA_SHA256.getName(), "1024", MessageTag.ACCM_POS_SIG_SIG)));
     }
 
     @Test
@@ -697,8 +715,13 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         assertEquals(Indication.INDETERMINATE, sav.getConclusion().getIndication());
         assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, sav.getConclusion().getSubIndication());
 
+        XmlAOV aov = signatureBBB.getAOV();
+        assertNotNull(aov);
+        assertEquals(Indication.INDETERMINATE, aov.getConclusion().getIndication());
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, aov.getConclusion().getSubIndication());
+
         boolean signRefDACheckFound = false;
-        for (XmlConstraint constraint : sav.getConstraint()) {
+        for (XmlConstraint constraint : aov.getConstraint()) {
             if (i18nProvider.getMessage(MessageTag.ACCM, MessageTag.ACCM_POS_SIG_CERT_REF).equals(constraint.getName().getValue())) {
                 assertEquals(XmlStatus.NOT_OK, constraint.getStatus());
                 assertEquals(MessageTag.ASCCM_AR_ANS_ANR.getId(), constraint.getError().getKey());
@@ -760,8 +783,12 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         assertNotNull(sav);
         assertEquals(Indication.PASSED, sav.getConclusion().getIndication());
 
+        XmlAOV aov = signatureBBB.getAOV();
+        assertNotNull(aov);
+        assertEquals(Indication.PASSED, aov.getConclusion().getIndication());
+
         boolean signRefDACheckFound = false;
-        for (XmlConstraint constraint : sav.getConstraint()) {
+        for (XmlConstraint constraint : aov.getConstraint()) {
             if (i18nProvider.getMessage(MessageTag.ACCM, MessageTag.ACCM_POS_SIG_CERT_REF).equals(constraint.getName().getValue())) {
                 assertEquals(XmlStatus.WARNING, constraint.getStatus());
                 assertEquals(MessageTag.ASCCM_AR_ANS_ANR.getId(), constraint.getWarning().getKey());
@@ -819,8 +846,12 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         assertNotNull(sav);
         assertEquals(Indication.PASSED, sav.getConclusion().getIndication());
 
+        XmlAOV aov = signatureBBB.getAOV();
+        assertNotNull(aov);
+        assertEquals(Indication.PASSED, aov.getConclusion().getIndication());
+
         boolean signRefDACheckFound = false;
-        for (XmlConstraint constraint : sav.getConstraint()) {
+        for (XmlConstraint constraint : aov.getConstraint()) {
             if (i18nProvider.getMessage(MessageTag.ACCM, MessageTag.ACCM_POS_SIG_CERT_REF).equals(constraint.getName().getValue())) {
                 assertEquals(XmlStatus.WARNING, constraint.getStatus());
                 assertEquals(MessageTag.ASCCM_AR_ANS_ANR.getId(), constraint.getWarning().getKey());
@@ -875,8 +906,13 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         assertEquals(Indication.INDETERMINATE, sav.getConclusion().getIndication());
         assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, sav.getConclusion().getSubIndication());
 
+        XmlAOV aov = signatureBBB.getAOV();
+        assertNotNull(aov);
+        assertEquals(Indication.INDETERMINATE, aov.getConclusion().getIndication());
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, aov.getConclusion().getSubIndication());
+
         boolean signRefDACheckFound = false;
-        for (XmlConstraint constraint : sav.getConstraint()) {
+        for (XmlConstraint constraint : aov.getConstraint()) {
             if (i18nProvider.getMessage(MessageTag.ACCM, MessageTag.ACCM_POS_SIG_CERT_REF).equals(constraint.getName().getValue())) {
                 assertEquals(XmlStatus.NOT_OK, constraint.getStatus());
                 assertEquals(MessageTag.ASCCM_AR_ANS_ANR.getId(), constraint.getError().getKey());
@@ -965,8 +1001,13 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         assertEquals(Indication.INDETERMINATE, sav.getConclusion().getIndication());
         assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, sav.getConclusion().getSubIndication());
 
+        XmlAOV aov = signatureBBB.getAOV();
+        assertNotNull(aov);
+        assertEquals(Indication.INDETERMINATE, aov.getConclusion().getIndication());
+        assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, aov.getConclusion().getSubIndication());
+
         boolean signRefDACheckFound = false;
-        for (XmlConstraint constraint : sav.getConstraint()) {
+        for (XmlConstraint constraint : aov.getConstraint()) {
             if (i18nProvider.getMessage(MessageTag.ACCM, MessageTag.ACCM_POS_SIG_CERT_REF).equals(constraint.getName().getValue())) {
                 assertEquals(XmlStatus.NOT_OK, constraint.getStatus());
                 assertEquals(MessageTag.ASCCM_AR_ANS_ANR.getId(), constraint.getError().getKey());
@@ -1001,7 +1042,7 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         assertEquals(Indication.INDETERMINATE, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
         assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, simpleReport.getSubIndication(simpleReport.getFirstSignatureId()));
         assertTrue(checkMessageValuePresence(simpleReport.getAdESValidationErrors(simpleReport.getFirstSignatureId()),
-                i18nProvider.getMessage(MessageTag.ASCCM_DAA_ANS, DigestAlgorithm.MD2, MessageTag.ACCM_POS_SIG_SIG)));
+                i18nProvider.getMessage(MessageTag.ASCCM_CAA_ANS, SignatureAlgorithm.RSA_MD2.getName(), MessageTag.ACCM_POS_SIG_SIG)));
         assertFalse(checkMessageValuePresence(simpleReport.getAdESValidationErrors(simpleReport.getFirstSignatureId()),
                 i18nProvider.getMessage(MessageTag.BSV_ICTGTNACCET_ANS)));
 
@@ -1021,8 +1062,11 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         for (XmlConstraint constraint : signatureSAV.getConstraint()) {
             if (MessageTag.ACCM.getId().equals(constraint.getName().getKey())) {
                 assertEquals(XmlStatus.NOT_OK, constraint.getStatus());
-                assertEquals(i18nProvider.getMessage(MessageTag.ASCCM_DAA_ANS, DigestAlgorithm.MD2, MessageTag.ACCM_POS_SIG_SIG),
-                        constraint.getError().getValue());
+                assertEquals(MessageTag.ACCM_ANS.getId(), constraint.getError().getKey());
+                assertEquals(i18nProvider.getMessage(MessageTag.CRYPTOGRAPHIC_CHECK_FAILURE,
+                                i18nProvider.getMessage(MessageTag.ASCCM_CAA_ANS, SignatureAlgorithm.RSA_MD2.getName(), MessageTag.ACCM_POS_SIG_SIG),
+                                ValidationProcessUtils.getFormattedDate(diagnosticData.getValidationDate())),
+                        constraint.getAdditionalInfo());
                 cryptoCheckFound = true;
             } else {
                 assertEquals(XmlStatus.OK, constraint.getStatus());
@@ -1071,7 +1115,7 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         assertEquals(Indication.INDETERMINATE, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
         assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE, simpleReport.getSubIndication(simpleReport.getFirstSignatureId()));
         assertTrue(checkMessageValuePresence(simpleReport.getAdESValidationErrors(simpleReport.getFirstSignatureId()),
-                i18nProvider.getMessage(MessageTag.ASCCM_DAA_ANS, DigestAlgorithm.MD2, MessageTag.ACCM_POS_SIG_SIG)));
+                i18nProvider.getMessage(MessageTag.ASCCM_CAA_ANS, SignatureAlgorithm.RSA_MD2.getName(), MessageTag.ACCM_POS_SIG_SIG)));
         assertTrue(checkMessageValuePresence(simpleReport.getAdESValidationErrors(simpleReport.getFirstSignatureId()),
                 i18nProvider.getMessage(MessageTag.BSV_ICTGTNACCET_ANS)));
 
@@ -1091,8 +1135,11 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         for (XmlConstraint constraint : signatureSAV.getConstraint()) {
             if (MessageTag.ACCM.getId().equals(constraint.getName().getKey())) {
                 assertEquals(XmlStatus.NOT_OK, constraint.getStatus());
-                assertEquals(i18nProvider.getMessage(MessageTag.ASCCM_DAA_ANS, DigestAlgorithm.MD2, MessageTag.ACCM_POS_SIG_SIG),
-                        constraint.getError().getValue());
+                assertEquals(MessageTag.ACCM_ANS.getId(), constraint.getError().getKey());
+                assertEquals(i18nProvider.getMessage(MessageTag.CRYPTOGRAPHIC_CHECK_FAILURE,
+                                i18nProvider.getMessage(MessageTag.ASCCM_CAA_ANS, SignatureAlgorithm.RSA_MD2.getName(), MessageTag.ACCM_POS_SIG_SIG),
+                                ValidationProcessUtils.getFormattedDate(diagnosticData.getValidationDate())),
+                        constraint.getAdditionalInfo());
                 cryptoCheckFound = true;
             } else {
                 assertEquals(XmlStatus.OK, constraint.getStatus());
@@ -1147,7 +1194,7 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         assertEquals(Indication.INDETERMINATE, simpleReport.getIndication(simpleReport.getFirstSignatureId()));
         assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, simpleReport.getSubIndication(simpleReport.getFirstSignatureId()));
         assertTrue(checkMessageValuePresence(simpleReport.getAdESValidationErrors(simpleReport.getFirstSignatureId()),
-                i18nProvider.getMessage(MessageTag.ASCCM_DAA_ANS, DigestAlgorithm.MD2, MessageTag.ACCM_POS_SIG_SIG)));
+                i18nProvider.getMessage(MessageTag.ASCCM_CAA_ANS, SignatureAlgorithm.RSA_MD2.getName(), MessageTag.ACCM_POS_SIG_SIG)));
         assertFalse(checkMessageValuePresence(simpleReport.getAdESValidationErrors(simpleReport.getFirstSignatureId()),
                 i18nProvider.getMessage(MessageTag.BSV_ICTGTNACCET_ANS)));
         assertFalse(checkMessageValuePresence(simpleReport.getAdESValidationWarnings(simpleReport.getFirstSignatureId()),
@@ -1157,7 +1204,7 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         assertEquals(Indication.INDETERMINATE, contentTst.getIndication());
         assertEquals(SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE, contentTst.getSubIndication());
         assertTrue(checkMessageValuePresence(convertMessages(contentTst.getAdESValidationDetails().getError()),
-                i18nProvider.getMessage(MessageTag.ASCCM_DAA_ANS, DigestAlgorithm.SHA3_224.getName(), MessageTag.ACCM_POS_TST_SIG)));
+                i18nProvider.getMessage(MessageTag.ASCCM_CAA_ANS, SignatureAlgorithm.RSA_SHA3_224.getName(), MessageTag.ACCM_POS_TST_SIG)));
 
         DetailedReport detailedReport = reports.getDetailedReport();
 
@@ -1176,8 +1223,11 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         for (XmlConstraint constraint : signatureSAV.getConstraint()) {
             if (MessageTag.ACCM.getId().equals(constraint.getName().getKey())) {
                 assertEquals(XmlStatus.NOT_OK, constraint.getStatus());
-                assertEquals(i18nProvider.getMessage(MessageTag.ASCCM_DAA_ANS, DigestAlgorithm.MD2, MessageTag.ACCM_POS_SIG_SIG),
-                        constraint.getError().getValue());
+                assertEquals(MessageTag.ACCM_ANS.getId(), constraint.getError().getKey());
+                assertEquals(i18nProvider.getMessage(MessageTag.CRYPTOGRAPHIC_CHECK_FAILURE,
+                        i18nProvider.getMessage(MessageTag.ASCCM_CAA_ANS, SignatureAlgorithm.RSA_MD2.getName(), MessageTag.ACCM_POS_SIG_SIG),
+                                ValidationProcessUtils.getFormattedDate(diagnosticData.getValidationDate())),
+                        constraint.getAdditionalInfo());
                 cryptoCheckFound = true;
             } else if (MessageTag.BBB_SAV_ICTVS.getId().equals(constraint.getName().getKey())) {
                 assertEquals(XmlStatus.WARNING, constraint.getStatus());
@@ -1204,8 +1254,11 @@ class CryptographicValidationExecutorTest extends AbstractProcessExecutorTest {
         for (XmlConstraint constraint : timestampSAV.getConstraint()) {
             if (MessageTag.ACCM.getId().equals(constraint.getName().getKey())) {
                 assertEquals(XmlStatus.NOT_OK, constraint.getStatus());
-                assertEquals(i18nProvider.getMessage(MessageTag.ASCCM_DAA_ANS, DigestAlgorithm.SHA3_224.getName(), MessageTag.ACCM_POS_TST_SIG),
-                        constraint.getError().getValue());
+                assertEquals(MessageTag.ACCM_ANS.getId(), constraint.getError().getKey());
+                assertEquals(i18nProvider.getMessage(MessageTag.CRYPTOGRAPHIC_CHECK_FAILURE,
+                                i18nProvider.getMessage(MessageTag.ASCCM_CAA_ANS, SignatureAlgorithm.RSA_SHA3_224.getName(), MessageTag.ACCM_POS_TST_SIG),
+                                ValidationProcessUtils.getFormattedDate(diagnosticData.getValidationDate())),
+                        constraint.getAdditionalInfo());
                 cryptoCheckForTstFound = true;
             } else {
                 assertEquals(XmlStatus.OK, constraint.getStatus());

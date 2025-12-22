@@ -91,7 +91,7 @@ class XAdESLevelLTDetachedWithEmbeddedEvidenceRecordWrongDocProvidedTest extends
                 assertNotNull(digestMatcher.getId());
                 assertNotNull(digestMatcher.getUri());
                 assertNull(digestMatcher.getDocumentName());
-                assertFalse(digestMatcher.isDataFound());
+                assertTrue(digestMatcher.isDataFound());
                 assertFalse(digestMatcher.isDataIntact());
                 referenceDMFound = true;
 
@@ -129,7 +129,7 @@ class XAdESLevelLTDetachedWithEmbeddedEvidenceRecordWrongDocProvidedTest extends
                 assertNotNull(digestMatcher.getDigestValue());
                 ++orphanRefCounter;
             } else if (DigestMatcherType.EVIDENCE_RECORD_MASTER_SIGNATURE == digestMatcher.getType()) {
-                assertFalse(digestMatcher.isDataFound());
+                assertTrue(digestMatcher.isDataFound());
                 assertFalse(digestMatcher.isDataIntact());
                 assertNull(digestMatcher.getDigestMethod());
                 assertNull(digestMatcher.getDigestValue());
@@ -239,8 +239,8 @@ class XAdESLevelLTDetachedWithEmbeddedEvidenceRecordWrongDocProvidedTest extends
             }
 
             XmlEvidenceRecord evidenceRecord = signatureEvidenceRecords.get(0);
-            assertEquals(Indication.INDETERMINATE, evidenceRecord.getIndication());
-            assertEquals(SubIndication.SIGNED_DATA_NOT_FOUND, evidenceRecord.getSubIndication());
+            assertEquals(Indication.FAILED, evidenceRecord.getIndication());
+            assertEquals(SubIndication.HASH_FAILURE, evidenceRecord.getSubIndication());
 
             assertTrue(Utils.isCollectionEmpty(evidenceRecord.getEvidenceRecordScope()));
         }

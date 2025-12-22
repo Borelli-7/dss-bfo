@@ -35,6 +35,7 @@ import eu.europa.esig.dss.utils.Utils;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,14 +51,16 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.Provider;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -71,6 +74,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class DSSUtilsTest {
 
@@ -78,10 +83,20 @@ class DSSUtilsTest {
 
 	private static CertificateToken certificate;
 
+	static {
+		DSSSecurityProvider.initSystemProviders();
+	}
+
 	@BeforeAll
 	static void init() {
 		certificate = DSSUtils.loadCertificate(new File("src/test/resources/TSP_Certificate_2014.crt"));
 		assertNotNull(certificate);
+	}
+
+	@AfterEach
+	void resetToDefault() {
+		DSSSecurityProvider.setSecurityProvider(new BouncyCastleProvider());
+		DSSSecurityProvider.setAlternativeSecurityProviders(new Provider[] {});
 	}
 
 	@Test
@@ -123,8 +138,6 @@ class DSSUtilsTest {
 
 	@Test
 	void digestTest() {
-		Security.addProvider(DSSSecurityProvider.getSecurityProvider());
-
 		byte[] data = "Hello world!".getBytes(StandardCharsets.UTF_8);
 		assertEquals("d3486ae9136e7856bc42212385ea797094475802", Utils.toHex(DSSUtils.digest(DigestAlgorithm.SHA1, data)));
 		assertEquals("7e81ebe9e604a0c97fef0e4cfe71f9ba0ecba13332bde953ad1c66e4", Utils.toHex(DSSUtils.digest(DigestAlgorithm.SHA224, data)));
@@ -156,21 +169,26 @@ class DSSUtilsTest {
 	void testDontSkipCertificatesWhenMultipleAreFoundInP7c() throws IOException {
 		try (FileInputStream fis = new FileInputStream("src/test/resources/certchain.p7c")) {
 			DSSException exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(fis));
-			assertEquals("Could not parse certificate", exception.getMessage());
+			assertTrue(exception.getMessage().contains("Unable to load CertificateFactory for the given certificate"));
 		}
 	}
 
 	@Test
 	void testLoadP7cPEM() throws DSSException, IOException {
 		Collection<CertificateToken> certs = DSSUtils.loadCertificateFromP7c(Files.newInputStream(Paths.get("src/test/resources/certchain.p7c")));
-		assertTrue(Utils.isCollectionNotEmpty(certs));
-		assertTrue(certs.size() > 1);
+		assertEquals(3, Utils.collectionSize(certs));
+
+		certs = DSSUtils.loadCertificateFromP7c(new File("src/test/resources/certchain.p7c"));
+		assertEquals(3, Utils.collectionSize(certs));
 	}
 
 	@Test
 	void testLoadP7cNotPEM() throws DSSException, IOException {
 		Collection<CertificateToken> certs = DSSUtils.loadCertificateFromP7c(Files.newInputStream(Paths.get("src/test/resources/AdobeCA.p7c")));
-		assertTrue(Utils.isCollectionNotEmpty(certs));
+		assertEquals(1, Utils.collectionSize(certs));
+
+		certs = DSSUtils.loadCertificateFromP7c(new File("src/test/resources/AdobeCA.p7c"));
+		assertEquals(1, Utils.collectionSize(certs));
 	}
 
 	@Test
@@ -360,6 +378,86 @@ class DSSUtilsTest {
 	}
 
 	@Test
+	void encodeURI() {
+		assertNull(DSSUtils.encodeURI(null));
+		assertEquals("", DSSUtils.encodeURI(""));
+
+		// simple filename
+		assertEquals("helloworld", DSSUtils.encodeURI("helloworld"));
+		assertEquals("helloworld.txt", DSSUtils.encodeURI("helloworld.txt"));
+
+		// Basic fragment identifiers
+		assertEquals("#helloworld", DSSUtils.encodeURI("#helloworld"));
+		assertEquals("#abc123", DSSUtils.encodeURI("#abc123"));
+		assertEquals("#a_b-c~d", DSSUtils.encodeURI("#a_b-c~d"));
+		assertEquals("#äöü", DSSUtils.encodeURI("#äöü"));
+
+		// Fragment with characters needing encoding
+		assertEquals("#hello%20world", DSSUtils.encodeURI("#hello world"));
+		assertEquals("#hello/?world", DSSUtils.encodeURI("#hello/?world"));
+		assertEquals("#hello:@world", DSSUtils.encodeURI("#hello:@world"));
+
+		// Multiple # inside fragment
+		assertEquals("#hello%23world", DSSUtils.encodeURI("#hello#world"));
+		assertEquals("#one%23two%23three", DSSUtils.encodeURI("#one#two#three"));
+
+		// Full URLs with fragments
+		assertEquals("https://example.com/test#section", DSSUtils.encodeURI("https://example.com/test#section"));
+		assertEquals("https://example.com/a/b#c/d", DSSUtils.encodeURI("https://example.com/a/b#c/d"));
+		assertEquals("https://example.com/hi#world/tree%23one", DSSUtils.encodeURI("https://example.com/hi#world/tree#one"));
+
+		// Full URLs containing spaces / illegal chars
+		assertEquals("https://example.com/hello%20world#frag", DSSUtils.encodeURI("https://example.com/hello world#frag"));
+		assertEquals("https://example.com/a%20b/c#d%20e", DSSUtils.encodeURI("https://example.com/a b/c#d e"));
+
+		// Corrupted URLs
+		assertEquals("https:/example.com/a%20b/c#d%20e", DSSUtils.encodeURI("https:/example.com/a b/c#d e"));
+		assertEquals("https/example.com/a%20b/c#d%20e", DSSUtils.encodeURI("https/example.com/a b/c#d e"));
+		assertEquals("https//example.com/a%20b/c#d%20e", DSSUtils.encodeURI("https//example.com/a b/c#d e"));
+
+		// Failed URL transformation URL
+		assertEquals("https:example.com/a b/c#d e", DSSUtils.encodeURI("https:example.com/a b/c#d e"));
+
+		// URL with complex query
+		assertEquals("https://test.com/search?q=a%20b&sort=asc#top", DSSUtils.encodeURI("https://test.com/search?q=a b&sort=asc#top"));
+
+		// Path-only references
+		assertEquals("Hello%20world.txt", DSSUtils.encodeURI("Hello world.txt"));
+		assertEquals("Hello+world.txt", DSSUtils.encodeURI("Hello+world.txt"));
+		assertEquals("hello/world", DSSUtils.encodeURI("hello/world"));
+		assertEquals("hello/world%20wide", DSSUtils.encodeURI("hello/world wide"));
+		assertEquals("hello%2520world", DSSUtils.encodeURI("hello%20world"));
+		assertEquals("path/with%25percent", DSSUtils.encodeURI("path/with%percent"));
+
+		// Path + fragment
+		assertEquals("my/path#id", DSSUtils.encodeURI("my/path#id"));
+		assertEquals("my/path#id%23sub", DSSUtils.encodeURI("my/path#id#sub"));
+		assertEquals("folder/file%20name#my%20fragment", DSSUtils.encodeURI("folder/file name#my fragment"));
+
+		// Relative references
+		assertEquals("doc.xml", DSSUtils.encodeURI("doc.xml"));
+		assertEquals("doc.xml#sig", DSSUtils.encodeURI("doc.xml#sig"));
+		assertEquals("doc%20name.xml#frag%20id", DSSUtils.encodeURI("doc name.xml#frag id"));
+
+		// Embedded scheme inside path
+		assertEquals("hello/https://google.com/hi#world/tree%23one", DSSUtils.encodeURI("hello/https://google.com/hi#world/tree#one"));
+		assertEquals("prefix/urn:example:abc#x%23y", DSSUtils.encodeURI("prefix/urn:example:abc#x#y"));
+
+		// Unicode outside fragment
+		assertEquals("hällo/world", DSSUtils.encodeURI("hällo/world"));
+		assertEquals("path/✓/check", DSSUtils.encodeURI("path/✓/check"));
+		assertEquals("привет.xml", DSSUtils.encodeURI("привет.xml"));
+		assertEquals("δοκιμή.xml", DSSUtils.encodeURI("δοκιμή.xml"));
+
+		// Illegal characters requiring encoding
+		assertEquals("a%3Cb", DSSUtils.encodeURI("a<b"));
+		assertEquals("a%3Eb", DSSUtils.encodeURI("a>b"));
+		assertEquals("x%7Cy", DSSUtils.encodeURI("x|y"));
+		assertEquals("file%20name#frag", DSSUtils.encodeURI("file name#frag"));
+		assertEquals("file#f%20r%23a*g", DSSUtils.encodeURI("file#f r#a*g"));
+	}
+
+	@Test
 	void testRSASSAPSS() {
 		CertificateToken token = DSSUtils.loadCertificate(this.getClass().getResourceAsStream("/BA-QC-Wurzel-CA-2_PN.txt"));
 		assertTrue(token.isSelfSigned());
@@ -432,8 +530,6 @@ class DSSUtilsTest {
 
 		// RFC 8410
 
-		Security.addProvider(DSSSecurityProvider.getSecurityProvider());
-		
 		CertificateToken token = DSSUtils.loadCertificateFromBase64EncodedString(
 				"MIIBLDCB36ADAgECAghWAUdKKo3DMDAFBgMrZXAwGTEXMBUGA1UEAwwOSUVURiBUZXN0IERlbW8wHhcNMTYwODAxMTIxOTI0WhcNNDAxMjMxMjM1OTU5WjAZMRcwFQYDVQQDDA5JRVRGIFRlc3QgRGVtbzAqMAUGAytlbgMhAIUg8AmJMKdUdIt93LQ+91oNvzoNJjga9OukqY6qm05qo0UwQzAPBgNVHRMBAf8EBTADAQEAMA4GA1UdDwEBAAQEAwIDCDAgBgNVHQ4BAQAEFgQUmx9e7e0EM4Xk97xiPFl1uQvIuzswBQYDK2VwA0EAryMB/t3J5v/BzKc9dNZIpDmAgs3babFOTQbs+BolzlDUwsPrdGxO3YNGhW7Ibz3OGhhlxXrCe1Cgw1AH9efZBw==");
 		assertNotNull(token);
@@ -511,7 +607,6 @@ class DSSUtilsTest {
 
 	@Test
 	void signAndConvertECSignatureValueTest() throws Exception {
-		Security.addProvider(new BouncyCastleProvider());
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("ECDSA");
 		KeyPair pair = gen.generateKeyPair();
 
@@ -665,6 +760,129 @@ class DSSUtilsTest {
 		assertFalse(DSSUtils.isEmpty(new InMemoryDocument(new byte[] { 'a' })));
 		assertFalse(DSSUtils.isEmpty(new InMemoryDocument(getClass().getResourceAsStream("/good-user.crt"))));
 		assertFalse(DSSUtils.isEmpty(new FileDocument("src/test/resources/good-user.crt")));
+	}
+
+	@Test
+	void loadCertificateWithAlternativeSecurityProviderTest() throws IOException {
+		File certificateFile = new File("src/test/resources/at_sdi.cer");
+		Exception exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(certificateFile));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setAlternativeSecurityProviders("SUN");
+
+		CertificateToken certificateToken = DSSUtils.loadCertificate(certificateFile);
+		assertNotNull(certificateToken);
+
+		DSSSecurityProvider.setAlternativeSecurityProviders(new Provider[]{});
+
+		byte[] certBinaries = certificateToken.getEncoded();
+		exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(certBinaries));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setAlternativeSecurityProviders("SUN");
+
+		certificateToken = DSSUtils.loadCertificate(certBinaries);
+		assertNotNull(certificateToken);
+
+		DSSSecurityProvider.setAlternativeSecurityProviders(new Provider[]{});
+
+		exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(Files.newInputStream(certificateFile.toPath())));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setAlternativeSecurityProviders("SUN");
+
+		// InputStream can be read only once, therefore it fails with BC
+
+		exception = assertThrows(DSSException.class, () -> DSSUtils.loadCertificate(Files.newInputStream(certificateFile.toPath())));
+		assertTrue(exception.getMessage().contains("Unable to load CertificateFactory"));
+
+		DSSSecurityProvider.setSecurityProvider("SUN");
+
+		certificateToken = DSSUtils.loadCertificate(Files.newInputStream(certificateFile.toPath()));
+		assertNotNull(certificateToken);
+	}
+
+	@Test
+	void getKeyUsageBitsTest() {
+		X509Certificate x509Certificate = mock(X509Certificate.class);
+		when(x509Certificate.getSigAlgOID()).thenReturn(SignatureAlgorithm.RSA_SHA256.getOid());
+
+		CertificateToken certificateToken = new CertificateToken(x509Certificate);
+		assertNotNull(certificateToken);
+
+		when(x509Certificate.getKeyUsage()).thenReturn(null);
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.emptyList(), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[0]);
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.emptyList(), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[9]);
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.emptyList(), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[18]);
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.emptyList(), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.DIGITAL_SIGNATURE), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true, false });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.DIGITAL_SIGNATURE), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true, false, false, false, false, false, false, false, false });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.DIGITAL_SIGNATURE), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { false, false, false, false, false, false, false, false, false });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.emptyList(), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { false, false, false, false, false, false, false, false, true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.DECIPHER_ONLY), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { false, false, false, false, false, false, false, false, true, true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.DECIPHER_ONLY), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true, true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Arrays.asList(KeyUsageBit.DIGITAL_SIGNATURE, KeyUsageBit.NON_REPUDIATION), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { false, true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Collections.singletonList(KeyUsageBit.NON_REPUDIATION), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true, true, false, false, false, false, false, false, false });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Arrays.asList(KeyUsageBit.DIGITAL_SIGNATURE, KeyUsageBit.NON_REPUDIATION), certificateToken.getKeyUsageBits());
+
+		when(x509Certificate.getKeyUsage()).thenReturn(new boolean[] { true, true, true, true, true, true, true, true, true });
+		certificateToken = new CertificateToken(x509Certificate);
+		assertEquals(Arrays.asList(KeyUsageBit.values()), certificateToken.getKeyUsageBits());
+	}
+
+	@Test
+	void getHostTest() {
+		assertEquals("", DSSUtils.getHost(null));
+		assertEquals("", DSSUtils.getHost(""));
+		assertEquals("127.0.0.1", DSSUtils.getHost("127.0.0.1"));
+		assertEquals("127.0.0.1", DSSUtils.getHost("http://127.0.0.1"));
+		assertEquals("127.0.0.1", DSSUtils.getHost("http://127.0.0.1/hello"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("crl-source.hn"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("crl-source.hn/o=Hello"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("http://crl-source.hn/hello/"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("https://crl-source.hn/o=Hello"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("ldap://crl-source.hn/o=Hello"));
+		assertEquals("crl-source.hn", DSSUtils.getHost("ldap://crl-source.hn:8080/o=Hello"));
+		assertEquals("www.crl-source.hn", DSSUtils.getHost("ldap://www.crl-source.hn/o=Hello"));
+		assertEquals("ep.nbusr.sk", DSSUtils.getHost("ldap://ep.nbusr.sk/cn%3dKCA%20NBU%20SR%203,ou%3dSIBEP,o%3dNarodny%20bezpecnostny%20urad,l%3dBratislava,c%3dSK?certificateRevocationList"));
+		assertEquals("", DSSUtils.getHost("ldap:///cn%3dKCA%20NBU%20SR%203,ou%3dSIBEP,o%3dNarodny%20bezpecnostny%20urad,l%3dBratislava,c%3dSK?certificateRevocationList"));
 	}
 
 }

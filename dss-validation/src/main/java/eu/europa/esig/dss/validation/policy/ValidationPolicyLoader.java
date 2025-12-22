@@ -27,9 +27,10 @@ import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
-import eu.europa.esig.dss.model.policy.CryptographicSuiteFactory;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.model.policy.ValidationPolicyFactory;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteCatalogue;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteFactory;
 import eu.europa.esig.dss.spi.exception.IllegalInputException;
 import eu.europa.esig.dss.utils.Utils;
 
@@ -37,8 +38,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,7 +56,7 @@ public class ValidationPolicyLoader {
     private final ValidationPolicy validationPolicy;
 
     /** Map of cryptographic suite documents and their applicability scopes */
-    private final Map<CryptographicSuite, List<ContextAndSubContext>> cryptographicSuitesMap = new HashMap<>();
+    private final Map<CryptographicSuite, List<ContextAndSubContext>> cryptographicSuitesMap = new LinkedHashMap<>();
 
     /**
      * Empty constructor
@@ -127,7 +129,7 @@ public class ValidationPolicyLoader {
         try (InputStream is = ValidationPolicyLoader.class.getResourceAsStream(validationPolicyFilePath)) {
             return fromValidationPolicy(is);
         } catch (IOException e) {
-            throw new IllegalInputException(String.format( "Unable to load a cryptographic suite from path '%s'. " +
+            throw new IllegalInputException(String.format("Unable to load a cryptographic suite from path '%s'. " +
                     "Reason : %s", validationPolicyFilePath, e.getMessage()), e);
         }
     }
@@ -225,6 +227,19 @@ public class ValidationPolicyLoader {
     }
 
     /**
+     * Sets a global cryptographic suite.
+     * The suite will overwrite all cryptographic constraints defined in the original {@code ValidationPolicy} file.
+     * It is also will be used when a cryptographic suite is not provided for a specific scope.
+     * The method {@code #withCryptographicSuiteForContext} can be used to specify constraints for a specific scope.
+     *
+     * @param cryptographicSuiteCatalogue {@link CryptographicSuiteCatalogue}
+     * @return {@link ValidationPolicyLoader}
+     */
+    public ValidationPolicyLoaderWithCryptoSuite withCryptographicSuite(CryptographicSuiteCatalogue cryptographicSuiteCatalogue) {
+        return withCryptographicSuiteForContext(cryptographicSuiteCatalogue, null);
+    }
+
+    /**
      * Sets a default cryptographic suite for the given Context and SubContext.
      * This method will load the first available cryptographic suite.
      * DSS provides two modules with implementations, namely 'dss-policy-crypto-xml' and 'dss-policy-crypto-json'.
@@ -307,6 +322,19 @@ public class ValidationPolicyLoader {
     }
 
     /**
+     * Sets a cryptographic suite catalogue for the given Context.
+     * The supported contexts are: SIGNATURE, COUNTER_SIGNATURE, TIMESTAMP, EVIDENCE_RECORD, REVOCATION.
+     * The cryptographic suite will be used only for the specific scope.
+     *
+     * @param cryptographicSuiteCatalogue {@link CryptographicSuiteCatalogue}
+     * @param context {@link Context}
+     * @return {@link ValidationPolicyLoader}
+     */
+    public ValidationPolicyLoaderWithCryptoSuite withCryptographicSuiteForContext(CryptographicSuiteCatalogue cryptographicSuiteCatalogue, Context context) {
+        return withCryptographicSuiteForContext(cryptographicSuiteCatalogue, context, null);
+    }
+
+    /**
      * Sets a default cryptographic suite for the given Context and SubContext.
      * This method will load the first available cryptographic suite.
      * DSS provides two modules with implementations, namely 'dss-policy-crypto-xml' and 'dss-policy-crypto-json'.
@@ -339,7 +367,7 @@ public class ValidationPolicyLoader {
      */
     public ValidationPolicyLoaderWithCryptoSuite withCryptographicSuiteForContext(DSSDocument cryptographicSuite, Context context, SubContext subContext) {
         Objects.requireNonNull(cryptographicSuite, "Cryptographic suite document cannot be null!");
-        return withCryptographicSuiteForContext(loadCryptographicSuite(cryptographicSuite), context, subContext);
+        return withCryptographicSuiteForContext(loadCryptographicSuiteCatalogue(cryptographicSuite), context, subContext);
     }
 
     /**
@@ -359,7 +387,7 @@ public class ValidationPolicyLoader {
     }
 
     /**
-     * Sets a cryptographic suite {@code File} for the given Context and SubContext.
+     * Sets a cryptographic suite catalogue {@code File} for the given Context and SubContext.
      * The supported contexts are: SIGNATURE, COUNTER_SIGNATURE, TIMESTAMP, EVIDENCE_RECORD, REVOCATION.
      * The supported subContext are: SIGNING_CERT and CA_CERTIFICATE.
      * The cryptographic suite will be used only for the specific scope.
@@ -392,7 +420,7 @@ public class ValidationPolicyLoader {
         try (InputStream is = getClass().getResourceAsStream(cryptographicSuiteFilePath)) {
             return withCryptographicSuiteForContext(is, context, subContext);
         } catch (IOException e) {
-            throw new IllegalInputException(String.format( "Unable to load a cryptographic suite from path '%s'. " +
+            throw new IllegalInputException(String.format("Unable to load a cryptographic suite catalogue from path '%s'. " +
                     "Reason : %s", cryptographicSuiteFilePath, e.getMessage()), e);
         }
     }
@@ -408,11 +436,111 @@ public class ValidationPolicyLoader {
      * @param subContext {@link SubContext}
      * @return {@link ValidationPolicyLoader}
      */
-    public ValidationPolicyLoaderWithCryptoSuite withCryptographicSuiteForContext(CryptographicSuite cryptographicSuite, Context context, SubContext subContext) {
+    public ValidationPolicyLoaderWithCryptoSuite withCryptographicSuiteForContext(CryptographicSuite cryptographicSuite,
+                                                                                  Context context, SubContext subContext) {
         Objects.requireNonNull(cryptographicSuite, "Cryptographic suite cannot be null!");
         cryptographicSuitesMap.computeIfAbsent(cryptographicSuite, k -> new ArrayList<>())
                 .add(new ContextAndSubContext(context, subContext));
         return new ValidationPolicyLoaderWithCryptoSuite(this, cryptographicSuite);
+    }
+
+    /**
+     * Sets a cryptographic suite for the given Context and SubContext.
+     * The supported contexts are: SIGNATURE, COUNTER_SIGNATURE, TIMESTAMP, EVIDENCE_RECORD, REVOCATION.
+     * The supported subContext are: SIGNING_CERT and CA_CERTIFICATE.
+     * The cryptographic suite will be used only for the specific scope.
+     *
+     * @param cryptographicSuiteCatalogue {@link CryptographicSuiteCatalogue}
+     * @param context {@link Context}
+     * @param subContext {@link SubContext}
+     * @return {@link ValidationPolicyLoader}
+     */
+    public ValidationPolicyLoaderWithCryptoSuite withCryptographicSuiteForContext(CryptographicSuiteCatalogue cryptographicSuiteCatalogue,
+                                                                                  Context context, SubContext subContext) {
+        Objects.requireNonNull(cryptographicSuiteCatalogue, "Cryptographic suite catalogue cannot be null!");
+
+        final List<CryptographicSuite> cryptographicSuites = new ArrayList<>();
+
+        if (context != null) {
+            switch (context) {
+                case SIGNATURE:
+                case CERTIFICATE:
+                    if (subContext != null) {
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getSignatureCertificatesCryptographicSuite(), context, subContext);
+                    } else {
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getSignatureCryptographicSuite(), context, subContext);
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getSignatureCertificatesCryptographicSuite(), context, SubContext.SIGNING_CERT);
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getSignatureCertificatesCryptographicSuite(), context, SubContext.CA_CERTIFICATE);
+                    }
+                    break;
+
+                case COUNTER_SIGNATURE:
+                    if (subContext != null) {
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getCounterSignatureCertificatesCryptographicSuite(), context, subContext);
+                    } else {
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getCounterSignatureCryptographicSuite(), context, subContext);
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getCounterSignatureCertificatesCryptographicSuite(), context, SubContext.SIGNING_CERT);
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getCounterSignatureCertificatesCryptographicSuite(), context, SubContext.CA_CERTIFICATE);
+                    }
+                    break;
+
+                case REVOCATION:
+                    if (subContext != null) {
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getRevocationCertificatesCryptographicSuite(), context, subContext);
+                    } else {
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getRevocationCryptographicSuite(), context, subContext);
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getRevocationCertificatesCryptographicSuite(), context, SubContext.SIGNING_CERT);
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getRevocationCertificatesCryptographicSuite(), context, SubContext.CA_CERTIFICATE);
+                    }
+                    break;
+
+                case TIMESTAMP:
+                    if (subContext != null) {
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getTimestampCertificatesCryptographicSuite(), context, subContext);
+                    } else {
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getTimestampCryptographicSuite(), context, subContext);
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getTimestampCertificatesCryptographicSuite(), context, SubContext.SIGNING_CERT);
+                        addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getTimestampCertificatesCryptographicSuite(), context, SubContext.CA_CERTIFICATE);
+                    }
+                    break;
+
+                case EVIDENCE_RECORD:
+                    addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getEvidenceRecordSignatureCryptographicSuite(), context, subContext);
+                    break;
+
+                default:
+                    throw new UnsupportedOperationException(String.format("The Context '%s' is not supported!", context));
+
+            }
+
+        } else {
+            // apply all constraints
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getCryptographicSuite(), context, subContext);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getSignatureCryptographicSuite(), Context.CERTIFICATE, subContext);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getSignatureCertificatesCryptographicSuite(), Context.CERTIFICATE, SubContext.SIGNING_CERT);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getSignatureCertificatesCryptographicSuite(), Context.CERTIFICATE, SubContext.CA_CERTIFICATE);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getSignatureCryptographicSuite(), Context.SIGNATURE, subContext);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getSignatureCertificatesCryptographicSuite(), Context.SIGNATURE, SubContext.SIGNING_CERT);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getSignatureCertificatesCryptographicSuite(), Context.SIGNATURE, SubContext.CA_CERTIFICATE);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getCounterSignatureCryptographicSuite(), Context.COUNTER_SIGNATURE, subContext);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getCounterSignatureCertificatesCryptographicSuite(), Context.COUNTER_SIGNATURE, SubContext.SIGNING_CERT);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getCounterSignatureCertificatesCryptographicSuite(), Context.COUNTER_SIGNATURE, SubContext.CA_CERTIFICATE);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getRevocationCryptographicSuite(), Context.REVOCATION, subContext);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getRevocationCertificatesCryptographicSuite(), Context.REVOCATION, SubContext.SIGNING_CERT);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getRevocationCertificatesCryptographicSuite(), Context.REVOCATION, SubContext.CA_CERTIFICATE);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getTimestampCryptographicSuite(), Context.TIMESTAMP, subContext);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getTimestampCertificatesCryptographicSuite(), Context.TIMESTAMP, SubContext.SIGNING_CERT);
+            addCryptographicSuite(cryptographicSuites, cryptographicSuiteCatalogue.getTimestampCertificatesCryptographicSuite(), Context.TIMESTAMP, SubContext.CA_CERTIFICATE);
+        }
+
+        return new ValidationPolicyLoaderWithCryptoSuite(this, cryptographicSuites);
+    }
+
+    private void addCryptographicSuite(List<CryptographicSuite> cryptographicSuites, CryptographicSuite cryptographicSuite, 
+                                       Context context, SubContext subContext) {
+        cryptographicSuitesMap.computeIfAbsent(cryptographicSuite, k -> new ArrayList<>())
+                .add(new ContextAndSubContext(context, subContext));
+        cryptographicSuites.add(cryptographicSuite);
     }
 
     /**
@@ -479,11 +607,11 @@ public class ValidationPolicyLoader {
     }
 
     /**
-     * Loads a default cryptographic suite
+     * Loads a default cryptographic suite catalogue
      *
-     * @return {@link CryptographicSuite}
+     * @return {@link CryptographicSuiteCatalogue}
      */
-    private static CryptographicSuite loadDefaultCryptographicSuite() {
+    private static CryptographicSuiteCatalogue loadDefaultCryptographicSuite() {
         ServiceLoader<CryptographicSuiteFactory> loader = ServiceLoader.load(CryptographicSuiteFactory.class);
         Iterator<CryptographicSuiteFactory> factoryOptions = loader.iterator();
 
@@ -496,12 +624,12 @@ public class ValidationPolicyLoader {
     }
 
     /**
-     * Loads a cryptographic suite from the given {@code cryptographicSuiteDocument}
+     * Loads a cryptographic suite from the given {@code DSSDocument}
      *
      * @param cryptographicSuiteDocument {@link DSSDocument}
      * @return {@link CryptographicSuite}
      */
-    private static CryptographicSuite loadCryptographicSuite(DSSDocument cryptographicSuiteDocument) {
+    private static CryptographicSuiteCatalogue loadCryptographicSuiteCatalogue(DSSDocument cryptographicSuiteDocument) {
         ServiceLoader<CryptographicSuiteFactory> loader = ServiceLoader.load(CryptographicSuiteFactory.class);
         Iterator<CryptographicSuiteFactory> factoryOptions = loader.iterator();
 
@@ -527,7 +655,7 @@ public class ValidationPolicyLoader {
         private final ValidationPolicyLoader validationPolicyLoader;
 
         /** The current added cryptographic suite */
-        private final CryptographicSuite cryptographicSuite;
+        private final List<CryptographicSuite> cryptographicSuites;
 
         /**
          * Constructor to create a {@code ValidationPolicyFactory} using a custom validation policy
@@ -537,8 +665,19 @@ public class ValidationPolicyLoader {
          */
         protected ValidationPolicyLoaderWithCryptoSuite(final ValidationPolicyLoader validationPolicyLoader,
                                                         final CryptographicSuite cryptographicSuite) {
+            this(validationPolicyLoader, Collections.singletonList(cryptographicSuite));
+        }
+
+        /**
+         * Constructor to create a {@code ValidationPolicyFactory} using a custom validation policy
+         *
+         * @param validationPolicyLoader {@link ValidationPolicyLoader}
+         * @param cryptographicSuites a list of {@link CryptographicSuite}s
+         */
+        protected ValidationPolicyLoaderWithCryptoSuite(final ValidationPolicyLoader validationPolicyLoader,
+                                                        final List<CryptographicSuite> cryptographicSuites) {
             this.validationPolicyLoader = validationPolicyLoader;
-            this.cryptographicSuite = cryptographicSuite;
+            this.cryptographicSuites = cryptographicSuites;
         }
 
         @Override
@@ -643,7 +782,7 @@ public class ValidationPolicyLoader {
          * @return this
          */
         public ValidationPolicyLoaderWithCryptoSuite andLevel(Level level) {
-            cryptographicSuite.setLevel(level);
+            cryptographicSuites.forEach(s -> s.setLevel(level));
             return this;
         }
 
@@ -654,7 +793,7 @@ public class ValidationPolicyLoader {
          * @return this
          */
         public ValidationPolicyLoaderWithCryptoSuite andAcceptableDigestAlgorithmsLevel(Level level) {
-            cryptographicSuite.setAcceptableDigestAlgorithmsLevel(level);
+            cryptographicSuites.forEach(s -> s.setAcceptableDigestAlgorithmsLevel(level));
             return this;
         }
 
@@ -663,9 +802,21 @@ public class ValidationPolicyLoader {
          *
          * @param level {@link Level}
          * @return this
+         * @deprecated since DSS 6.4. Please use {@code #andAcceptableSignatureAlgorithmsLevel} method instead.
          */
+        @Deprecated
         public ValidationPolicyLoaderWithCryptoSuite andAcceptableEncryptionAlgorithmsLevel(Level level) {
-            cryptographicSuite.setAcceptableEncryptionAlgorithmsLevel(level);
+            return andAcceptableSignatureAlgorithmsLevel(level);
+        }
+
+        /**
+         * Sets the execution level for acceptable signature algorithms check of the last provided cryptographic suite
+         *
+         * @param level {@link Level}
+         * @return this
+         */
+        public ValidationPolicyLoaderWithCryptoSuite andAcceptableSignatureAlgorithmsLevel(Level level) {
+            cryptographicSuites.forEach(s -> s.setAcceptableSignatureAlgorithmsLevel(level));
             return this;
         }
 
@@ -675,9 +826,22 @@ public class ValidationPolicyLoader {
          *
          * @param level {@link Level}
          * @return this
+         * @deprecated since DSS 6.4. Please use {@code #andAcceptableSignatureAlgorithmsMiniKeySizeLevel} method instead.
          */
+        @Deprecated
         public ValidationPolicyLoaderWithCryptoSuite andAcceptableEncryptionAlgorithmsMiniKeySizeLevel(Level level) {
-            cryptographicSuite.setAcceptableEncryptionAlgorithmsMiniKeySizeLevel(level);
+            return andAcceptableSignatureAlgorithmsMiniKeySizeLevel(level);
+        }
+
+        /**
+         * Sets the execution level for acceptable minimum key sizes of encryption algorithms check of
+         * the last provided cryptographic suite
+         *
+         * @param level {@link Level}
+         * @return this
+         */
+        public ValidationPolicyLoaderWithCryptoSuite andAcceptableSignatureAlgorithmsMiniKeySizeLevel(Level level) {
+            cryptographicSuites.forEach(s -> s.setAcceptableSignatureAlgorithmsMiniKeySizeLevel(level));
             return this;
         }
 
@@ -689,7 +853,7 @@ public class ValidationPolicyLoader {
          * @return this
          */
         public ValidationPolicyLoaderWithCryptoSuite andAlgorithmsExpirationDateLevel(Level level) {
-            cryptographicSuite.setAlgorithmsExpirationDateLevel(level);
+            cryptographicSuites.forEach(s -> s.setAlgorithmsExpirationDateLevel(level));
             return this;
         }
 
@@ -701,7 +865,7 @@ public class ValidationPolicyLoader {
          * @return this
          */
         public ValidationPolicyLoaderWithCryptoSuite andAlgorithmsExpirationTimeAfterPolicyUpdateLevel(Level level) {
-            cryptographicSuite.setAlgorithmsExpirationTimeAfterPolicyUpdateLevel(level);
+            cryptographicSuites.forEach(s -> s.setAlgorithmsExpirationTimeAfterPolicyUpdateLevel(level));
             return this;
         }
 

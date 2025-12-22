@@ -173,7 +173,7 @@ public abstract class AbstractCryptographicConstraintsTest extends AbstractTestV
 		List<Algo> algorithms = algoExpirationDate.getAlgos();
 		boolean listContainsAlgorithms = false;
 		for (Algo algorithm : algorithms) {
-			if (algorithm.getValue().equals(algorithmName) && algorithm.getSize().equals(keySize)) {
+			if (algorithm.getValue().equals(algorithmName) && algorithm.getSize().compareTo(keySize) <= 0){
 				algorithm.setDate(expirationDate);
 				listContainsAlgorithms = true;
 			}

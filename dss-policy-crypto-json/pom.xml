@@ -3,7 +3,7 @@
     <parent>
         <groupId>eu.europa.ec.joinup.sd-dss</groupId>
         <artifactId>sd-dss</artifactId>
-        <version>6.3</version>
+        <version>6.4.RC1</version>
     </parent>
 
     <artifactId>dss-policy-crypto-json</artifactId>
@@ -34,6 +34,11 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

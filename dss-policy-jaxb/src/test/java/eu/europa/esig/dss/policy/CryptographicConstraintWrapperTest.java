@@ -45,8 +45,8 @@ class CryptographicConstraintWrapperTest {
 
         assertNull(cryptographicSuite.getLevel());
         assertNull(cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertNull(cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertNull(cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertNull(cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertNull(cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertNull(cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertNull(cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
@@ -55,8 +55,8 @@ class CryptographicConstraintWrapperTest {
         assertEquals(Level.FAIL, cryptographicSuite.getLevel()); // default
         // inherited from default
         assertEquals(Level.FAIL, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
@@ -66,48 +66,48 @@ class CryptographicConstraintWrapperTest {
         cryptographicSuite.setLevel(Level.IGNORE);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
         cryptographicSuite.setAlgorithmsExpirationTimeAfterPolicyUpdateLevel(Level.INFORM);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
         cryptographicSuite.setAcceptableDigestAlgorithmsLevel(Level.INFORM);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
-        cryptographicSuite.setAcceptableEncryptionAlgorithmsLevel(Level.INFORM);
+        cryptographicSuite.setAcceptableSignatureAlgorithmsLevel(Level.INFORM);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.IGNORE, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
-        cryptographicSuite.setAcceptableEncryptionAlgorithmsMiniKeySizeLevel(Level.INFORM);
+        cryptographicSuite.setAcceptableSignatureAlgorithmsMiniKeySizeLevel(Level.INFORM);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.IGNORE, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
 
         cryptographicSuite.setAlgorithmsExpirationDateLevel(Level.INFORM);
         assertEquals(Level.IGNORE, cryptographicSuite.getLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.INFORM, cryptographicSuite.getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateLevel());
         assertEquals(Level.INFORM, cryptographicSuite.getAlgorithmsExpirationDateAfterUpdateLevel());
     }

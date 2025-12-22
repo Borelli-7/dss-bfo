@@ -21,9 +21,9 @@
 package eu.europa.esig.dss.validation.executor.process;
 
 import eu.europa.esig.dss.detailedreport.DetailedReport;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraint;
-import eu.europa.esig.dss.detailedreport.jaxb.XmlSAV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlStatus;
 import eu.europa.esig.dss.diagnostic.DiagnosticDataFacade;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlCertificate;
@@ -95,11 +95,11 @@ class DSS3575ExecutorTest extends AbstractProcessExecutorTest {
             XmlBasicBuildingBlocks tstBBB = detailedReport.getBasicBuildingBlockById(xmlTimestamp.getId());
             assertNotNull(tstBBB);
 
-            XmlSAV xmlSAV = tstBBB.getSAV();
-            assertNotNull(xmlSAV);
+            XmlAOV xmlAOV = tstBBB.getAOV();
+            assertNotNull(xmlAOV);
 
             int signCertRefCheckCounter = 0;
-            for (XmlConstraint xmlConstraint : xmlSAV.getConstraint()) {
+            for (XmlConstraint xmlConstraint : xmlAOV.getConstraint()) {
                 if (i18nProvider.getMessage(MessageTag.ACCM, MessageTag.ACCM_POS_SIG_CERT_REF).equals(xmlConstraint.getName().getValue())) {
                     assertEquals(XmlStatus.OK, xmlConstraint.getStatus());
                     ++signCertRefCheckCounter;
@@ -193,11 +193,11 @@ class DSS3575ExecutorTest extends AbstractProcessExecutorTest {
             XmlBasicBuildingBlocks tstBBB = detailedReport.getBasicBuildingBlockById(xmlTimestamp.getId());
             assertNotNull(tstBBB);
 
-            XmlSAV xmlSAV = tstBBB.getSAV();
-            assertNotNull(xmlSAV);
+            XmlAOV xmlAOV = tstBBB.getAOV();
+            assertNotNull(xmlAOV);
 
             int signCertRefCheckCounter = 0;
-            for (XmlConstraint xmlConstraint : xmlSAV.getConstraint()) {
+            for (XmlConstraint xmlConstraint : xmlAOV.getConstraint()) {
                 if (i18nProvider.getMessage(MessageTag.ACCM, MessageTag.ACCM_POS_SIG_CERT_REF).equals(xmlConstraint.getName().getValue())) {
                     assertEquals(XmlStatus.NOT_OK, xmlConstraint.getStatus());
                     ++signCertRefCheckCounter;
@@ -300,11 +300,11 @@ class DSS3575ExecutorTest extends AbstractProcessExecutorTest {
             XmlBasicBuildingBlocks tstBBB = detailedReport.getBasicBuildingBlockById(xmlTimestamp.getId());
             assertNotNull(tstBBB);
 
-            XmlSAV xmlSAV = tstBBB.getSAV();
-            assertNotNull(xmlSAV);
+            XmlAOV xmlAOV = tstBBB.getAOV();
+            assertNotNull(xmlAOV);
 
             int signCertRefCheckCounter = 0;
-            for (XmlConstraint xmlConstraint : xmlSAV.getConstraint()) {
+            for (XmlConstraint xmlConstraint : xmlAOV.getConstraint()) {
                 if (i18nProvider.getMessage(MessageTag.ACCM, MessageTag.ACCM_POS_SIG_CERT_REF).equals(xmlConstraint.getName().getValue())) {
                     assertEquals(XmlStatus.OK, xmlConstraint.getStatus());
                     ++signCertRefCheckCounter;
@@ -409,11 +409,11 @@ class DSS3575ExecutorTest extends AbstractProcessExecutorTest {
             XmlBasicBuildingBlocks tstBBB = detailedReport.getBasicBuildingBlockById(xmlTimestamp.getId());
             assertNotNull(tstBBB);
 
-            XmlSAV xmlSAV = tstBBB.getSAV();
-            assertNotNull(xmlSAV);
+            XmlAOV xmlAOV = tstBBB.getAOV();
+            assertNotNull(xmlAOV);
 
             int signCertRefCheckInvalidCounter = 0;
-            for (XmlConstraint xmlConstraint : xmlSAV.getConstraint()) {
+            for (XmlConstraint xmlConstraint : xmlAOV.getConstraint()) {
                 if (i18nProvider.getMessage(MessageTag.ACCM, MessageTag.ACCM_POS_SIG_CERT_REF).equals(xmlConstraint.getName().getValue())) {
                     if (XmlStatus.NOT_OK == xmlConstraint.getStatus()) {
                         ++signCertRefCheckInvalidCounter;

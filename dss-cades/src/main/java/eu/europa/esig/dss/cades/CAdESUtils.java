@@ -20,8 +20,8 @@
  */
 package eu.europa.esig.dss.cades;
 
-import eu.europa.esig.dss.cades.signature.CustomMessageDigestCalculatorProvider;
-import eu.europa.esig.dss.cades.validation.PrecomputedDigestCalculatorProvider;
+import eu.europa.esig.dss.cms.operator.CustomMessageDigestCalculatorProvider;
+import eu.europa.esig.dss.cms.operator.PrecomputedDigestCalculatorProvider;
 import eu.europa.esig.dss.cms.CMS;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EvidenceRecordIncorporationType;
@@ -29,7 +29,6 @@ import eu.europa.esig.dss.enumerations.TimestampType;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.DigestDocument;
-import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.signature.resources.InMemoryResourcesHandlerBuilder;
 import eu.europa.esig.dss.spi.DSSASN1Utils;
@@ -53,7 +52,6 @@ import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.Attributes;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
-import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.ess.ESSCertID;
 import org.bouncycastle.asn1.ess.ESSCertIDv2;
 import org.bouncycastle.asn1.ess.SigningCertificate;
@@ -61,17 +59,10 @@ import org.bouncycastle.asn1.ess.SigningCertificateV2;
 import org.bouncycastle.asn1.tsp.ArchiveTimeStamp;
 import org.bouncycastle.asn1.tsp.ArchiveTimeStampChain;
 import org.bouncycastle.asn1.tsp.ArchiveTimeStampSequence;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.IssuerSerial;
-import org.bouncycastle.cms.CMSAbsentContent;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.CMSProcessableFile;
 import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
-import org.bouncycastle.cms.CMSTypedData;
 import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.tsp.TSPException;
@@ -80,7 +71,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -152,98 +142,6 @@ public final class CAdESUtils {
 	}
 
 	/**
-	 * This method generate {@code CMSSignedData} using the provided #{@code CMSSignedDataGenerator}, the content and
-	 * the indication if the content should be encapsulated.
-	 *
-	 * @param generator {@link CMSSignedDataGenerator}
-	 * @param content {@link CMSTypedData}
-	 * @param encapsulate true if the content should be encapsulated in the signature, false otherwise
-	 * @return {@link CMSSignedData}
-	 * @deprecated since DSS 6.3. To be removed.
-	 */
-	@Deprecated
-	public static CMSSignedData generateCMSSignedData(final CMSSignedDataGenerator generator,
-													  final CMSTypedData content, final boolean encapsulate) {
-		try {
-			return generator.generate(content, encapsulate);
-		} catch (CMSException e) {
-			throw new DSSException("Unable to generate the CMSSignedData", e);
-		}
-	}
-
-	/**
-	 * Generates a counter signature
-	 *
-	 * @param cmsSignedDataGenerator {@link CMSSignedDataGenerator} to extend the CMS SignedData
-	 * @param signerInfoToSign {@link SignerInformation} to be counter-signed
-	 * @return {@link SignerInformationStore} with a counter signature
-	 * @deprecated since DSS 6.3. To be removed.
-	 */
-	@Deprecated
-	public static SignerInformationStore generateCounterSigners(CMSSignedDataGenerator cmsSignedDataGenerator,
-																SignerInformation signerInfoToSign) {
-		try {
-			return cmsSignedDataGenerator.generateCounterSigners(signerInfoToSign);
-		} catch (CMSException e) {
-			throw new DSSException("Unable to generate the SignerInformationStore for the counter-signature", e);
-		}
-	}
-
-	/**
-	 * Generates a detached CMS SignedData
-	 *
-	 * @param generator {@link CMSSignedDataGenerator}
-	 * @param content {@link CMSProcessableByteArray} to sign
-	 * @return {@link CMSSignedData}
-	 * @deprecated since DSS 6.3. To be removed.
-	 */
-	@Deprecated
-	public static CMSSignedData generateDetachedCMSSignedData(final CMSSignedDataGenerator generator,
-															  final CMSProcessableByteArray content) {
-		try {
-			return generator.generate(content, false);
-		} catch (CMSException e) {
-			throw new DSSException("Unable to generate the CMSSignedData", e);
-		}
-	}
-
-	/**
-	 * This method is used to ensure the presence of all items from SignedData.digestAlgorithm set
-	 * from {@code oldCmsSignedData} within {@code newCmsSignedData}
-	 *
-	 * @param newCmsSignedData {@link CMSSignedData} to be extended with digest algorithms, if required
- 	 * @param oldCmsSignedData {@link CMSSignedData} to copy digest algorithms set from
-	 * @return extended {@link CMSSignedData}
-	 * @deprecated since DSS 6.3. See {@code CMSUtils#populateDigestAlgorithmSet}
-	 */
-	@Deprecated
-	public static CMSSignedData populateDigestAlgorithmSet(CMSSignedData newCmsSignedData,
-														   CMSSignedData oldCmsSignedData) {
-		if (oldCmsSignedData != null) {
-			for (AlgorithmIdentifier algorithmIdentifier : oldCmsSignedData.getDigestAlgorithmIDs()) {
-				newCmsSignedData = CMSSignedData.addDigestAlgorithm(newCmsSignedData, algorithmIdentifier);
-			}
-		}
-		return newCmsSignedData;
-	}
-
-	/**
-	 * This method adds a DigestAlgorithm used by an Archive TimeStamp to
-	 * the SignedData.digestAlgorithms set, when required.
-	 * <p>
-	 * See ETSI EN 319 122-1, ch. "5.5.3 The archive-time-stamp-v3 attribute"
-	 *
-	 * @param cmsSignedData {@link CMSSignedData} to extend
-	 * @param algorithmIdentifier {@link AlgorithmIdentifier} to add
-	 * @return {@link CMSSignedData}
-	 * @deprecated since DSS 6.3. See {@code CMSUtils#populateDigestAlgorithmSet}
-	 */
-	@Deprecated
-	public static CMSSignedData addDigestAlgorithm(CMSSignedData cmsSignedData, AlgorithmIdentifier algorithmIdentifier) {
-		return CMSSignedData.addDigestAlgorithm(cmsSignedData, algorithmIdentifier);
-	}
-
-	/**
 	 * Gets the DER SignedAttributes table from the given {@code SignerInformation}
 	 *
 	 * @param signerInformation
@@ -264,27 +162,6 @@ public final class CAdESUtils {
 	}
 
 	/**
-	 * This method returns the signed content extracted from a CMSTypedData
-	 * 
-	 * @param cmsTypedData
-	 *            {@code CMSTypedData} cannot be null
-	 * @return the signed content extracted from {@code CMSTypedData}
-	 * @deprecated since DSS 6.3. To be removed.
-	 */
-	@Deprecated
-	public static byte[] getSignedContent(final CMSTypedData cmsTypedData) {
-		if (cmsTypedData == null) {
-			throw new DSSException("CMSTypedData is null (should be a detached signature)");
-		}
-		try (ByteArrayOutputStream originalDocumentData = new ByteArrayOutputStream()) {
-			cmsTypedData.write(originalDocumentData);
-			return originalDocumentData.toByteArray();
-		} catch (CMSException | IOException e) {
-			throw new DSSException(e);
-		}
-	}
-
-	/**
 	 * This method returns the existing unsigned attributes or a new empty attributes hashtable
 	 *
 	 * @param signerInformation
@@ -293,7 +170,7 @@ public final class CAdESUtils {
 	 */
 	public static AttributeTable getUnsignedAttributes(final SignerInformation signerInformation) {
 		final AttributeTable unsignedAttributes = signerInformation.getUnsignedAttributes();
-		return emptyIfNull(unsignedAttributes);
+		return DSSASN1Utils.emptyIfNull(unsignedAttributes);
 	}
 
 	/**
@@ -305,7 +182,7 @@ public final class CAdESUtils {
 	 */
 	public static AttributeTable getSignedAttributes(final SignerInformation signerInformation) {
 		final AttributeTable signedAttributes = signerInformation.getSignedAttributes();
-		return emptyIfNull(signedAttributes);
+		return DSSASN1Utils.emptyIfNull(signedAttributes);
 	}
 
 	/**
@@ -445,17 +322,6 @@ public final class CAdESUtils {
 		AttributeTable attributeTable = getUnsignedAttributes(signerInformation);
 		return DSSASN1Utils.getAsn1Attributes(attributeTable, oid);
 	}
-
-	/**
-	 * Checks if the signature is detached
-	 * @param cmsSignedData {@link CMSSignedData}
-	 * @return TRUE if the signature is detached, FALSE otherwise
-	 * @deprecated since DSS 6.3. See {@code cmsSignedData.isDetachedSignature()}
-	 */
-	@Deprecated
-	public static boolean isDetachedSignature(CMSSignedData cmsSignedData) {
-		return cmsSignedData.isDetachedSignature();
-	}
 	
 	/**
 	 * Returns the original document from the provided {@code CMS}
@@ -483,40 +349,20 @@ public final class CAdESUtils {
 	}
 
 	/**
-	 * Returns the content to be signed
-	 *
-	 * @param toSignData {@link DSSDocument} to sign
-	 * @return {@link CMSTypedData}
-	 * @deprecated since DSS 6.3. See {@code CMSUtils#toCMSEncapsulatedContent(DSSDocument document)}
-	 */
-	@Deprecated
-	public static CMSTypedData getContentToBeSigned(final DSSDocument toSignData) {
-		Objects.requireNonNull(toSignData, "Document to be signed is missing");
-		CMSTypedData content;
-		if (toSignData instanceof DigestDocument) {
-			content = new CMSAbsentContent();
-		} else if (toSignData instanceof FileDocument) {
-			FileDocument fileDocument = (FileDocument) toSignData;
-			content = new CMSProcessableFile(fileDocument.getFile());
-		} else {
-			content = new CMSProcessableByteArray(DSSUtils.toByteArray(toSignData));
-		}
-		return content;
-	}
-
-	/**
 	 * Returns a {@code DigestCalculatorProvider}
 	 *
 	 * @param toSignDocument {@link DSSDocument} to sign
 	 * @param digestAlgorithm {@link DigestAlgorithm} to use
 	 * @return {@link DigestCalculatorProvider}
+	 * @deprecated since DSS 6.4. To be removed
 	 */
+	@Deprecated
 	public static DigestCalculatorProvider getDigestCalculatorProvider(DSSDocument toSignDocument,
 																	   DigestAlgorithm digestAlgorithm) {
 		if (digestAlgorithm != null) {
 			return new CustomMessageDigestCalculatorProvider(digestAlgorithm, toSignDocument.getDigestValue(digestAlgorithm));
 		} else if (toSignDocument instanceof DigestDocument) {
-			return new PrecomputedDigestCalculatorProvider((DigestDocument) toSignDocument);
+			return new PrecomputedDigestCalculatorProvider(toSignDocument);
 		}
 		return new BcDigestCalculatorProvider();
 	}
@@ -531,7 +377,7 @@ public final class CAdESUtils {
 		AttributeTable unsignedAttributes = getUnsignedAttributes(signerInformation);
 		Attribute[] attributes = unsignedAttributes.toASN1Structure().getAttributes();
 		for (final Attribute attribute : attributes) {
-			if (isAttributeOfType(attribute, OID.id_aa_ets_archiveTimestampV2)) {
+			if (DSSASN1Utils.isAttributeOfType(attribute, OID.id_aa_ets_archiveTimestampV2)) {
 				return true;
 			}
 		}
@@ -865,7 +711,9 @@ public final class CAdESUtils {
 	 *
 	 * @param attributeTable {@link AttributeTable}
 	 * @return TRUE if the attribute table is empty, FALSE otherwise
+	 * @deprecated since DSS 6.4. Please use {@code eu.europa.esig.dss.spi.DSSASN1Utils#isEmpty} method instead.
 	 */
+	@Deprecated
 	public static boolean isEmpty(AttributeTable attributeTable) {
 		return (attributeTable == null) || (attributeTable.size() == 0);
 	}
@@ -875,7 +723,9 @@ public final class CAdESUtils {
 	 *
 	 * @param originalAttributeTable {@link AttributeTable}
 	 * @return {@link AttributeTable}
+	 * @deprecated since DSS 6.4. Please use {@code eu.europa.esig.dss.spi.DSSASN1Utils#emptyIfNull} method instead.
 	 */
+	@Deprecated
 	public static AttributeTable emptyIfNull(AttributeTable originalAttributeTable) {
 		if (originalAttributeTable != null) {
 			return originalAttributeTable;
@@ -889,7 +739,9 @@ public final class CAdESUtils {
 	 * @param attribute {@link Attribute} to check
 	 * @param asn1ObjectIdentifier {@link ASN1ObjectIdentifier} type to check against
 	 * @return TRUE if the attribute is of type asn1ObjectIdentifier, FALSE otherwise
+	 * @deprecated since DSS 6.4. Please use {@code eu.europa.esig.dss.spi.DSSASN1Utils#isAttributeOfType} method instead.
 	 */
+	@Deprecated
 	public static boolean isAttributeOfType(Attribute attribute, ASN1ObjectIdentifier asn1ObjectIdentifier) {
 		if (attribute == null) {
 			return false;
@@ -943,23 +795,9 @@ public final class CAdESUtils {
 	 * @throws IOException if an exception on data reading occurs
 	 */
 	public static byte[] getEncodedValue(Attribute attribute) throws IOException {
-		ASN1Encodable value = getAsn1Encodable(attribute);
+		ASN1Encodable value = DSSASN1Utils.getAsn1Encodable(attribute);
 		ASN1Primitive asn1Primitive = value.toASN1Primitive();
 		return asn1Primitive.getEncoded();
-	}
-
-	/**
-	 * Gets the SignedData.encapContentInfo.eContentType identifier value
-	 *
-	 * @param cmsSignedData {@link CMSSignedData}
-	 * @return {@link ASN1ObjectIdentifier} cmsSignedData.getSignedContentTypeOID()
-	 * @deprecated since DSS 6.3. To be removed.
-	 */
-	@Deprecated
-	public static ASN1ObjectIdentifier getEncapsulatedContentType(final CMSSignedData cmsSignedData) {
-		final ContentInfo contentInfo = cmsSignedData.toASN1Structure();
-		final SignedData signedData = SignedData.getInstance(contentInfo.getContent());
-		return signedData.getEncapContentInfo().getContentType();
 	}
 
 	/**
@@ -977,18 +815,6 @@ public final class CAdESUtils {
 		// false value specifies an implicit encoding method
 		DERTaggedObject derTaggedObject = new DERTaggedObject(false, 1, otherRevocationInfoFormat);
 		return DSSASN1Utils.getDEREncoded(derTaggedObject);
-	}
-
-	/**
-	 * Returns {@code ASN1Encodable} of the {@code attribute}
-	 *
-	 * @param attribute {@link Attribute}
-	 * @return {@link ASN1Encodable}
-	 * @deprecated since DSS 6.3. See {@code DSSASN1Utils#getAsn1Encodable(Attribute)}
-	 */
-	@Deprecated
-	public static ASN1Encodable getAsn1Encodable(Attribute attribute) {
-		return attribute.getAttrValues().getObjectAt(0);
 	}
 
 }

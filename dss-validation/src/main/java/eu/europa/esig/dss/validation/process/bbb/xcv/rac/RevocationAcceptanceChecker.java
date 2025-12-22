@@ -91,8 +91,8 @@ public class RevocationAcceptanceChecker extends Chain<XmlRAC> {
 	 * @param validatedTokens a set of token {@link String} identifiers that have been already processed
 	 */
 	public RevocationAcceptanceChecker(I18nProvider i18nProvider, CertificateWrapper certificate,
-										CertificateRevocationWrapper revocationData, Date controlTime,
-										ValidationPolicy policy, Set<String> validatedTokens) {
+									   CertificateRevocationWrapper revocationData, Date controlTime,
+									   ValidationPolicy policy, Set<String> validatedTokens) {
 		super(i18nProvider, new XmlRAC());
 		this.certificate = certificate;
 		this.revocationData = revocationData;

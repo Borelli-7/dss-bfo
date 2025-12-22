@@ -21,8 +21,10 @@
 package eu.europa.esig.dss.validation;
 
 import eu.europa.esig.dss.enumerations.Context;
+import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.Level;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.model.x509.CertificateToken;
@@ -203,7 +205,19 @@ class RevocationDataVerifierFactoryTest {
         calendar.setTime(new Date());
         calendar.set(Calendar.YEAR, 2000);
 
+        revocationDataVerifier.setAcceptableSignatureAlgorithmKeyLength(Collections.singletonMap(SignatureAlgorithm.RSA_SHA256, 2048));
+        assertTrue(revocationDataVerifier.isAcceptable(ocspToken));
+
+        revocationDataVerifier.setAcceptableSignatureAlgorithmKeyLength(Collections.emptyMap());
+        assertFalse(revocationDataVerifier.isAcceptable(ocspToken));
+
         revocationDataVerifier.setAcceptableEncryptionAlgorithmKeyLength(Collections.singletonMap(EncryptionAlgorithm.RSA, 2048));
+        assertTrue(revocationDataVerifier.isAcceptable(ocspToken));
+
+        revocationDataVerifier.setAcceptableDigestAlgorithms(Collections.emptyList());
+        assertFalse(revocationDataVerifier.isAcceptable(ocspToken));
+
+        revocationDataVerifier.setAcceptableDigestAlgorithms(Collections.singleton(DigestAlgorithm.SHA256));
         assertTrue(revocationDataVerifier.isAcceptable(ocspToken));
 
         CryptographicConstraint cryptographicRevocationConstraint = validationPolicy.getRevocationConstraints()

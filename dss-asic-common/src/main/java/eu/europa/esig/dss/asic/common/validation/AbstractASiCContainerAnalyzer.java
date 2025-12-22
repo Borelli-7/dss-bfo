@@ -481,7 +481,8 @@ public abstract class AbstractASiCContainerAnalyzer extends DefaultDocumentAnaly
 
 	private boolean coversFile(EvidenceRecord evidenceRecord, String filename) {
 		for (ReferenceValidation referenceValidation : evidenceRecord.getReferenceValidation()) {
-			if (filename == null || filename.equals(referenceValidation.getDocumentName())) {
+			DSSDocument referenceDocument = referenceValidation.getDocument();
+			if (filename == null || (referenceDocument != null && filename.equals(referenceDocument.getName()))) {
 				return true;
 			}
 		}

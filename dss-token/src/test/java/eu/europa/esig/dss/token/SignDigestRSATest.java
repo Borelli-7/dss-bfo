@@ -38,7 +38,6 @@ import javax.crypto.Cipher;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore.PasswordProtection;
-import java.security.Security;
 import java.security.Signature;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -52,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SignDigestRSATest {
 
 	static {
-		Security.addProvider(DSSSecurityProvider.getSecurityProvider());
+		DSSSecurityProvider.initSystemProviders();
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(SignDigestRSATest.class);

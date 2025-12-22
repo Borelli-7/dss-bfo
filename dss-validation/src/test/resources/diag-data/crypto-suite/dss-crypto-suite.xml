@@ -26,7 +26,7 @@
         <dssc:End>2004-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -42,7 +42,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -51,14 +51,14 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>SHA224</dssc:Name>
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.2.4</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#sha224</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#sha224</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <dssc:Evaluation>
       <dssc:Validity>
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -67,13 +67,13 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>SHA256</dssc:Name>
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.2.1</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmlenc#sha256</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmlenc#sha256</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- recommended -->
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -82,13 +82,13 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>SHA384</dssc:Name>
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.2</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#sha384</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#sha384</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- recommended -->
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -97,13 +97,13 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>SHA512</dssc:Name>
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.2.3</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmlenc#sha512</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmlenc#sha512</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- recommended -->
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Information>
@@ -115,28 +115,28 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>SHA3-256</dssc:Name>
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.2.8</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2007/05/xmldsig-more#sha3-256</dssc:URI>
+      <dssc:URI>http://www.w3.org/2007/05/xmldsig-more#sha3-256</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- recommended -->
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
 
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
-      <dssc:Name>SHA3-384</dssc:Name> 
+      <dssc:Name>SHA3-384</dssc:Name>
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.2.9</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2007/05/xmldsig-more#sha3-384</dssc:URI>
+      <dssc:URI>http://www.w3.org/2007/05/xmldsig-more#sha3-384</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- recommended -->
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -145,13 +145,13 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>SHA3-512</dssc:Name>
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.2.10</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2007/05/xmldsig-more#sha3-512</dssc:URI>
+      <dssc:URI>http://www.w3.org/2007/05/xmldsig-more#sha3-512</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- recommended -->
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -167,7 +167,7 @@
         <dssc:End>2014-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -183,7 +183,7 @@
         <dssc:End>2020-12-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -194,10 +194,77 @@
   <!-- RSA -->
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
-      <dssc:Name>sha224WithRSAEncryption</dssc:Name>
- <!-- PKCS#1v1.5 padding -->
-      <dssc:ObjectIdentifier>1.2.840.113549.1.1.14</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#rsa-sha224</dssc:URI>
+      <dssc:Name>md5WithRSAEncryption</dssc:Name>
+      <!-- PKCS#1v1.5 padding -->
+      <dssc:ObjectIdentifier>1.2.840.113549.1.1.4</dssc:ObjectIdentifier>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#rsa-md5</dssc:URI>
+    </dssc:AlgorithmIdentifier>
+    <!-- historical -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>786</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2004-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>1024</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2004-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>1536</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2004-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <!-- legacy -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>1900</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2004-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <!-- legacy -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>3000</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2004-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+  </dssc:Algorithm>
+
+  <dssc:Algorithm>
+    <dssc:AlgorithmIdentifier>
+      <dssc:Name>sha1WithRSAEncryption</dssc:Name>
+      <!-- PKCS#1v1.5 padding -->
+      <dssc:ObjectIdentifier>1.2.840.113549.1.1.5</dssc:ObjectIdentifier>
+      <dssc:URI>http://www.w3.org/2000/09/xmldsig#rsa-sha1</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -208,7 +275,74 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>1024</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2012-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>1536</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2012-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <!-- legacy -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>1900</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2012-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <!-- legacy -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>3000</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2012-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+  </dssc:Algorithm>
+
+  <dssc:Algorithm>
+    <dssc:AlgorithmIdentifier>
+      <dssc:Name>sha224WithRSAEncryption</dssc:Name>
+      <!-- PKCS#1v1.5 padding -->
+      <dssc:ObjectIdentifier>1.2.840.113549.1.1.14</dssc:ObjectIdentifier>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#rsa-sha224</dssc:URI>
+    </dssc:AlgorithmIdentifier>
+    <!-- historical -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>786</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2010-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -219,7 +353,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -230,11 +364,11 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
-	<dssc:Evaluation>
+    <dssc:Evaluation>
       <dssc:Parameter name="moduluslength">
         <dssc:Min>1900</dssc:Min>
       </dssc:Parameter>
@@ -242,11 +376,11 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
-	<!-- legacy -->
-	<dssc:Evaluation>
+    <!-- legacy -->
+    <dssc:Evaluation>
       <dssc:Parameter name="moduluslength">
         <dssc:Min>3000</dssc:Min>
       </dssc:Parameter>
@@ -254,7 +388,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -262,9 +396,9 @@
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
       <dssc:Name>sha256WithRSAEncryption</dssc:Name>
- <!-- PKCS#1v1.5 padding -->
+      <!-- PKCS#1v1.5 padding -->
       <dssc:ObjectIdentifier>1.2.840.113549.1.1.11</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -275,7 +409,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -286,7 +420,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -297,11 +431,11 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
-	<dssc:Evaluation>
+    <dssc:Evaluation>
       <dssc:Parameter name="moduluslength">
         <dssc:Min>1900</dssc:Min>
       </dssc:Parameter>
@@ -309,11 +443,11 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
-	<!-- recommended -->
-	<dssc:Evaluation>
+    <!-- recommended -->
+    <dssc:Evaluation>
       <dssc:Parameter name="moduluslength">
         <dssc:Min>3000</dssc:Min>
       </dssc:Parameter>
@@ -321,7 +455,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -329,9 +463,9 @@
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
       <dssc:Name>sha384WithRSAEncryption</dssc:Name>
- <!-- PKCS#1v1.5 padding -->
+      <!-- PKCS#1v1.5 padding -->
       <dssc:ObjectIdentifier>1.2.840.113549.1.1.12</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#rsa-sha384</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#rsa-sha384</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -342,7 +476,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -353,7 +487,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -364,7 +498,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -376,7 +510,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -388,7 +522,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -396,9 +530,9 @@
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
       <dssc:Name>sha512WithRSAEncryption</dssc:Name>
- <!-- PKCS#1v1.5 padding -->
+      <!-- PKCS#1v1.5 padding -->
       <dssc:ObjectIdentifier>1.2.840.113549.1.1.13</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -409,7 +543,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -420,7 +554,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -431,7 +565,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -443,7 +577,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -455,74 +589,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
-      </etsi19322:MoreDetails>
-    </dssc:Evaluation>
-  </dssc:Algorithm>
-
-  <dssc:Algorithm>
-    <dssc:AlgorithmIdentifier>
-      <dssc:Name>id-rsassa-pkcs1-v1-5-with-sha3-224</dssc:Name>
- <!-- PKCS#1v1.5 padding -->
-      <dssc:ObjectIdentifier>2.16.840.1.101.3.4.3.13</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
-    </dssc:AlgorithmIdentifier>
-    <!-- historical -->
-    <dssc:Evaluation>
-      <dssc:Parameter name="moduluslength">
-        <dssc:Min>786</dssc:Min>
-      </dssc:Parameter>
-      <dssc:Validity>
-        <dssc:End>2010-08-01+00:00</dssc:End>
-      </dssc:Validity>
-      <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
-      </etsi19322:MoreDetails>
-    </dssc:Evaluation>
-    <dssc:Evaluation>
-      <dssc:Parameter name="moduluslength">
-        <dssc:Min>1024</dssc:Min>
-      </dssc:Parameter>
-      <dssc:Validity>
-        <dssc:End>2019-10-01+00:00</dssc:End>
-      </dssc:Validity>
-      <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
-      </etsi19322:MoreDetails>
-    </dssc:Evaluation>
-    <dssc:Evaluation>
-      <dssc:Parameter name="moduluslength">
-        <dssc:Min>1536</dssc:Min>
-      </dssc:Parameter>
-      <dssc:Validity>
-        <dssc:End>2019-10-01+00:00</dssc:End>
-      </dssc:Validity>
-      <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
-      </etsi19322:MoreDetails>
-    </dssc:Evaluation>
-    <!-- legacy -->
-    <dssc:Evaluation>
-      <dssc:Parameter name="moduluslength">
-        <dssc:Min>1900</dssc:Min>
-      </dssc:Parameter>
-      <dssc:Validity>
-        <dssc:End>2029-01-01+00:00</dssc:End>
-      </dssc:Validity>
-      <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
-      </etsi19322:MoreDetails>
-    </dssc:Evaluation>
-    <!-- recommended -->
-    <dssc:Evaluation>
-      <dssc:Parameter name="moduluslength">
-        <dssc:Min>3000</dssc:Min>
-      </dssc:Parameter>
-      <dssc:Validity>
-        <dssc:End>2029-01-01+00:00</dssc:End>
-      </dssc:Validity>
-      <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -530,9 +597,9 @@
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
       <dssc:Name>id-rsassa-pkcs1-v1-5-with-sha3-256</dssc:Name>
- <!-- PKCS#1v1.5 padding -->
+      <!-- PKCS#1v1.5 padding -->
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.3.14</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -543,7 +610,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -554,7 +621,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -565,7 +632,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -577,7 +644,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -589,7 +656,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -597,9 +664,9 @@
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
       <dssc:Name>id-rsassa-pkcs1-v1-5-with-sha3-384</dssc:Name>
- <!-- PKCS#1v1.5 padding -->
+      <!-- PKCS#1v1.5 padding -->
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.3.15</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -610,7 +677,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -621,7 +688,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -632,7 +699,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -644,7 +711,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -656,7 +723,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -664,9 +731,9 @@
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
       <dssc:Name>id-rsassa-pkcs1-v1-5-with-sha3-512</dssc:Name>
- <!-- PKCS#1v1.5 padding -->
+      <!-- PKCS#1v1.5 padding -->
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.3.16</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -677,7 +744,7 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -688,7 +755,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -699,7 +766,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -711,7 +778,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -723,17 +790,17 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
 
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
-      <dssc:Name>rsassa-pss</dssc:Name>
- <!-- PSS padding -->
-      <dssc:ObjectIdentifier>1.2.840.113549.1.1.10</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2007/05/xmldsig-more#rsa-pss</dssc:URI>
+      <dssc:Name>ripedm160WithRSAEncryption</dssc:Name>
+      <!-- PKCS#1v1.5 padding -->
+      <dssc:ObjectIdentifier>1.3.36.3.3.1.2</dssc:ObjectIdentifier>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#rsa-ripemd160</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -744,7 +811,74 @@
         <dssc:End>2010-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>1024</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2014-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>1536</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2014-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <!-- legacy -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>1900</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2014-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+    <!-- recommended -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>3000</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2014-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
+      </etsi19322:MoreDetails>
+    </dssc:Evaluation>
+  </dssc:Algorithm>
+
+  <dssc:Algorithm>
+    <dssc:AlgorithmIdentifier>
+      <dssc:Name>rsassa-pss</dssc:Name>
+      <!-- PSS padding -->
+      <dssc:ObjectIdentifier>1.2.840.113549.1.1.10</dssc:ObjectIdentifier>
+      <dssc:URI>http://www.w3.org/2007/05/xmldsig-more#rsa-pss</dssc:URI>
+    </dssc:AlgorithmIdentifier>
+    <!-- historical -->
+    <dssc:Evaluation>
+      <dssc:Parameter name="moduluslength">
+        <dssc:Min>786</dssc:Min>
+      </dssc:Parameter>
+      <dssc:Validity>
+        <dssc:End>2010-08-01+00:00</dssc:End>
+      </dssc:Validity>
+      <etsi19322:MoreDetails>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -755,7 +889,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -766,7 +900,7 @@
         <dssc:End>2019-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -778,7 +912,7 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -788,7 +922,7 @@
       </dssc:Parameter>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -798,7 +932,7 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>DSA</dssc:Name>
       <dssc:ObjectIdentifier>1.2.840.10040.4.1</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -812,7 +946,7 @@
         <dssc:End>2015-12-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -827,10 +961,10 @@
         <dssc:End>2029-01-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
-	<!-- recommended -->
+    <!-- recommended -->
     <dssc:Evaluation>
       <dssc:Parameter name="plength">
         <dssc:Min>3000</dssc:Min>
@@ -840,17 +974,17 @@
       </dssc:Parameter>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-      	<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
-  
+
   <!-- ECDSA -->
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
       <dssc:Name>ECDSA with SHA-224</dssc:Name>
       <dssc:ObjectIdentifier>1.2.840.10045.4.3.1</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha224</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha224</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -864,7 +998,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -878,7 +1012,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -893,7 +1027,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -905,10 +1039,10 @@
         <dssc:Min>256</dssc:Min>
       </dssc:Parameter>
       <dssc:Validity>
-        <dssc:End>2029-01-01+01:00</dssc:End> <!-- legacy suite -->
+        <dssc:End>2029-01-01+00:00</dssc:End> <!-- legacy suite -->
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -916,7 +1050,7 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>ECDSA with SHA-256</dssc:Name>
       <dssc:ObjectIdentifier>1.2.840.10045.4.3.2</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -930,7 +1064,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -944,7 +1078,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -959,7 +1093,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -972,7 +1106,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -980,7 +1114,7 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>ECDSA with SHA-384</dssc:Name>
       <dssc:ObjectIdentifier>1.2.840.10045.4.3.3</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -994,7 +1128,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1008,7 +1142,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1023,7 +1157,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1036,7 +1170,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1044,7 +1178,7 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>ECDSA with SHA-512</dssc:Name>
       <dssc:ObjectIdentifier>1.2.840.10045.4.3.4</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512</dssc:URI>
+      <dssc:URI>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -1058,7 +1192,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1072,7 +1206,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1087,7 +1221,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1100,7 +1234,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1108,7 +1242,7 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>ECDSA with SHA3-256</dssc:Name>
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.3.10</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2021/04/xmldsig-more#ecdsa-sha3-256</dssc:URI>
+      <dssc:URI>http://www.w3.org/2021/04/xmldsig-more#ecdsa-sha3-256</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -1122,7 +1256,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1136,7 +1270,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1151,7 +1285,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1164,7 +1298,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1172,7 +1306,7 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>ECDSA with SHA3-384</dssc:Name>
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.3.11</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2021/04/xmldsig-more#ecdsa-sha3-384</dssc:URI>
+      <dssc:URI>http://www.w3.org/2021/04/xmldsig-more#ecdsa-sha3-384</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -1186,7 +1320,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1200,7 +1334,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1215,7 +1349,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1228,7 +1362,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1236,7 +1370,7 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>ECDSA with SHA3-512</dssc:Name>
       <dssc:ObjectIdentifier>2.16.840.1.101.3.4.3.12</dssc:ObjectIdentifier>
-	  <dssc:URI>http://www.w3.org/2021/04/xmldsig-more#ecdsa-sha3-512</dssc:URI>
+      <dssc:URI>http://www.w3.org/2021/04/xmldsig-more#ecdsa-sha3-512</dssc:URI>
     </dssc:AlgorithmIdentifier>
     <!-- historical -->
     <dssc:Evaluation>
@@ -1250,7 +1384,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1264,7 +1398,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1279,7 +1413,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1292,7 +1426,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1314,7 +1448,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1328,7 +1462,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1343,7 +1477,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1356,7 +1490,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1378,7 +1512,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <dssc:Evaluation>
@@ -1392,7 +1526,7 @@
         <dssc:End>2012-08-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- legacy -->
@@ -1407,7 +1541,7 @@
         <dssc:End>2021-10-01+00:00</dssc:End>
       </dssc:Validity>
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>L</dssc:Recommendation>
+        <etsi19322:Recommendation>L</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
     <!-- recommended -->
@@ -1420,7 +1554,7 @@
       </dssc:Parameter>
       <dssc:Validity />
       <etsi19322:MoreDetails>
-        <dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1431,12 +1565,12 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>FRP256v1</dssc:Name>
       <dssc:ObjectIdentifier>1.2.250.1.223.101.256.1</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1444,12 +1578,12 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>brainpoolP256r1</dssc:Name>
       <dssc:ObjectIdentifier>1.3.36.3.3.2.8.1.1.7</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1457,12 +1591,12 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>brainpoolP384r1</dssc:Name>
       <dssc:ObjectIdentifier>1.3.36.3.3.2.8.1.1.11</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1470,12 +1604,12 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>brainpoolP512r1</dssc:Name>
       <dssc:ObjectIdentifier>1.3.36.3.3.2.8.1.1.13</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1483,12 +1617,12 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>secp256r1</dssc:Name>
       <dssc:ObjectIdentifier>1.2.840.10045.3.1.7</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1496,12 +1630,12 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>secp384r1</dssc:Name>
       <dssc:ObjectIdentifier>1.3.132.0.34</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
@@ -1509,29 +1643,29 @@
     <dssc:AlgorithmIdentifier>
       <dssc:Name>secp512r1</dssc:Name>
       <dssc:ObjectIdentifier>1.3.132.0.35</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>
 
-  
-  
+
+
   <!-- EC-SDSA-opt -->
   <dssc:Algorithm>
     <dssc:AlgorithmIdentifier>
       <dssc:Name>EC-SDSA-opt</dssc:Name>
       <dssc:ObjectIdentifier>1.0.14888.3.0.13</dssc:ObjectIdentifier>
-	  <!-- URI not defined -->
+      <!-- URI not defined -->
     </dssc:AlgorithmIdentifier>
     <dssc:Evaluation>
       <dssc:Validity/>
       <etsi19322:MoreDetails>
-		<dssc:Recommendation>R</dssc:Recommendation>
+        <etsi19322:Recommendation>R</etsi19322:Recommendation>
       </etsi19322:MoreDetails>
     </dssc:Evaluation>
   </dssc:Algorithm>

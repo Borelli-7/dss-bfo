@@ -68,7 +68,7 @@ import eu.europa.esig.dss.xades.tsl.TrustedListV5SignatureParametersBuilder;
 import eu.europa.esig.dss.xml.common.definition.DSSNamespace;
 import eu.europa.esig.dss.xml.common.definition.xmldsig.XMLDSigNamespace;
 import eu.europa.esig.dss.xml.utils.DomUtils;
-import eu.europa.esig.trustedlist.enums.Assert;
+import eu.europa.esig.dss.enumerations.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -449,21 +449,25 @@ public abstract class AbstractMRALOTLTest extends PKIFactoryAccess {
         }
 
         Map<String, String> qualifierEquivalenceMap = getQualifierEquivalenceMap();
-        if (Utils.isMapNotEmpty(qualifierEquivalenceMap)) {
+        if (qualifierEquivalenceMap != null) {
             Element qualifierEquivalenceListElement = DomUtils.getElement(mraInformation,
                     "./mra:TrustServiceEquivalenceInformation/mra:TrustServiceTSLQualificationExtensionEquivalenceList/mra:QualifierEquivalenceList");
-            removeAllChildren(qualifierEquivalenceListElement);
-            for (Map.Entry<String, String> entry : qualifierEquivalenceMap.entrySet()) {
-                Element qualifierEquivalenceElement = document.createElementNS(MRA_NAMESPACE.getUri(), "mra:QualifierEquivalence");
-                qualifierEquivalenceListElement.appendChild(qualifierEquivalenceElement);
+            if (Utils.isMapEmpty(qualifierEquivalenceMap)) {
+                removeElement(qualifierEquivalenceListElement);
+            } else {
+                removeAllChildren(qualifierEquivalenceListElement);
+                for (Map.Entry<String, String> entry : qualifierEquivalenceMap.entrySet()) {
+                    Element qualifierEquivalenceElement = document.createElementNS(MRA_NAMESPACE.getUri(), "mra:QualifierEquivalence");
+                    qualifierEquivalenceListElement.appendChild(qualifierEquivalenceElement);
 
-                Element qualifierPointingPartyElement = document.createElementNS(MRA_NAMESPACE.getUri(), "mra:QualifierPointingParty");
-                qualifierEquivalenceElement.appendChild(qualifierPointingPartyElement);
-                qualifierPointingPartyElement.setAttribute("uri", entry.getValue());
+                    Element qualifierPointingPartyElement = document.createElementNS(MRA_NAMESPACE.getUri(), "mra:QualifierPointingParty");
+                    qualifierEquivalenceElement.appendChild(qualifierPointingPartyElement);
+                    qualifierPointingPartyElement.setAttribute("uri", entry.getValue());
 
-                Element qualifierPointedPartyElement = document.createElementNS(MRA_NAMESPACE.getUri(), "mra:QualifierPointedParty");
-                qualifierEquivalenceElement.appendChild(qualifierPointedPartyElement);
-                qualifierPointedPartyElement.setAttribute("uri", entry.getKey());
+                    Element qualifierPointedPartyElement = document.createElementNS(MRA_NAMESPACE.getUri(), "mra:QualifierPointedParty");
+                    qualifierEquivalenceElement.appendChild(qualifierPointedPartyElement);
+                    qualifierPointedPartyElement.setAttribute("uri", entry.getKey());
+                }
             }
         }
 
@@ -602,11 +606,14 @@ public abstract class AbstractMRALOTLTest extends PKIFactoryAccess {
         }
     }
 
-    void removeAllChildren(Node node)
-    {
+    void removeAllChildren(Node node) {
         while (node.getFirstChild() != null) {
             node.removeChild(node.getFirstChild());
         }
+    }
+
+    void removeElement(Node node) {
+        node.getParentNode().removeChild(node);
     }
 
     private void setCondition(Document document, Element element, Condition condition) {

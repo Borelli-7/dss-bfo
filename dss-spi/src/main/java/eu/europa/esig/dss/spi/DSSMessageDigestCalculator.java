@@ -24,8 +24,6 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.DSSMessageDigest;
 import eu.europa.esig.dss.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,8 +41,6 @@ import java.util.Objects;
  *
  */
 public class DSSMessageDigestCalculator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DSSMessageDigestCalculator.class);
 
     /** The Map of DigestAlgorithm and corresponding computed message-digest */
     private final Map<DigestAlgorithm, MessageDigest> messageDigestMap;
@@ -150,19 +146,6 @@ public class DSSMessageDigestCalculator {
                 update(buffer, 0, count);
             }
         }
-    }
-
-    /**
-     * Returns the {@code DSSMessageDigest} accordingly to the current state.
-     * This method resets the state of message-digest.
-     *
-     * @return {@link DSSMessageDigest}
-     * @deprecated since DSS 6.3. Please use {@code #getMessageDigest(DigestAlgorithm)} method instead.
-     */
-    @Deprecated
-    public DSSMessageDigest getMessageDigest() {
-        LOG.warn("Use of deprecated method #getMessageDigest()! Please use #getMessageDigest(DigestAlgorithm) method instead!");
-        return getMessageDigest(messageDigestMap.keySet().iterator().next());
     }
 
     /**

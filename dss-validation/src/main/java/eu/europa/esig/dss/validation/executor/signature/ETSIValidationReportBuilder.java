@@ -21,6 +21,7 @@
 package eu.europa.esig.dss.validation.executor.signature;
 
 import eu.europa.esig.dss.detailedreport.DetailedReport;
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCertificateChain;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlChainItem;
@@ -33,7 +34,6 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlEvidenceRecord;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlMessage;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlProofOfExistence;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlRevocationInformation;
-import eu.europa.esig.dss.detailedreport.jaxb.XmlSAV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlStatus;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlSubXCV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlValidationProcessEvidenceRecord;
@@ -72,6 +72,7 @@ import eu.europa.esig.dss.enumerations.RevocationRefOrigin;
 import eu.europa.esig.dss.enumerations.RevocationType;
 import eu.europa.esig.dss.enumerations.SignaturePolicyType;
 import eu.europa.esig.dss.enumerations.SignatureQualification;
+import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.enumerations.TimestampQualification;
 import eu.europa.esig.dss.enumerations.TimestampType;
 import eu.europa.esig.dss.jaxb.object.Message;
@@ -640,16 +641,18 @@ public class ETSIValidationReportBuilder {
 		}
 		XmlEvidenceRecord xmlEvidenceRecord = detailedReport.getXmlEvidenceRecordById(evidenceRecord.getId());
 		XmlValidationProcessEvidenceRecord validationProcessEvidenceRecord = xmlEvidenceRecord.getValidationProcessEvidenceRecord();
-		XmlCryptographicValidation cryptographicValidation = validationProcessEvidenceRecord.getCryptographicValidation();
+		XmlAOV xmlAOV = validationProcessEvidenceRecord.getAOV();
+		XmlCryptographicValidation cryptographicValidation = ValidationProcessUtils.getFinalCryptographicValidation(xmlAOV);
 		if (cryptographicValidation != null) {
 			fillCryptographicInfo(validationReportData, evidenceRecord, cryptographicValidation);
 		}
 	}
+
 	private void fillCryptographicInfo(ValidationReportDataType validationReportData, EvidenceRecordWrapper evidenceRecord,
 									   XmlCryptographicValidation cryptographicValidation) {
 		CryptoInformationType cryptoInformationType = objectFactory.createCryptoInformationType();
 		cryptoInformationType.setValidationObjectId(getVOReference(getEvidenceRecordValidationObject(evidenceRecord)));
-		cryptoInformationType.setSecureAlgorithm(cryptographicValidation.isSecure());
+		cryptoInformationType.setSecureAlgorithm(Indication.PASSED == cryptographicValidation.getConclusion().getIndication());
 		XmlCryptographicAlgorithm algorithm = cryptographicValidation.getAlgorithm();
 		if (algorithm != null) {
 			cryptoInformationType.setAlgorithm(algorithm.getUri());
@@ -819,8 +822,14 @@ public class ETSIValidationReportBuilder {
 	}
 
 	private void fillIndicationSubIndication(ValidationStatusType validationStatus, String tokenId) {
-		validationStatus.setMainIndication(detailedReport.getFinalIndication(tokenId));
-		validationStatus.getSubIndication().add(detailedReport.getFinalSubIndication(tokenId));
+		Indication finalIndication = detailedReport.getFinalIndication(tokenId);
+		if (finalIndication != null) {
+			validationStatus.setMainIndication(finalIndication);
+		}
+		SubIndication finalSubIndication = detailedReport.getFinalSubIndication(tokenId);
+		if (finalSubIndication != null) {
+			validationStatus.getSubIndication().add(finalSubIndication);
+		}
 	}
 
 	private void fillMessages(ValidationStatusType validationStatus, String tokenId) {
@@ -901,9 +910,10 @@ public class ETSIValidationReportBuilder {
 				if (certificateChain != null) {
 					fillCertificateChainAndTrustAnchor(validationReportData, certificateChain);
 				}
-				XmlSAV sav = basicBuildingBlock.getSAV();
-				if (sav != null && sav.getCryptographicValidation() != null) {
-					fillCryptographicInfo(validationReportData, token, sav.getCryptographicValidation());
+				XmlAOV aov = basicBuildingBlock.getAOV();
+				XmlCryptographicValidation cryptographicValidation = ValidationProcessUtils.getFinalCryptographicValidation(aov);
+				if (cryptographicValidation != null) {
+					fillCryptographicInfo(validationReportData, token, cryptographicValidation);
 				}
 			}
 			if (signingCertificate != null && signingCertificate.getRevocationInfo() != null) {
@@ -923,7 +933,7 @@ public class ETSIValidationReportBuilder {
 		} else {
 			throw new IllegalArgumentException(String.format("Unsupported class %s", token.getClass()));
 		}
-		cryptoInformationType.setSecureAlgorithm(cryptographicValidation.isSecure());
+		cryptoInformationType.setSecureAlgorithm(Indication.PASSED == cryptographicValidation.getConclusion().getIndication());
 		XmlCryptographicAlgorithm algorithm = cryptographicValidation.getAlgorithm();
 		if (algorithm != null) {
 			cryptoInformationType.setAlgorithm(algorithm.getUri());

@@ -20,6 +20,7 @@
  */
 package eu.europa.esig.dss.validation.process.vpfswatsp.checks.pcv;
 
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBlockType;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
@@ -29,17 +30,17 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlVTS;
 import eu.europa.esig.dss.diagnostic.CertificateWrapper;
 import eu.europa.esig.dss.diagnostic.TokenProxy;
 import eu.europa.esig.dss.enumerations.Context;
-import eu.europa.esig.dss.enumerations.SubContext;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.LevelRule;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.validation.process.Chain;
 import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
-import eu.europa.esig.dss.validation.process.bbb.sav.checks.CryptographicCheck;
+import eu.europa.esig.dss.validation.process.bbb.aov.AlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.TokenCertificateChainAlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.checks.AlgorithmObsolescenceValidationCheck;
 import eu.europa.esig.dss.validation.process.vpfswatsp.POEExtraction;
 import eu.europa.esig.dss.validation.process.vpfswatsp.checks.pcv.checks.ProspectiveCertificateChainCheck;
 import eu.europa.esig.dss.validation.process.vpfswatsp.checks.pcv.checks.SuccessfulValidationTimeSlidingFoundCheck;
@@ -108,8 +109,6 @@ public class PastCertificateValidation extends Chain<XmlPCV> {
 
 	@Override
 	protected void initChain() {
-
-		CertificateWrapper signingCertificate = token.getSigningCertificate();
 
 		/*
 		 * 1) The building block shall build a new prospective certificate chain that
@@ -197,20 +196,8 @@ public class PastCertificateValidation extends Chain<XmlPCV> {
 		 * current status to INDETERMINATE/CHAIN_CONSTRAINTS_FAILURE and shall go to step 1).
 		 */
 		if (controlTime != null) {
-			List<CertificateWrapper> certificateChain = token.getCertificateChain();
-			for (CertificateWrapper certificate : certificateChain) {
-				if (trustedCertificate == certificate) {
-					// There is no need to check for the trusted certificate
-					break;
-				}
 
-				SubContext subContext = SubContext.CA_CERTIFICATE;
-				if (Utils.areStringsEqual(signingCertificate.getId(), certificate.getId())) {
-					subContext = SubContext.SIGNING_CERT;
-				}
-
-				item = item.setNextItem(cryptographicCheck(result, certificate, controlTime, subContext));
-			}
+			item = item.setNextItem(cryptographicCheck(result, controlTime));
 
 		}
 
@@ -241,11 +228,13 @@ public class PastCertificateValidation extends Chain<XmlPCV> {
 		return new SuccessfulValidationTimeSlidingFoundCheck(i18nProvider, result, vts, getFailLevelRule());
 	}
 
-	private ChainItem<XmlPCV> cryptographicCheck(XmlPCV result, CertificateWrapper certificate, Date validationTime, SubContext subContext) {
-		CryptographicSuite constraint = policy.getCertificateCryptographicConstraint(context, subContext);
+	private ChainItem<XmlPCV> cryptographicCheck(XmlPCV result, Date validationTime) {
+		AlgorithmObsolescenceValidation<?> algorithmObsolescenceValidation = new TokenCertificateChainAlgorithmObsolescenceValidation<>(
+				i18nProvider, token, context, validationTime, policy);
+		XmlAOV aovResult = algorithmObsolescenceValidation.execute();
+
 		MessageTag position = ValidationProcessUtils.getCertificateChainCryptoPosition(context);
-		
-		return new CryptographicCheck<>(i18nProvider, result, certificate, position, validationTime, constraint);
+		return new AlgorithmObsolescenceValidationCheck<>(i18nProvider, result, aovResult, validationTime, position, token.getId());
 	}
 
 	/**

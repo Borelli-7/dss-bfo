@@ -89,6 +89,7 @@ import eu.europa.esig.dss.enumerations.MessageType;
 import eu.europa.esig.dss.enumerations.RevocationOrigin;
 import eu.europa.esig.dss.enumerations.RevocationRefOrigin;
 import eu.europa.esig.dss.enumerations.RevocationType;
+import eu.europa.esig.dss.enumerations.SignatureForm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignaturePolicyType;
 import eu.europa.esig.dss.enumerations.SignatureScopeType;
@@ -579,6 +580,7 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 		checkTrustServices(diagnosticData);
 		checkContainerInfo(diagnosticData);
 		checkPDFAInfo(diagnosticData);
+		checkJWSSerializationType(diagnosticData);
 
 		checkNoDuplicateSignatures(diagnosticData);
 		checkNoDuplicateCompleteCertificates(diagnosticData);
@@ -999,6 +1001,17 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 						}
 					}
 					assertTrue(signingCertFound);
+
+					assertNull(revocationWrapper.getCRLNumber());
+					assertNull(revocationWrapper.getExpiredCertsOnCRL());
+
+				} else if (RevocationType.CRL.equals(revocationWrapper.getRevocationType())) {
+					assertNull(revocationWrapper.getArchiveCutOff());
+					assertFalse(revocationWrapper.isCertHashExtensionPresent());
+					assertFalse(revocationWrapper.isCertHashExtensionMatch());
+
+				} else {
+					fail(String.format("Not supported revocation token type : %s", revocationWrapper.getRevocationType()));
 				}
 			}
 		}
@@ -1386,7 +1399,6 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 						SignatureScopeType.ARCHIVED != signatureScope.getScope()) {
 					fail(String.format("Unsupported SignatureScopeType '%s'!", signatureScope.getScope()));
 				}
-				assertNotNull(signatureScope.getName());
 				assertNotNull(signatureScope.getDescription());
 
 				XmlSignerData signerData = signatureScope.getSignerData();
@@ -1635,6 +1647,20 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 		}
 	}
 
+	protected void checkJWSSerializationType(DiagnosticData diagnosticData) {
+		for (SignatureWrapper signatureWrapper : diagnosticData.getSignatures()) {
+				if (signatureWrapper.getSignatureFormat() != null && signatureWrapper.getSignatureFormat().getSignatureForm() == SignatureForm.JAdES) {
+					assertNotNull(signatureWrapper.getJWSSerializationType());
+				} else {
+					assertNull(signatureWrapper.getJWSSerializationType());
+				}
+		}
+	}
+
+	protected void checkExpirationDate(DiagnosticData diagnosticData) {
+		// not implemented by default
+	}
+
 	protected void checkNoDuplicateTimestamps(List<TimestampWrapper> timestampTokens) {
 		Set<String> tstIds = timestampTokens.stream().map(TimestampWrapper::getId).collect(Collectors.toSet());
 		assertEquals(timestampTokens.size(), tstIds.size());
@@ -1742,7 +1768,8 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 				assertTrue(Utils.isCollectionEmpty(simpleReport.getAdESValidationErrors(sigId)));
 
 				if (!createdWithTrustAnchor(simpleReport.getCertificateChain(sigId))
-						&& !timestampedWithTrustAnchor(simpleReport.getSignatureTimestamps(sigId))) {
+						&& !timestampedWithTrustAnchor(simpleReport.getSignatureTimestamps(sigId))
+						&& !preservedByERWithTrustAnchor(simpleReport.getSignatureEvidenceRecords(sigId))) {
 					assertNotNull(simpleReport.getExtensionPeriodMax(sigId));
 				}
 				++numberOfValidSignatures;
@@ -1821,6 +1848,13 @@ public abstract class AbstractPkiFactoryTestValidation extends PKIFactoryAccess 
 	private boolean timestampedWithTrustAnchor(List<eu.europa.esig.dss.simplereport.jaxb.XmlTimestamp> xmlTimestampList) {
 		if (Utils.isCollectionNotEmpty(xmlTimestampList)) {
 			return xmlTimestampList.stream().anyMatch(t -> createdWithTrustAnchor(t.getCertificateChain()));
+		}
+		return false;
+	}
+
+	private boolean preservedByERWithTrustAnchor(List<eu.europa.esig.dss.simplereport.jaxb.XmlEvidenceRecord> xmlEvidenceRecordList) {
+		if (Utils.isCollectionNotEmpty(xmlEvidenceRecordList)) {
+			return xmlEvidenceRecordList.stream().anyMatch(er -> timestampedWithTrustAnchor(er.getTimestamps().getTimestamp()));
 		}
 		return false;
 	}

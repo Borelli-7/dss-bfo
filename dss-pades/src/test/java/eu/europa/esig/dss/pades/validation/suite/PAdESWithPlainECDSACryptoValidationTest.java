@@ -27,6 +27,7 @@ import eu.europa.esig.dss.detailedreport.jaxb.XmlMessage;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
 import eu.europa.esig.dss.diagnostic.SignatureWrapper;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.model.DSSDocument;
@@ -89,8 +90,8 @@ class PAdESWithPlainECDSACryptoValidationTest {
         List<XmlMessage> messages = xmlConclusion.getErrors();
         assertNotNull(messages);
         for (XmlMessage message : messages) {
-            if (MessageTag.ASCCM_EAA_ANS.name().equals(message.getKey())) {
-                assertEquals(new I18nProvider().getMessage(MessageTag.ASCCM_EAA_ANS, EncryptionAlgorithm.PLAIN_ECDSA.getName(), MessageTag.ACCM_POS_SIG_SIG),
+            if (MessageTag.ASCCM_CAA_ANS.name().equals(message.getKey())) {
+                assertEquals(new I18nProvider().getMessage(MessageTag.ASCCM_CAA_ANS, SignatureAlgorithm.PLAIN_ECDSA_SHA256.getName(), MessageTag.ACCM_POS_SIG_SIG),
                         message.getValue());
                 return;
             }
@@ -121,8 +122,8 @@ class PAdESWithPlainECDSACryptoValidationTest {
         List<XmlMessage> messages = xmlConclusion.getErrors();
         assertNotNull(messages);
         for (XmlMessage message : messages) {
-            if (MessageTag.ASCCM_EAA_ANS.name().equals(message.getKey())) {
-                assertEquals(new I18nProvider().getMessage(MessageTag.ASCCM_EAA_ANS, EncryptionAlgorithm.PLAIN_ECDSA.getName(), MessageTag.ACCM_POS_SIG_SIG),
+            if (MessageTag.ASCCM_CAA_ANS.name().equals(message.getKey())) {
+                assertEquals(new I18nProvider().getMessage(MessageTag.ASCCM_CAA_ANS, SignatureAlgorithm.PLAIN_ECDSA_SHA256.getName(), MessageTag.ACCM_POS_SIG_SIG),
                         message.getValue());
                 return;
             }

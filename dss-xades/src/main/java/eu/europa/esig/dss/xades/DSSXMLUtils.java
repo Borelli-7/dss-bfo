@@ -633,7 +633,7 @@ public final class DSSXMLUtils {
 		final byte[] digestValue = getDigestValue(digestValueBase64);
 
 		if (digestAlgorithm == null || Utils.isArrayEmpty(digestValue)) {
-			LOG.warn("Unable to read object DigestAlgAndValueType (XMLDSig or XAdES 1.1.1)");
+			LOG.warn("Unable to read object DigestAlgAndValueType. An error occurred during processing.");
 			return null;
 
 		} else {
@@ -701,9 +701,34 @@ public final class DSSXMLUtils {
 	 * @param reference {@link Reference} to check
 	 * @param xadesPaths {@link XAdESPath}
 	 * @return TRUE if the reference refers to the CounterSignature, FALSE otherwise
+	 * @deprecated since DSS 6.4. Please use {@code #isCounterSignatureReferenceType(reference.getType())} method instead
 	 */
+	@Deprecated
 	public static boolean isCounterSignature(final Reference reference, final XAdESPath xadesPaths) {
-		return xadesPaths.getCounterSignatureUri().equals(reference.getType());
+		return isCounterSignatureReferenceType(reference.getType());
+	}
+
+	/**
+	 * Determines if the given {@code reference} refers to CounterSignature element within the {@code signature}
+	 *
+	 * @param reference {@link Reference} to check
+	 * @param signature {@link XAdESSignature} signature being validated
+	 * @return TRUE if the reference refers to the CounterSignature, FALSE otherwise
+	 */
+	public static boolean isCounterSignatureReference(final Reference reference, final XAdESSignature signature) {
+		XAdESSignature masterSignature = (XAdESSignature) signature.getMasterSignature();
+		if (masterSignature != null) {
+			return isCounterSignatureReferenceType(reference.getType()) || isSignatureValueReferenced(masterSignature, reference);
+		} else if (isCounterSignatureReferenceType(reference.getType())) {
+			LOG.warn("Master signature is not found! " +
+					"Unable to verify counter signed SignatureValue for detached signatures.");
+		}
+		return false;
+	}
+
+	private static boolean isSignatureValueReferenced(final XAdESSignature masterSignature, Reference reference) {
+		return masterSignature.getSignatureValueId() != null &&
+				masterSignature.getSignatureValueId().equals(DomUtils.getId(reference.getURI()));
 	}
 	
 	/**
@@ -908,10 +933,8 @@ public final class DSSXMLUtils {
 			final XAdESSignature xadesCounterSignature = new XAdESSignature((Element) counterSignatureNode, masterSignature.getXAdESPathsHolders());
 			xadesCounterSignature.setFilename(masterSignature.getFilename());
 			xadesCounterSignature.setDetachedContents(masterSignature.getDetachedContents());
-			if (isCounterSignature(xadesCounterSignature)) {
-				xadesCounterSignature.setMasterSignature(masterSignature);
-				return xadesCounterSignature;
-			}
+			xadesCounterSignature.setMasterSignature(masterSignature);
+			return xadesCounterSignature;
 			
 		} catch (Exception e) {
 			String errorMessage = "An error occurred during counter signature extraction. The element entry is skipped. Reason : {}";
@@ -923,30 +946,6 @@ public final class DSSXMLUtils {
 		}
 		
 		return null;
-	}
-
-	/**
-	 * This method verifies whether a given signature is a countersignature.
-	 *
-	 * From ETSI TS 101 903 V1.4.2: - The signature's ds:SignedInfo element MUST contain one ds:Reference element
-	 * referencing the ds:Signature element of the
-	 * embedding and countersigned XAdES signature - The content of the ds:DigestValue in the aforementioned
-	 * ds:Reference element of the countersignature MUST
-	 * be the base-64 encoded digest of the complete (and canonicalized) ds:SignatureValue element (i.e. including the
-	 * starting and closing tags) of the
-	 * embedding and countersigned XAdES signature.
-	 *
-	 * @param xadesCounterSignature {@link XAdESSignature} a signature extracted from {@code <ds:CounterSignature>} element
-	 * @return TRUE if the current XAdES Signature contains a coutner signature reference, FALSE otherwise
-	 */
-	private static boolean isCounterSignature(final XAdESSignature xadesCounterSignature) {
-		final List<Reference> references = xadesCounterSignature.getReferences();
-		for (final Reference reference : references) {
-			if (isCounterSignature(reference, xadesCounterSignature.getXAdESPaths())) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -1150,10 +1149,9 @@ public final class DSSXMLUtils {
 		try {
 			final Digest digest = new Digest();
 			digest.setValue(reference.getDigestValue());
-			digest.setAlgorithm(
-					DigestAlgorithm.forXML(reference.getMessageDigestAlgorithm().getAlgorithmURI()));
+			digest.setAlgorithm(DigestAlgorithm.forXML(reference.getMessageDigestAlgorithm().getAlgorithmURI()));
 			return digest;
-		} catch (XMLSecurityException e) {
+		} catch (Exception e) {
 			LOG.warn("Unable to extract Digest from a reference with Id [{}] : {}",
 					reference.getId(), e.getMessage(), e);
 			return null;
@@ -1331,15 +1329,28 @@ public final class DSSXMLUtils {
 	 *
 	 * @param reference {@link Reference} to get a name of the linked document for
 	 * @return {@link String} document name
+	 * @deprecated since DSS 6.4. Please use {@code getDocument(reference).getName()} method instead
 	 */
+	@Deprecated
 	public static String getDocumentName(Reference reference) {
+		DSSDocument document = getDocument(reference);
+		return document != null ? document.getName() : null;
+	}
+
+	/**
+	 * This method returns a name of the linked document to the reference (when applicable)
+	 *
+	 * @param reference {@link Reference} to get a name of the linked document for
+	 * @return {@link String} document name
+	 */
+	public static DSSDocument getDocument(Reference reference) {
 		try {
 			XMLSignatureInput xmlSignatureInput = getClosedContentsBeforeTransformation(reference);
 			if (xmlSignatureInput instanceof DSSDocumentXMLSignatureInput) {
-				return ((DSSDocumentXMLSignatureInput) xmlSignatureInput).getDocumentName();
+				return ((DSSDocumentXMLSignatureInput) xmlSignatureInput).getDocument();
 			}
 		} catch (Exception e) {
-			String errorMessage = "Unable to verify matching document name for a reference with Id [{}] : {}";
+			String errorMessage = "Unable to verify matching document for a reference with Id [{}] : {}";
 			if (LOG.isDebugEnabled()) {
 				LOG.warn(errorMessage, reference.getId(), e.getMessage(), e);
 			} else {

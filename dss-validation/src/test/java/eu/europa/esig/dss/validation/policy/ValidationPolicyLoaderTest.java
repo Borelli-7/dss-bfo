@@ -27,6 +27,9 @@ import eu.europa.esig.dss.enumerations.SubContext;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteCatalogue;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteEvaluation;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteParameter;
 import eu.europa.esig.dss.policy.CryptographicConstraintWrapper;
 import eu.europa.esig.dss.policy.EtsiValidationPolicy;
 import eu.europa.esig.dss.policy.jaxb.Algo;
@@ -38,16 +41,19 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ValidationPolicyLoaderTest {
 
@@ -62,20 +68,11 @@ class ValidationPolicyLoaderTest {
         assertNotNull(validationPolicyWithCryptoSuite);
         assertInstanceOf(ValidationPolicyWithCryptographicSuite.class, validationPolicyWithCryptoSuite);
 
-        assertEquals(new HashSet<>(validationPolicy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithms()),
-                new HashSet<>(validationPolicyWithCryptoSuite.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithms()));
+        assertAlgorithmsEquals(validationPolicy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithms(),
+                validationPolicyWithCryptoSuite.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithms());
 
-        assertEquals(new EnumMap<>(validationPolicy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithmsWithExpirationDates()),
-                new EnumMap<>(validationPolicyWithCryptoSuite.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithmsWithExpirationDates()));
-
-        assertEquals(new HashSet<>(validationPolicy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithms()),
-                new HashSet<>(validationPolicyWithCryptoSuite.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithms()));
-
-        assertEquals(new HashSet<>(validationPolicy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithmsWithMinKeySizes()),
-                new HashSet<>(validationPolicyWithCryptoSuite.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithmsWithMinKeySizes()));
-
-        assertEquals(new HashMap<>(validationPolicy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithmsWithExpirationDates()),
-                new HashMap<>(validationPolicyWithCryptoSuite.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithmsWithExpirationDates()));
+        assertAlgorithmsEquals(validationPolicy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableSignatureAlgorithms(),
+                validationPolicyWithCryptoSuite.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableSignatureAlgorithms());
     }
 
     @Test
@@ -89,7 +86,7 @@ class ValidationPolicyLoaderTest {
                 DigestAlgorithm.SHA3_256, DigestAlgorithm.SHA3_384, DigestAlgorithm.SHA3_512,
                 DigestAlgorithm.RIPEMD160, DigestAlgorithm.WHIRLPOOL));
 
-        assertEquals(fullSet, new HashSet<>(new HashSet<>(policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithms())));
+        assertEquals(fullSet, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithms().keySet());
 
         // default crypto suite
         CryptographicConstraint altCrypto = new CryptographicConstraint();
@@ -107,13 +104,13 @@ class ValidationPolicyLoaderTest {
         Set<DigestAlgorithm> sha256List = Collections.singleton(DigestAlgorithm.SHA256);
         for (Context context : Context.values()) {
             if (Context.EVIDENCE_RECORD != context) {
-                assertEquals(sha256List, new HashSet<>(policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms()));
+                assertEquals(sha256List, policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms().keySet());
                 for (SubContext subContext : SubContext.values()) {
-                    assertEquals(sha256List, new HashSet<>(policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms()));
+                    assertEquals(sha256List, policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms().keySet());
                 }
             }
         }
-        assertEquals(sha256List, new HashSet<>(policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms()));
+        assertEquals(sha256List, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
 
         for (Context context : Context.values()) {
             policy = ValidationPolicyLoader.fromDefaultValidationPolicy().withCryptographicSuiteForContext(altCryptoSuite, context).create();
@@ -121,20 +118,20 @@ class ValidationPolicyLoaderTest {
             for (Context currentContext : Context.values()) {
                 if (Context.EVIDENCE_RECORD == currentContext) {
                     if (context == currentContext) {
-                        assertEquals(sha256List, new HashSet<>(policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms()));
+                        assertEquals(sha256List, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
                     } else {
-                        assertEquals(fullSet, new HashSet<>(policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms()));
+                        assertEquals(fullSet, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
                     }
 
                 } else {
                     if (context == currentContext) {
-                        assertEquals(sha256List, new HashSet<>(policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms()));
-                        assertEquals(sha256List, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-                        assertEquals(sha256List, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
+                        assertEquals(sha256List, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(sha256List, policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(sha256List, policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
                     } else {
-                        assertEquals(fullSet, new HashSet<>(policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms()));
-                        assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-                        assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
+                        assertEquals(fullSet, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(fullSet, policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(fullSet, policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
                     }
                 }
             }
@@ -149,11 +146,11 @@ class ValidationPolicyLoaderTest {
                         if (Context.EVIDENCE_RECORD != currentContext) {
                             for (SubContext currentSubContext : SubContext.values()) {
                                 if (context == currentContext && subContext == currentSubContext) {
-                                    assertEquals(fullSet, new HashSet<>(policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms()));
-                                    assertEquals(sha256List, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms()));
+                                    assertEquals(fullSet, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                                    assertEquals(sha256List, policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms().keySet());
                                 } else {
-                                    assertEquals(fullSet, new HashSet<>(policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms()));
-                                    assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms()));
+                                    assertEquals(fullSet, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                                    assertEquals(fullSet, policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms().keySet());
                                 }
                             }
                         }
@@ -183,9 +180,9 @@ class ValidationPolicyLoaderTest {
         Set<DigestAlgorithm> sha1Set = Collections.singleton(DigestAlgorithm.SHA1);
         for (Context context : Context.values()) {
             if (Context.EVIDENCE_RECORD != context) {
-                assertEquals(sha1Set, new HashSet<>(policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms()));
+                assertEquals(sha1Set, policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms().keySet());
                 for (SubContext subContext : SubContext.values()) {
-                    assertEquals(sha1Set, new HashSet<>(policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms()));
+                    assertEquals(sha1Set, policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms().keySet());
                 }
             }
         }
@@ -201,9 +198,9 @@ class ValidationPolicyLoaderTest {
 
         for (Context context : Context.values()) {
             if (Context.EVIDENCE_RECORD != context) {
-                assertEquals(fullSet, new HashSet<>(policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms()));
+                assertEquals(fullSet, policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms().keySet());
                 for (SubContext subContext : SubContext.values()) {
-                    assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms()));
+                    assertEquals(fullSet, policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms().keySet());
                 }
             }
         }
@@ -214,20 +211,21 @@ class ValidationPolicyLoaderTest {
             for (Context currentContext : Context.values()) {
                 if (Context.EVIDENCE_RECORD == currentContext) {
                     if (context == currentContext) {
-                        assertEquals(fullSet, new HashSet<>(policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms()));
+                        assertEquals(fullSet, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
                     } else {
-                        assertEquals(sha1Set, new HashSet<>(policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms()));
+                        assertEquals(sha1Set, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
                     }
 
                 } else {
+                    // same for SIGNATURE and CERTIFICATE
                     if (context == currentContext) {
-                        assertEquals(fullSet, new HashSet<>(policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms()));
-                        assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-                        assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
+                        assertEquals(fullSet, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(fullSet, policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(fullSet, policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
                     } else {
-                        assertEquals(sha1Set, new HashSet<>(policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms()));
-                        assertEquals(sha1Set, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-                        assertEquals(sha1Set, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
+                        assertEquals(sha1Set, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(sha1Set, policy.getCertificateCryptographicConstraint(currentContext, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+                        assertEquals(sha1Set, policy.getCertificateCryptographicConstraint(currentContext, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
                     }
                 }
             }
@@ -242,11 +240,11 @@ class ValidationPolicyLoaderTest {
                         if (Context.EVIDENCE_RECORD != currentContext) {
                             for (SubContext currentSubContext : SubContext.values()) {
                                 if (context == currentContext && subContext == currentSubContext) {
-                                    assertEquals(sha1Set, new HashSet<>(policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms()));
-                                    assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms()));
+                                    assertEquals(sha1Set, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                                    assertEquals(fullSet, policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms().keySet());
                                 } else {
-                                    assertEquals(sha1Set, new HashSet<>(policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms()));
-                                    assertEquals(sha1Set, new HashSet<>(policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms()));
+                                    assertEquals(sha1Set, policy.getSignatureCryptographicConstraint(currentContext).getAcceptableDigestAlgorithms().keySet());
+                                    assertEquals(sha1Set, policy.getCertificateCryptographicConstraint(currentContext, currentSubContext).getAcceptableDigestAlgorithms().keySet());
                                 }
                             }
                         }
@@ -265,9 +263,9 @@ class ValidationPolicyLoaderTest {
         Set<DigestAlgorithm> emptySet = Collections.emptySet();
         for (Context context : Context.values()) {
             if (Context.EVIDENCE_RECORD != context) {
-                assertEquals(emptySet, new HashSet<>(policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms()));
+                assertEquals(emptySet, policy.getSignatureCryptographicConstraint(context).getAcceptableDigestAlgorithms().keySet());
                 for (SubContext subContext : SubContext.values()) {
-                    assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms()));
+                    assertEquals(emptySet, policy.getCertificateCryptographicConstraint(context, subContext).getAcceptableDigestAlgorithms().keySet());
                 }
             }
         }
@@ -283,23 +281,23 @@ class ValidationPolicyLoaderTest {
                 DigestAlgorithm.SHA3_256, DigestAlgorithm.SHA3_384, DigestAlgorithm.SHA3_512,
                 DigestAlgorithm.RIPEMD160, DigestAlgorithm.WHIRLPOOL));
 
-        assertEquals(fullSet, new HashSet<>(policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getSignatureCryptographicConstraint(Context.COUNTER_SIGNATURE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getSignatureCryptographicConstraint(Context.CERTIFICATE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms()));
+        assertEquals(fullSet, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getSignatureCryptographicConstraint(Context.COUNTER_SIGNATURE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getSignatureCryptographicConstraint(Context.CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
 
-        assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-        assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
-        assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.COUNTER_SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.COUNTER_SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.CERTIFICATE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.CERTIFICATE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
+        assertEquals(fullSet, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(fullSet, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(fullSet, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.COUNTER_SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.COUNTER_SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.CERTIFICATE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.CERTIFICATE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
 
         CryptographicConstraint altCrypto = new CryptographicConstraint();
         altCrypto.setLevel(Level.FAIL);
@@ -319,23 +317,23 @@ class ValidationPolicyLoaderTest {
 
         Set<DigestAlgorithm> sha256Set = Collections.singleton(DigestAlgorithm.SHA256);
 
-        assertEquals(fullSet, new HashSet<>(policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getSignatureCryptographicConstraint(Context.COUNTER_SIGNATURE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getSignatureCryptographicConstraint(Context.CERTIFICATE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms()));
+        assertEquals(fullSet, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getSignatureCryptographicConstraint(Context.COUNTER_SIGNATURE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getSignatureCryptographicConstraint(Context.CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getEvidenceRecordCryptographicConstraint().getAcceptableDigestAlgorithms().keySet());
 
-        assertEquals(sha256Set, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-        assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
-        assertEquals(fullSet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.COUNTER_SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.COUNTER_SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.CERTIFICATE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms()));
-        assertEquals(emptySet, new HashSet<>(policy.getCertificateCryptographicConstraint(Context.CERTIFICATE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms()));
+        assertEquals(sha256Set, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(fullSet, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(fullSet, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.COUNTER_SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.COUNTER_SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.CERTIFICATE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithms().keySet());
+        assertEquals(emptySet, policy.getCertificateCryptographicConstraint(Context.CERTIFICATE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithms().keySet());
     }
 
     @Test
@@ -346,56 +344,56 @@ class ValidationPolicyLoaderTest {
                 .create();
 
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
@@ -407,56 +405,56 @@ class ValidationPolicyLoaderTest {
                 .create();
 
         assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.INFORM, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.INFORM, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.INFORM, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.INFORM, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.INFORM, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.INFORM, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
@@ -464,65 +462,65 @@ class ValidationPolicyLoaderTest {
                 .withCryptographicSuiteForContext(new File("src/test/resources/diag-data/crypto-suite/dss-crypto-suite.json"), Context.SIGNATURE)
                 .andLevel(Level.WARN)
                 .andAcceptableDigestAlgorithmsLevel(Level.FAIL)
-                .andAcceptableEncryptionAlgorithmsLevel(Level.FAIL)
+                .andAcceptableSignatureAlgorithmsLevel(Level.FAIL)
                 .withCryptographicSuiteForContext(new File("src/test/resources/diag-data/crypto-suite/dss-crypto-suite.xml"), Context.TIMESTAMP, SubContext.SIGNING_CERT)
                 .andLevel(Level.INFORM)
-                .andAcceptableEncryptionAlgorithmsMiniKeySizeLevel(Level.FAIL)
+                .andAcceptableSignatureAlgorithmsMiniKeySizeLevel(Level.FAIL)
                 .andAlgorithmsExpirationDateLevel(Level.FAIL)
                 .andAlgorithmsExpirationTimeAfterPolicyUpdateLevel(Level.FAIL)
                 .create();
 
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getSignatureCryptographicConstraint(Context.SIGNATURE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.WARN, policy.getCertificateCryptographicConstraint(Context.SIGNATURE, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.TIMESTAMP).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.INFORM, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.INFORM, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.INFORM, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.TIMESTAMP, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getSignatureCryptographicConstraint(Context.REVOCATION).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.SIGNING_CERT).getAlgorithmsExpirationDateAfterUpdateLevel());
 
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableDigestAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsLevel());
-        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableEncryptionAlgorithmsMiniKeySizeLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsLevel());
+        assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAcceptableSignatureAlgorithmsMiniKeySizeLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateLevel());
         assertEquals(Level.FAIL, policy.getCertificateCryptographicConstraint(Context.REVOCATION, SubContext.CA_CERTIFICATE).getAlgorithmsExpirationDateAfterUpdateLevel());
     }
@@ -590,6 +588,46 @@ class ValidationPolicyLoaderTest {
         exception = assertThrows(NullPointerException.class, () ->
                 validationPolicyLoader.withCryptographicSuite((CryptographicSuite) null));
         assertEquals("Cryptographic suite cannot be null!", exception.getMessage());
+
+        exception = assertThrows(NullPointerException.class, () ->
+                validationPolicyLoader.withCryptographicSuite((CryptographicSuiteCatalogue) null));
+        assertEquals("Cryptographic suite catalogue cannot be null!", exception.getMessage());
+    }
+
+    private <T> void assertAlgorithmsEquals(Map<T, Set<CryptographicSuiteEvaluation>> mapOne, Map<T, Set<CryptographicSuiteEvaluation>> mapTwo) {
+        if (mapOne == mapTwo)
+            return;
+
+        assertEquals(mapOne.size(), mapTwo.size());
+
+        for (Map.Entry<T, Set<CryptographicSuiteEvaluation>> e : mapOne.entrySet()) {
+            T key = e.getKey();
+            Set<CryptographicSuiteEvaluation> value = e.getValue();
+            if (value == null) {
+                assertTrue(mapTwo.get(key) == null && mapTwo.containsKey(key));
+            } else {
+                assertEquals(value.size(), mapTwo.get(key).size(), key.toString());
+                for (CryptographicSuiteEvaluation cse : value) {
+                    Set<CryptographicSuiteEvaluation> valueTwo = mapTwo.get(key);
+                    assertTrue(valueTwo.stream().anyMatch(cseTwo -> checkEvaluationEquals(cse, cseTwo)),
+                            String.format("Algo : %s\nFirst set :  %s\nSecond set : %s", key, value, valueTwo));
+                }
+            }
+        }
+    }
+
+    private boolean checkEvaluationEquals(CryptographicSuiteEvaluation evaluationOne, CryptographicSuiteEvaluation evaluationTwo) {
+        // NOTE: we compare manually because default XML Validation Policy does not create all parameters, defined in the cryptographic suites
+        return Objects.equals(evaluationOne.getAlgorithmUsage(), evaluationTwo.getAlgorithmUsage()) &&
+                Objects.equals(evaluationOne.getValidityStart(), evaluationTwo.getValidityStart()) &&
+                Objects.equals(evaluationOne.getValidityEnd(), evaluationTwo.getValidityEnd()) &&
+                Objects.equals(filterSupportedParameters(evaluationOne.getParameterList()), filterSupportedParameters(evaluationTwo.getParameterList()));
+    }
+
+    private Set<CryptographicSuiteParameter> filterSupportedParameters(Collection<CryptographicSuiteParameter> parameters) {
+        return parameters.stream().filter(p ->
+                        CryptographicSuiteUtils.MODULES_LENGTH_PARAMETER.equals(p.getName()) || CryptographicSuiteUtils.PLENGTH_PARAMETER.equals(p.getName()))
+                .collect(Collectors.toSet());
     }
 
 }

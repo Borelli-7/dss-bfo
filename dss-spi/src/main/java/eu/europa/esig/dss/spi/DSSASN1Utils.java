@@ -22,11 +22,13 @@ package eu.europa.esig.dss.spi;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
+import eu.europa.esig.dss.enumerations.X520Attributes;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.Digest;
 import eu.europa.esig.dss.model.TimestampBinary;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.model.x509.X500PrincipalHelper;
+import eu.europa.esig.dss.spi.security.DSSCertificateTokenSecurityFactory;
 import eu.europa.esig.dss.spi.x509.CertificateRef;
 import eu.europa.esig.dss.spi.x509.SignerIdentifier;
 import eu.europa.esig.dss.utils.Utils;
@@ -66,7 +68,6 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 import org.bouncycastle.cert.ocsp.OCSPException;
 import org.bouncycastle.cert.ocsp.OCSPResp;
@@ -86,10 +87,6 @@ import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PublicKey;
-import java.security.Security;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,6 +94,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -109,7 +107,7 @@ public final class DSSASN1Utils {
 	private static final Logger LOG = LoggerFactory.getLogger(DSSASN1Utils.class);
 
 	static {
-		Security.addProvider(DSSSecurityProvider.getSecurityProvider());
+		DSSSecurityProvider.initSystemProviders();
 	}
 
 	/**
@@ -555,15 +553,7 @@ public final class DSSASN1Utils {
 	 * @return {@link CertificateToken}
 	 */
 	public static CertificateToken getCertificate(final X509CertificateHolder x509CertificateHolder) {
-		try {
-			JcaX509CertificateConverter converter = new JcaX509CertificateConverter().setProvider(DSSSecurityProvider.getSecurityProviderName());
-			X509Certificate x509Certificate = converter.getCertificate(x509CertificateHolder);
-			return new CertificateToken(x509Certificate);
-
-		} catch (CertificateException e) {
-			throw new DSSException(String.format(
-					"Unable to get a CertificateToken from X509CertificateHolder : %s", e.getMessage()), e);
-		}
+		return DSSCertificateTokenSecurityFactory.X509_CERTIFICATE_HOLDER_INSTANCE.build(x509CertificateHolder);
 	}
 
 	/**
@@ -592,6 +582,23 @@ public final class DSSASN1Utils {
 			return new X500Principal(x500Name.getEncoded());
 		} catch (IOException e) {
 			throw new DSSException(String.format("Cannot extract X500Principal! Reason : %s", e.getMessage()), e);
+		}
+	}
+
+	/**
+	 * This method returns the {@code X500Principal} corresponding to the given string or {@code null} if the conversion
+	 * is not possible.
+	 *
+	 * @param x500PrincipalString
+	 *            a {@code String} representation of the {@code X500Principal}
+	 * @return {@code X500Principal} or null
+	 */
+	public static X500Principal getX500PrincipalOrNull(final String x500PrincipalString) {
+		try {
+			return new X500Principal(x500PrincipalString, X520Attributes.getUppercaseDescriptionForOids());
+		} catch (Exception e) {
+			LOG.warn("Unable to create an instance of X500Principal : {}", e.getMessage());
+			return null;
 		}
 	}
 	
@@ -639,7 +646,7 @@ public final class DSSASN1Utils {
 	 * @return true if the two parameters contain the same key/values
 	 */
 	public static boolean x500PrincipalAreEquals(final X500Principal firstX500Principal, final X500Principal secondX500Principal) {
-		if ((firstX500Principal == null) || (secondX500Principal == null)) {
+		if (firstX500Principal == null || secondX500Principal == null) {
 			return false;
 		}
 		if (firstX500Principal.equals(secondX500Principal)) {
@@ -696,7 +703,10 @@ public final class DSSASN1Utils {
 		}
 
 		try {
-			return IETFUtils.valueToString(attributeValue);
+			/*
+			 * NOTE: trim whitespaces. See RFC 4518 "2.6.1. Insignificant Space Handling" for more detail.
+			 */
+			return IETFUtils.valueToString(attributeValue).trim();
 		} catch (Exception e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.warn("Unable to handle attribute of class '{}' : {}", attributeValue.getClass().getName(), e.getMessage());
@@ -777,19 +787,6 @@ public final class DSSASN1Utils {
 	}
 
 	/**
-	 * Returns the first {@code SignerInformation} extracted from {@code CMSSignedData}.
-	 *
-	 * @param cms
-	 *            CMSSignedData
-	 * @return returns {@code SignerInformation}
-	 * @deprecated since DSS 6.3. Please use {@code #getFirstSignerInformation(cms.getSignerInfos())} method instead.
-	 */
-	@Deprecated
-	public static SignerInformation getFirstSignerInformation(final CMSSignedData cms) {
-		return getFirstSignerInformation(cms.getSignerInfos());
-	}
-
-	/**
 	 * Returns the first {@code SignerInformation} extracted from {@code SignerInformationStore}.
 	 *
 	 * @param signerInformationStore
@@ -831,23 +828,6 @@ public final class DSSASN1Utils {
 	}
 
 	/**
-	 * Extracts all extended key usages for the certificate token
-	 *
-	 * @param certToken {@link CertificateToken}
-	 * @return a list of {@link String}s
-	 * @deprecated since DSS 6.3. See {@code CertificateExtensionUtils#getExtendedKeyUsage(CertificateToken)}
-	 */
-	@Deprecated
-	public static List<String> getExtendedKeyUsage(CertificateToken certToken) {
-		try {
-			return certToken.getCertificate().getExtendedKeyUsage();
-		} catch (CertificateParsingException e) {
-			LOG.warn("Unable to retrieve ExtendedKeyUsage : {}", e.getMessage());
-			return Collections.emptyList();
-		}
-	}
-
-	/**
 	 * Gets the {@code IssuerSerial} object
 	 *
 	 * @param binaries representing the {@link IssuerSerial}
@@ -880,7 +860,7 @@ public final class DSSASN1Utils {
 			if (gnames != null) {
 				GeneralName[] names = gnames.getNames();
 				if (names.length == 1) {
-					signerIdentifier.setIssuerName(new X500Principal(names[0].getName().toASN1Primitive().getEncoded(ASN1Encoding.DER)));
+					signerIdentifier.setIssuerName(DSSASN1Utils.toX500Principal(X500Name.getInstance(names[0].getName())));
 				} else {
 					LOG.warn("More than one GeneralName");
 				}
@@ -912,6 +892,44 @@ public final class DSSASN1Utils {
 		}
 		Attributes attributes = new Attributes(encodableVector);
 		return attributes.getAttributes();
+	}
+
+	/**
+	 * Checks if the {@code attributeTable} is empty
+	 *
+	 * @param attributeTable {@link AttributeTable}
+	 * @return TRUE if the attribute table is empty, FALSE otherwise
+	 */
+	public static boolean isEmpty(AttributeTable attributeTable) {
+		return (attributeTable == null) || (attributeTable.size() == 0);
+	}
+
+	/**
+	 * Returns the current {@code originalAttributeTable} if instantiated, an empty {@code AttributeTable} if null
+	 *
+	 * @param originalAttributeTable {@link AttributeTable}
+	 * @return {@link AttributeTable}
+	 */
+	public static AttributeTable emptyIfNull(AttributeTable originalAttributeTable) {
+		if (originalAttributeTable != null) {
+			return originalAttributeTable;
+		}
+		return new AttributeTable(new Hashtable<ASN1ObjectIdentifier, Attribute>());
+	}
+
+	/**
+	 * Checks if the given attribute is an instance of the expected asn1ObjectIdentifier type
+	 *
+	 * @param attribute {@link Attribute} to check
+	 * @param asn1ObjectIdentifier {@link ASN1ObjectIdentifier} type to check against
+	 * @return TRUE if the attribute is of type asn1ObjectIdentifier, FALSE otherwise
+	 */
+	public static boolean isAttributeOfType(Attribute attribute, ASN1ObjectIdentifier asn1ObjectIdentifier) {
+		if (attribute == null) {
+			return false;
+		}
+		ASN1ObjectIdentifier objectIdentifier = attribute.getAttrType();
+		return asn1ObjectIdentifier.equals(objectIdentifier);
 	}
 	
 	/**

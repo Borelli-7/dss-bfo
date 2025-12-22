@@ -65,7 +65,7 @@ class Asn1EvidenceRecordTstRenewalInvalidValidationTest extends AbstractAsn1Evid
         assertEquals(2, referenceValidations.size());
         for (ReferenceValidation referenceValidation : referenceValidations) {
             assertEquals(DigestMatcherType.EVIDENCE_RECORD_ARCHIVE_OBJECT, referenceValidation.getType());
-            assertNotNull(referenceValidation.getDocumentName());
+            assertNotNull(referenceValidation.getDocument());
             assertTrue(referenceValidation.isFound());
             assertTrue(referenceValidation.isIntact());
         }
@@ -84,13 +84,13 @@ class Asn1EvidenceRecordTstRenewalInvalidValidationTest extends AbstractAsn1Evid
                 int arcTstCounter = 0;
                 for (ReferenceValidation referenceValidation : refValidations) {
                     if (DigestMatcherType.EVIDENCE_RECORD_ORPHAN_REFERENCE == referenceValidation.getType()) {
-                        assertNull(referenceValidation.getDocumentName());
+                        assertNull(referenceValidation.getDocument());
                         assertNotNull(referenceValidation.getDigest());
                         assertFalse(referenceValidation.isFound());
                         assertFalse(referenceValidation.isIntact());
                         ++orphanRefCounter;
                     } else if (DigestMatcherType.EVIDENCE_RECORD_ARCHIVE_TIME_STAMP == referenceValidation.getType()) {
-                        assertNull(referenceValidation.getDocumentName());
+                        assertNull(referenceValidation.getDocument());
                         assertNull(referenceValidation.getDigest());
                         assertTrue(referenceValidation.isFound());
                         assertFalse(referenceValidation.isIntact());

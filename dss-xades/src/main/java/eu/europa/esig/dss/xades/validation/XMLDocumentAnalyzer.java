@@ -22,11 +22,10 @@ package eu.europa.esig.dss.xades.validation;
 
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.spi.exception.IllegalInputException;
-import eu.europa.esig.dss.spi.policy.DefaultSignaturePolicyValidatorLoader;
-import eu.europa.esig.dss.spi.policy.SignaturePolicyValidatorLoader;
+import eu.europa.esig.dss.spi.policy.SignaturePolicyValidator;
+import eu.europa.esig.dss.spi.signature.AdvancedSignature;
 import eu.europa.esig.dss.spi.validation.analyzer.DefaultDocumentAnalyzer;
 import eu.europa.esig.dss.spi.validation.analyzer.evidencerecord.EvidenceRecordAnalyzerFactory;
-import eu.europa.esig.dss.spi.signature.AdvancedSignature;
 import eu.europa.esig.dss.xades.DSSXMLUtils;
 import eu.europa.esig.dss.xades.XAdESSignatureUtils;
 import eu.europa.esig.dss.xades.definition.XAdESPath;
@@ -187,10 +186,8 @@ public class XMLDocumentAnalyzer extends DefaultDocumentAnalyzer {
 	}
 
 	@Override
-	public SignaturePolicyValidatorLoader getSignaturePolicyValidatorLoader() {
-		DefaultSignaturePolicyValidatorLoader signaturePolicyValidatorLoader = new DefaultSignaturePolicyValidatorLoader();
-		signaturePolicyValidatorLoader.setDefaultSignaturePolicyValidator(new XMLSignaturePolicyValidator());
-		return signaturePolicyValidatorLoader;
+	protected SignaturePolicyValidator getDefaultSignaturePolicyValidator() {
+		return new XMLSignaturePolicyValidator();
 	}
 
 }

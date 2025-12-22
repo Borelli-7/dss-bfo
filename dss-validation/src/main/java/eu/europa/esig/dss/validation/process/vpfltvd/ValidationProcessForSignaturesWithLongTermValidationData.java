@@ -20,9 +20,9 @@
  */
 package eu.europa.esig.dss.validation.process.vpfltvd;
 
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBlockType;
-import eu.europa.esig.dss.detailedreport.jaxb.XmlCC;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCRS;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConclusion;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlConstraint;
@@ -49,23 +49,19 @@ import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
 import eu.europa.esig.dss.model.policy.CertificateApplicabilityRule;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.LevelRule;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.validation.process.Chain;
 import eu.europa.esig.dss.validation.process.ChainItem;
 import eu.europa.esig.dss.validation.process.ValidationProcessUtils;
-import eu.europa.esig.dss.validation.process.bbb.sav.SignatureAcceptanceValidation;
-import eu.europa.esig.dss.validation.process.bbb.sav.cc.CertificateChainCryptographicCheck;
-import eu.europa.esig.dss.validation.process.bbb.sav.cc.DigestMatcherListCryptographicChainBuilder;
-import eu.europa.esig.dss.validation.process.bbb.sav.cc.SigningCertificateRefDigestAlgorithmCheckChainBuilder;
-import eu.europa.esig.dss.validation.process.bbb.sav.cc.TokenCertificateChainCryptographicCheck;
-import eu.europa.esig.dss.validation.process.bbb.sav.cc.TokenCertificateChainCryptographicChecker;
-import eu.europa.esig.dss.validation.process.bbb.sav.checks.CryptographicCheck;
-import eu.europa.esig.dss.validation.process.bbb.sav.checks.CryptographicCheckWithId;
+import eu.europa.esig.dss.validation.process.bbb.aov.AlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.SignatureSignedDataAlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.SignatureValueAndSignedAttributesAlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.TokenCertificateChainAlgorithmObsolescenceValidation;
+import eu.europa.esig.dss.validation.process.bbb.aov.checks.AlgorithmObsolescenceValidationCheck;
+import eu.europa.esig.dss.validation.process.bbb.aov.checks.AlgorithmObsolescenceValidationCheckWithId;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.LTALevelTimeStampCheck;
-import eu.europa.esig.dss.validation.process.bbb.sav.checks.SignatureAcceptanceValidationResultCheck;
 import eu.europa.esig.dss.validation.process.bbb.sav.checks.TLevelTimeStampCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.crs.CertificateRevocationSelector;
 import eu.europa.esig.dss.validation.process.bbb.xcv.rfc.RevocationFreshnessChecker;
@@ -73,6 +69,7 @@ import eu.europa.esig.dss.validation.process.bbb.xcv.rfc.checks.RevocationDataAv
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.CertificateRevocationSelectorResultCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.RevocationDataRequiredCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.sub.checks.RevocationFreshnessCheckerResultCheck;
+import eu.europa.esig.dss.validation.process.vpfbs.checks.SignatureAcceptanceValidationNoCryptoResultCheck;
 import eu.europa.esig.dss.validation.process.vpfltvd.checks.AcceptableBasicSignatureValidationCheck;
 import eu.europa.esig.dss.validation.process.vpfltvd.checks.BestSignatureTimeBeforeCertificateExpirationCheck;
 import eu.europa.esig.dss.validation.process.vpfltvd.checks.BestSignatureTimeBeforeSuspensionTimeCheck;
@@ -361,19 +358,9 @@ public class ValidationProcessForSignaturesWithLongTermValidationData extends Ch
 		 * CRYPTO_CONSTRAINTS_FAILURE_NO_POE.
 		 */
 		if (isCryptoConstraintFailureNoPoe(bsConclusion)) {
-			
-			CryptographicSuite signatureConstraint = policy.getSignatureCryptographicConstraint(currentContext);
-			
-			// check validity of Cryptographic Constraints for the Signature
-			item = item.setNextItem(tokenUsedAlgorithmsAreSecureAtTime(currentSignature, bestSignatureTime.getTime(),
-					ValidationProcessUtils.getCryptoPosition(currentContext), signatureConstraint));
 
-			DigestMatcherListCryptographicChainBuilder<XmlValidationProcessLongTermData> digestMatcherCCBuilder =
-					new DigestMatcherListCryptographicChainBuilder<>(i18nProvider, result, currentSignature.getDigestMatchers(),
-							bestSignatureTime.getTime(), signatureConstraint);
-			item = digestMatcherCCBuilder.build(item);
+			item = item.setNextItem(signatureValueAndSignedAttributesAlgorithmsAcceptable(bestSignatureTime.getTime(), currentContext));
 
-			item = signCertRefIsSecureAtBST(item, bestSignatureTime.getTime(), currentContext);
 		}
 
 		/*
@@ -462,14 +449,14 @@ public class ValidationProcessForSignaturesWithLongTermValidationData extends Ch
 		 * b) best-signature-time as the validation time parameter.
 		 * c) The Cryptographic Constraints.
 		 */
-		// executed at step 4)c)
+		item = item.setNextItem(signedDataObjectAlgorithmsAcceptable(bestSignatureTime.getTime(), currentContext));
 		
 		/*
 		 * 9) If the signature acceptance validation process returns PASSED, the SVA shall go to the next step.
 		 * Otherwise, the SVA shall return the indication and sub-indication returned by
 		 * the Signature Acceptance Validation Process.
 		 */
-		item = item.setNextItem(signatureIsAcceptable(bestSignatureTime.getTime(), currentContext));
+		item = item.setNextItem(signatureIsAcceptable());
 
 		/*
 		 * 10) The SVA shall apply the cryptographic constraints to all the certificates and revocation status information used
@@ -605,7 +592,7 @@ public class ValidationProcessForSignaturesWithLongTermValidationData extends Ch
 	private ChainItem<XmlValidationProcessLongTermData> revocationDateAfterBestSignatureTimeValidation(
 			ChainItem<XmlValidationProcessLongTermData> item, Date bestSignatureTime, SubIndication subIndication) {
 
-		LevelRule constraint = policy.getRevocationTimeAgainstBestSignatureDurationRule();
+		LevelRule constraint = policy.getRevocationTimeAgainstBestSignatureTimeConstraint();
 		
 		for (Map.Entry<CertificateWrapper, CertificateRevocationWrapper> certRevMapEntry : certificateRevocationMap.entrySet()) {
 			CertificateWrapper certificate = certRevMapEntry.getKey();
@@ -666,41 +653,41 @@ public class ValidationProcessForSignaturesWithLongTermValidationData extends Ch
 	}
 
 	private ChainItem<XmlValidationProcessLongTermData> signingTimeAttributePresent(Context context) {
-		return new SigningTimeAttributePresentCheck(i18nProvider, result, currentSignature, policy.getSigningDurationRule(context));
+		return new SigningTimeAttributePresentCheck(i18nProvider, result, currentSignature, policy.getSigningTimeConstraint(context));
 	}
 
 	private ChainItem<XmlValidationProcessLongTermData> timestampDelay(Date bestSignatureTime) {
 		return new TimestampDelayCheck<>(i18nProvider, result, currentSignature, bestSignatureTime, policy.getTimestampDelayConstraint());
 	}
 
-	private ChainItem<XmlValidationProcessLongTermData> tokenUsedAlgorithmsAreSecureAtTime(TokenProxy currentToken, Date validationDate,
-			MessageTag position, CryptographicSuite constraint) {
-		return new CryptographicCheck<>(i18nProvider, result, currentToken,  position, validationDate, constraint);
+	private ChainItem<XmlValidationProcessLongTermData> tokenUsedAlgorithmsAreSecureAtTimeWithId(
+			TokenProxy currentToken, Date validationDate, MessageTag position) {
+		XmlBasicBuildingBlocks revocationBBB = bbbs.get(currentToken.getId());
+		XmlAOV xmlAOV = revocationBBB.getAOV();
+		return new AlgorithmObsolescenceValidationCheckWithId<>(i18nProvider, result, xmlAOV, validationDate, position, currentToken.getId());
 	}
 
-	private ChainItem<XmlValidationProcessLongTermData> tokenUsedAlgorithmsAreSecureAtTimeWithId(TokenProxy currentToken, Date validationDate,
-																								 MessageTag position, CryptographicSuite constraint) {
-		return new CryptographicCheckWithId<>(i18nProvider, result, currentToken, position, validationDate, constraint);
+	private ChainItem<XmlValidationProcessLongTermData> signatureValueAndSignedAttributesAlgorithmsAcceptable(Date bestSignatureTime, Context context) {
+		AlgorithmObsolescenceValidation<?> algorithmObsolescenceValidation =
+				new SignatureValueAndSignedAttributesAlgorithmObsolescenceValidation<>(
+						i18nProvider, currentSignature, context, bestSignatureTime, policy);
+		XmlAOV aovResult = algorithmObsolescenceValidation.execute();
+
+		return new AlgorithmObsolescenceValidationCheck<>(i18nProvider, result, aovResult, bestSignatureTime, MessageTag.ACCM_POS_SIG_VAL_AND_PRT, currentSignature.getId());
 	}
 
-	/**
-	 * This method verifies the validity of the used cryptographic constraints for signed-attributes
-	 *
-	 * @param item {@link ChainItem} the last initialized chain item to be processed
-	 * @param validationTime {@link Date} best-signature-time
-	 * @param context {@link Context}
-	 * @return {@link ChainItem}
-	 */
-	private ChainItem<XmlValidationProcessLongTermData> signCertRefIsSecureAtBST(
-			ChainItem<XmlValidationProcessLongTermData> item, Date validationTime, Context context) {
-		return new SigningCertificateRefDigestAlgorithmCheckChainBuilder<>(
-				i18nProvider, result, validationTime, currentSignature, context, policy).build(item);
+	private ChainItem<XmlValidationProcessLongTermData> signedDataObjectAlgorithmsAcceptable(Date bestSignatureTime, Context context) {
+		// NOTE: we execute AlgorithmObsolescenceValidation check, as the only time sensitive part of SAV
+		AlgorithmObsolescenceValidation<?> algorithmObsolescenceValidation =
+				new SignatureSignedDataAlgorithmObsolescenceValidation(i18nProvider, currentSignature, context, bestSignatureTime, policy);
+		XmlAOV aovResult = algorithmObsolescenceValidation.execute();
+
+		return new AlgorithmObsolescenceValidationCheck<>(i18nProvider, result, aovResult, bestSignatureTime, MessageTag.ACCM_POS_SIGND_OBJ, currentSignature.getId());
 	}
-	
-	private ChainItem<XmlValidationProcessLongTermData> signatureIsAcceptable(Date bestSignatureTime, Context context) {
-		SignatureAcceptanceValidation sav = new SignatureAcceptanceValidation(
-				i18nProvider, diagnosticData, bestSignatureTime, currentSignature, context, bbbs, policy);
-		return new SignatureAcceptanceValidationResultCheck<>(i18nProvider, result, sav.execute(), getFailLevelRule());
+
+	private ChainItem<XmlValidationProcessLongTermData> signatureIsAcceptable() {
+		XmlBasicBuildingBlocks signatureBBB = bbbs.get(currentSignature.getId());
+		return new SignatureAcceptanceValidationNoCryptoResultCheck<>(i18nProvider, result, signatureBBB.getSAV(), currentSignature, getFailLevelRule());
 	}
 	
 	/**
@@ -718,19 +705,15 @@ public class ValidationProcessForSignaturesWithLongTermValidationData extends Ch
 			return item;
 		}
 
-		MessageTag position = ValidationProcessUtils.getCertificateChainCryptoPosition(context);
-		TokenCertificateChainCryptographicChecker tcccc = new TokenCertificateChainCryptographicChecker(
-				i18nProvider, token, validationTime, context, position, policy);
-		XmlCC xmlCC = tcccc.execute();
+		AlgorithmObsolescenceValidation<?> algorithmObsolescenceValidation =
+				new TokenCertificateChainAlgorithmObsolescenceValidation<>(
+						i18nProvider, currentSignature, context, validationTime, policy);
+		XmlAOV aovResult = algorithmObsolescenceValidation.execute();
 
-		// Id is not ambiguous in case of signature validation
-		if (Context.SIGNATURE == context || Context.COUNTER_SIGNATURE == context) {
-			item = item.setNextItem(new CertificateChainCryptographicCheck<>(i18nProvider, result, validationTime, position,
-					xmlCC, policy.getSignatureCryptographicConstraint(context)));
-		} else {
-			item = item.setNextItem(new TokenCertificateChainCryptographicCheck<>(i18nProvider, result, token, validationTime,
-					position, xmlCC, policy.getSignatureCryptographicConstraint(context)));
-		}
+		MessageTag position = ValidationProcessUtils.getCertificateChainCryptoPosition(context);
+
+		item = item.setNextItem(new AlgorithmObsolescenceValidationCheck<>(i18nProvider, result, aovResult, validationTime, position, currentSignature.getId()));
+
 		return item;
 	}
 
@@ -749,9 +732,7 @@ public class ValidationProcessForSignaturesWithLongTermValidationData extends Ch
 		if (!checkedTokenIds.contains(revocationData.getId()) && revocationBBB != null) {
 
 			item = item.setNextItem(tokenUsedAlgorithmsAreSecureAtTimeWithId(revocationData, validationTime,
-					ValidationProcessUtils.getCryptoPosition(Context.REVOCATION), policy.getSignatureCryptographicConstraint(Context.REVOCATION)));
-			
-			item = certificateChainReliableAtTime(item, revocationData, validationTime, Context.REVOCATION);
+					ValidationProcessUtils.getCryptoPosition(Context.REVOCATION)));
 
 			checkedTokenIds.add(revocationData.getId());
 		}

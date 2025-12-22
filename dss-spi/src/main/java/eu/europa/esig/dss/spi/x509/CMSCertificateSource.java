@@ -43,7 +43,6 @@ import org.bouncycastle.asn1.ess.SigningCertificate;
 import org.bouncycastle.asn1.ess.SigningCertificateV2;
 import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.util.Store;
@@ -78,21 +77,6 @@ public abstract class CMSCertificateSource extends SignatureCertificateSource {
 
 	/** The SignerInformation of the current signature */
 	private final transient SignerInformation currentSignerInformation;
-	
-	/**
-	 * The constructor to instantiate a CMSCertificateSource. Allows to define a
-	 * used signerInformation.
-	 * 
-	 * @param cmsSignedData            {@link CMSSignedData}
-	 * @param currentSignerInformation the current {@link SignerInformation}
-	 *                                 extracted from cmsSignedData
-	 * @deprecated since DSS 6.3. Please use {@code new CMSCertificateSource(SignerInformationStore signerInformations,
-	 *             Store<X509CertificateHolder> certificates, SignerInformation currentSignerInformation} constructor instead
-	 */
-	@Deprecated
-	protected CMSCertificateSource(final CMSSignedData cmsSignedData, final SignerInformation currentSignerInformation) {
-		this(cmsSignedData.getSignerInfos(), cmsSignedData.getCertificates(), currentSignerInformation);
-	}
 
 	/**
 	 *

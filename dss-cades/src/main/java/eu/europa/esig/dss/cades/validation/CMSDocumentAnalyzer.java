@@ -23,7 +23,6 @@ package eu.europa.esig.dss.cades.validation;
 import eu.europa.esig.dss.cades.validation.scope.CAdESEvidenceRecordScopeFinder;
 import eu.europa.esig.dss.cades.validation.scope.CAdESSignatureScopeFinder;
 import eu.europa.esig.dss.cms.CMS;
-import eu.europa.esig.dss.cms.CMSSignedDocument;
 import eu.europa.esig.dss.cms.CMSUtils;
 import eu.europa.esig.dss.enumerations.TimestampedObjectType;
 import eu.europa.esig.dss.model.DSSDocument;
@@ -40,7 +39,6 @@ import eu.europa.esig.dss.spi.x509.evidencerecord.EvidenceRecord;
 import eu.europa.esig.dss.spi.x509.tsp.TimestampToken;
 import eu.europa.esig.dss.spi.x509.tsp.TimestampedReference;
 import eu.europa.esig.dss.utils.Utils;
-import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,18 +64,6 @@ public class CMSDocumentAnalyzer extends DefaultDocumentAnalyzer {
 	 */
 	CMSDocumentAnalyzer() {
 		// empty
-	}
-
-	/**
-	 * The default constructor for {@code CMSDocumentAnalyzer}.
-	 *
-	 * @param cmsSignedData
-	 *            pkcs7-signature(s)
-	 * @deprecated since DSS 6.3. Please use {@code new CMSDocumentAnalyzer(CMS cms)} constructor instead.
-	 */
-	@Deprecated
-	public CMSDocumentAnalyzer(final CMSSignedData cmsSignedData) {
-		this.cms = toCMS(new CMSSignedDocument(cmsSignedData));
 	}
 
 	/**

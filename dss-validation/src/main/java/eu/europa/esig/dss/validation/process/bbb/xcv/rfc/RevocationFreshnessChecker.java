@@ -27,13 +27,11 @@ import eu.europa.esig.dss.enumerations.Level;
 import eu.europa.esig.dss.enumerations.SubContext;
 import eu.europa.esig.dss.i18n.I18nProvider;
 import eu.europa.esig.dss.i18n.MessageTag;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
 import eu.europa.esig.dss.model.policy.DurationRule;
 import eu.europa.esig.dss.model.policy.LevelRule;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.validation.process.Chain;
 import eu.europa.esig.dss.validation.process.ChainItem;
-import eu.europa.esig.dss.validation.process.bbb.sav.checks.CryptographicCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.rfc.checks.NextUpdateCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.rfc.checks.RevocationDataFreshCheck;
 import eu.europa.esig.dss.validation.process.bbb.xcv.rfc.checks.RevocationDataFreshCheckWithNullConstraint;
@@ -49,9 +47,6 @@ import java.util.Date;
  * checking the revocation status of a certificate.
  */
 public class RevocationFreshnessChecker extends Chain<XmlRFC> {
-
-	/** Defines the name of th revocation position */
-	private static final MessageTag REVOCATION_POSITION = MessageTag.ACCM_POS_REVOC_SIG;
 
 	/** Revocation data to check */
 	private final RevocationWrapper revocationData;
@@ -149,7 +144,6 @@ public class RevocationFreshnessChecker extends Chain<XmlRFC> {
 				item = item.setNextItem(revocationDataFreshCheck(revocationData, revocationFreshnessConstraint));
 			}
 
-			item = item.setNextItem(revocationCryptographic(revocationData));
 		}
 	}
 
@@ -184,11 +178,6 @@ public class RevocationFreshnessChecker extends Chain<XmlRFC> {
 			LevelRule constraint = policy.getRevocationFreshnessNextUpdateConstraint(context, subContext);
 			return new RevocationDataFreshCheckWithNullConstraint(i18nProvider, result, revocationData, validationDate, constraint);
 		}
-	}
-
-	private ChainItem<XmlRFC> revocationCryptographic(RevocationWrapper revocationData) {
-		CryptographicSuite cryptographicSuite = policy.getSignatureCryptographicConstraint(Context.REVOCATION);
-		return new CryptographicCheck<>(i18nProvider, result, revocationData, REVOCATION_POSITION, validationDate, cryptographicSuite);
 	}
 
 }

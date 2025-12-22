@@ -118,7 +118,6 @@ public class PastSignatureValidationCertificateRevocationSelector extends LongTe
             }
         }
 
-
         return item;
     }
 
@@ -143,7 +142,7 @@ public class PastSignatureValidationCertificateRevocationSelector extends LongTe
     @Override
     protected ChainItem<XmlCRS> acceptableRevocationDataAvailable() {
         return new PastValidationAcceptableRevocationDataAvailable<>(i18nProvider, result,
-                acceptableCertificateRevocations, getFailLevelRule());
+                acceptableCertificateRevocations, result.getRAC(), getFailLevelRule());
     }
 
     private boolean isRevocationIssuerTrusted(CertificateWrapper certificateWrapper) {

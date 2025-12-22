@@ -55,7 +55,7 @@ public class XAdESReferenceValidation extends ReferenceValidation {
 		this.reference = reference;
 		this.setId(DSSXMLUtils.getReferenceId(reference));
 		this.setUri(DSSXMLUtils.getReferenceURI(reference));
-		this.setDocumentName(DSSXMLUtils.getDocumentName(reference));
+		this.setDocument(DSSXMLUtils.getDocument(reference));
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class XAdESReferenceValidation extends ReferenceValidation {
 					transforms = transformsDescriptionBuilder.build();
 				}
 			} catch (XMLSecurityException e) {
-				LOG.warn("Unable to analyze trasnformations", e);
+				LOG.warn("Unable to analyze transformations", e);
 			}
 		}
 		return transforms;

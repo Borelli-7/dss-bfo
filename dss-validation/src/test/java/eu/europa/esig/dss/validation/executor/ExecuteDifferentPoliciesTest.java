@@ -22,9 +22,9 @@ package eu.europa.esig.dss.validation.executor;
 
 import eu.europa.esig.dss.diagnostic.DiagnosticDataFacade;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDiagnosticData;
-import eu.europa.esig.dss.model.policy.CryptographicSuite;
-import eu.europa.esig.dss.model.policy.CryptographicSuiteFactory;
 import eu.europa.esig.dss.model.policy.ValidationPolicy;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteCatalogue;
+import eu.europa.esig.dss.model.policy.crypto.CryptographicSuiteFactory;
 import eu.europa.esig.dss.validation.executor.signature.DefaultSignatureProcessExecutor;
 import eu.europa.esig.dss.validation.policy.ValidationPolicyLoader;
 import eu.europa.esig.dss.validation.reports.Reports;
@@ -49,7 +49,7 @@ class ExecuteDifferentPoliciesTest {
 		Collection<Arguments> dataToRun = new ArrayList<>();
 
 		List<ValidationPolicy> validationPolicies = new ArrayList<>();
-		List<CryptographicSuite> cryptographicSuites = new ArrayList<>();
+		List<CryptographicSuiteCatalogue> cryptographicSuites = new ArrayList<>();
 
 		validationPolicies.add(ValidationPolicyLoader.fromDefaultValidationPolicy().create());
 		for (File policyFile : folderPolicy.listFiles()) {
@@ -61,8 +61,8 @@ class ExecuteDifferentPoliciesTest {
 
 		ServiceLoader<CryptographicSuiteFactory> loader = ServiceLoader.load(CryptographicSuiteFactory.class);
         for (CryptographicSuiteFactory factory : loader) {
-            CryptographicSuite cryptographicSuite = factory.loadDefaultCryptographicSuite();
-            cryptographicSuites.add(cryptographicSuite);
+			CryptographicSuiteCatalogue cryptographicSuiteCatalogue = factory.loadDefaultCryptographicSuite();
+            cryptographicSuites.add(cryptographicSuiteCatalogue);
         }
 
 		for (File diagData : folderDiagnosticData.listFiles()) {
@@ -70,9 +70,9 @@ class ExecuteDifferentPoliciesTest {
 				XmlDiagnosticData diagnosticData = DiagnosticDataFacade.newFacade().unmarshall(diagData);
 				for (ValidationPolicy validationPolicy : validationPolicies) {
 					dataToRun.add(Arguments.of(diagnosticData, ValidationPolicyLoader.fromValidationPolicy(validationPolicy).create()));
-					for (CryptographicSuite cryptographicSuite : cryptographicSuites) {
+					for (CryptographicSuiteCatalogue cryptographicSuiteCatalogue : cryptographicSuites) {
 						dataToRun.add(Arguments.of(diagnosticData, ValidationPolicyLoader.fromValidationPolicy(validationPolicy)
-								.withCryptographicSuite(cryptographicSuite).create()));
+								.withCryptographicSuite(cryptographicSuiteCatalogue).create()));
 					}
 				}
 			}

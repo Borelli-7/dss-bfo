@@ -26,11 +26,17 @@ package eu.europa.esig.dss.policy.crypto.json;
  */
 public final class CryptographicSuiteJsonConstraints {
 
+    /** Header name 'Address' definition */
+    public static final String ADDRESS = "Address";
+
     /** Header name 'Algorithm' definition */
     public static final String ALGORITHM = "Algorithm";
 
     /** Header name 'AlgorithmIdentifier' definition */
     public static final String ALGORITHM_IDENTIFIER = "AlgorithmIdentifier";
+
+    /** Header name 'AlgorithmUsage' definition */
+    public static final String ALGORITHM_USAGE = "AlgorithmUsage";
 
     /** Header name 'Any' definition */
     public static final String ANY = "Any";
@@ -41,6 +47,15 @@ public final class CryptographicSuiteJsonConstraints {
     /** Header name 'Evaluation' definition */
     public static final String EVALUATION = "Evaluation";
 
+    /** Header name 'id' definition */
+    public static final String ID = "id";
+
+    /** Header name 'Information' definition */
+    public static final String INFORMATION = "Information";
+
+    /** Header name 'lang' definition */
+    public static final String LANG = "lang";
+
     /** Header name 'Max' definition */
     public static final String MAX = "Max";
 
@@ -49,6 +64,12 @@ public final class CryptographicSuiteJsonConstraints {
 
     /** Header name 'name' definition */
     public static final String NAME = "name";
+
+    /** Header name 'Name' definition (capitalized) */
+    public static final String NAME_C = "Name";
+
+    /** Header name 'NextUpdate' definition (capitalized) */
+    public static final String NEXT_UPDATE = "NextUpdate";
 
     /** Header name 'ObjectIdentifier' definition */
     public static final String OBJECT_IDENTIFIER = "ObjectIdentifier";
@@ -62,17 +83,32 @@ public final class CryptographicSuiteJsonConstraints {
     /** Header name 'PolicyName' definition */
     public static final String POLICY_NAME = "PolicyName";
 
+    /** Header name 'Publisher' definition */
+    public static final String PUBLISHER = "Publisher";
+
+    /** Header name 'Recommendation' definition */
+    public static final String RECOMMENDATION = "Recommendation";
+
     /** SecuritySuitabilityPolicy */
     public static final String SECURITY_SUITABILITY_POLICY = "SecuritySuitabilityPolicy";
 
-    /** Start */
+    /** Header name 'Start' definition */
     public static final String START = "Start";
+
+    /** Header name 'Text' definition */
+    public static final String TEXT = "Text";
 
     /** Header name 'URI' definition */
     public static final String URI = "URI";
 
+    /** Header name 'Usage' definition */
+    public static final String USAGE = "Usage";
+
     /** Header name 'Validity' definition */
     public static final String VALIDITY = "Validity";
+
+    /** Header name 'Version' definition */
+    public static final String VERSION = "version";
 
     /**
      * Utils class

@@ -139,12 +139,8 @@ public class JAdESService extends AbstractSignatureService<JAdESSignatureParamet
 	@Override
 	public ToBeSigned getDataToSign(DSSDocument toSignDocument, JAdESSignatureParameters parameters) {
 		Objects.requireNonNull(toSignDocument, "toSignDocument cannot be null!");
-		Objects.requireNonNull(parameters, "SignatureParameters cannot be null!");
-		
-		assertSigningCertificateValid(parameters);
-		
-		JAdESBuilder jadesBuilder = getJAdESBuilder(parameters, Collections.singletonList(toSignDocument));
-		return jadesBuilder.buildDataToBeSigned();
+
+		return getDataToSign(Collections.singletonList(toSignDocument), parameters);
 	}
 
 	@Override
@@ -415,6 +411,10 @@ public class JAdESService extends AbstractSignatureService<JAdESSignatureParamet
 		if (JWSSerializationType.JSON_SERIALIZATION.equals(parameters.getJwsSerializationType())) {
 			throw new IllegalArgumentException("The JWSSerializationType.JSON_SERIALIZATION parameter " +
 					"is not supported for a JAdES Counter Signature!");
+		}
+		if (parameters.getContentType() != null) {
+			throw new IllegalArgumentException("Content Type protected header shall not be present " +
+					"for a JAdES Counter Signature!");
 		}
 	}
 

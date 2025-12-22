@@ -78,18 +78,5 @@ public class ASiCWithCAdESUtils {
 		LOG.warn("Unable to extract a signed document. Reason : Unknown asic container type.");
 		return null;
 	}
-	
-	/**
-	 * Checks if a document (e.g. a signature) with the given filename is covered by a manifest
-	 * 
-	 * @param manifestDocuments a list of manifest {@link DSSDocument}s extracted from the archive
-	 * @param filename {@link String} a filename of a document to check
-	 * @return TRUE if the document is covered by a manifest, FALSE otherwise
-	 * @deprecated since DSS 6.3. Please use {@code ASiCUtils#isCoveredByManifest} method instead.
-	 */
-	@Deprecated
-	public static boolean isCoveredByManifest(List<DSSDocument> manifestDocuments, String filename) {
-		return ASiCUtils.isCoveredByManifest(manifestDocuments, filename);
-	}
 
 }

@@ -24,6 +24,7 @@ import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestAlgoAndValue;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlRevocationRef;
 import eu.europa.esig.dss.enumerations.RevocationRefOrigin;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -60,7 +61,39 @@ public class RevocationRefWrapper {
 	}
 
 	/**
-	 * Returns revocation ref production time if present
+	 * Gets the CRL issuer RDN.
+	 * NOTE: applicable only for CRL references.
+	 *
+	 * @return {@link String}
+	 */
+	public String getIssuer() {
+		return revocationRef.getIssuer();
+	}
+
+	/**
+	 * Gets the issue time of the CRL.
+	 * NOTE: applicable only for CRL references.
+	 *
+	 * @return {@link Date}
+	 */
+	public Date getIssueTime() {
+		return revocationRef.getIssueTime();
+	}
+
+
+	/**
+	 * Gets the number of the CRL.
+	 * NOTE: applicable only for CRL references.
+	 *
+	 * @return {@link BigInteger}
+	 */
+	public BigInteger getNumber() {
+		return revocationRef.getNumber();
+	}
+
+	/**
+	 * Returns revocation ref production time if present.
+	 * NOTE: applicable only for OCSP response references.
 	 * 
 	 * @return {@link Date}
 	 */
@@ -69,7 +102,8 @@ public class RevocationRefWrapper {
 	}
 	
 	/**
-	 * Returns responder's ID name if present
+	 * Returns responder's ID name if present.
+	 * NOTE: applicable only for OCSP response references.
 	 * 
 	 * @return {@link String}
 	 */
@@ -81,7 +115,8 @@ public class RevocationRefWrapper {
 	}
 	
 	/**
-	 * Returns responder's ID key if present
+	 * Returns responder's ID key if present.
+	 * NOTE: applicable only for OCSP response references.
 	 * 
 	 * @return a byte array
 	 */

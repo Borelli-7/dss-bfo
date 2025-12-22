@@ -59,7 +59,7 @@ import java.util.Objects;
  * Base class for extending a CAdESSignature.
  *
  */
-abstract class CAdESSignatureExtension implements SignatureExtension<CAdESSignatureParameters> {
+public abstract class CAdESSignatureExtension implements SignatureExtension<CAdESSignatureParameters> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CAdESSignatureExtension.class);
 
@@ -79,7 +79,7 @@ abstract class CAdESSignatureExtension implements SignatureExtension<CAdESSignat
 	 * @param certificateVerifier {@link CertificateVerifier}
 	 */
 	protected CAdESSignatureExtension(final TSPSource tspSource, final CertificateVerifier certificateVerifier) {
-		Objects.requireNonNull(tspSource, "Missing TSPSource");
+		Objects.requireNonNull(tspSource, "The TSPSource cannot be null");
 		this.tspSource = tspSource;
 		this.certificateVerifier = certificateVerifier;
 	}

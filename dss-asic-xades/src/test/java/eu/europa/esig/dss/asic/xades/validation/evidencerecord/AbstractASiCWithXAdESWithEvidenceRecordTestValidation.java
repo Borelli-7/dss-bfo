@@ -260,7 +260,7 @@ public abstract class AbstractASiCWithXAdESWithEvidenceRecordTestValidation exte
                     assertTrue(referenceValidation.isFound());
                     assertTrue(referenceValidation.isIntact());
                     if (referenceValidation.isFound()) {
-                        assertNotNull(referenceValidation.getDocumentName());
+                        assertNotNull(referenceValidation.getDocument());
                     }
                 }
             }

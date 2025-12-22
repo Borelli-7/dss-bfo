@@ -373,10 +373,10 @@ class Snippets {
 				.andLevel(Level.WARN)
 				// and/or level for validation of digest algorithms acceptance
 				.andAcceptableDigestAlgorithmsLevel(Level.WARN)
-				// and/or level for validation of encryption algorithms acceptance
-				.andAcceptableEncryptionAlgorithmsLevel(Level.WARN)
-				// and/or level for validation of key sizes of encryption algorithms acceptance
-				.andAcceptableEncryptionAlgorithmsMiniKeySizeLevel(Level.WARN)
+				// and/or level for validation of signature algorithms acceptance
+				.andAcceptableSignatureAlgorithmsLevel(Level.WARN)
+				// and/or level for validation of key sizes of signature algorithms acceptance
+				.andAcceptableSignatureAlgorithmsMiniKeySizeLevel(Level.WARN)
 				// and/or level for validation of cryptographic algorithms against their expiration dates
 				.andAlgorithmsExpirationDateLevel(Level.WARN)
 				// and/or level for validation of cryptographic algorithms against their expiration dates

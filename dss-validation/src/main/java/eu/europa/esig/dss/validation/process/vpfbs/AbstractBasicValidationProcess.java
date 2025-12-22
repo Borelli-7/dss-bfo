@@ -20,6 +20,7 @@
  */
 package eu.europa.esig.dss.validation.process.vpfbs;
 
+import eu.europa.esig.dss.detailedreport.jaxb.XmlAOV;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBasicBuildingBlocks;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlBlockType;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlCV;
@@ -333,10 +334,10 @@ public abstract class AbstractBasicValidationProcess<T extends XmlConstraintsCon
          */
         XmlSAV xmlSAV = tokenBBBs.getSAV();
         if (xmlSAV != null) {
-            XmlCryptographicValidation cryptographicValidation = xmlSAV.getCryptographicValidation();
 
             item = item.setNextItem(signatureAcceptanceValidation(xmlSAV));
 
+            XmlAOV xmlAOV = tokenBBBs.getAOV();
             /*
              * If the signature acceptance validation process returns PASSED, the Basic Signature validation
              * process shall go to the next step.
@@ -359,7 +360,7 @@ public abstract class AbstractBasicValidationProcess<T extends XmlConstraintsCon
              */
             else if (Indication.INDETERMINATE.equals(xmlSAV.getConclusion().getIndication()) &&
                     SubIndication.CRYPTO_CONSTRAINTS_FAILURE_NO_POE.equals(xmlSAV.getConclusion().getSubIndication()) &&
-                    isSignatureValueConcernedByFailure(cryptographicValidation) && Utils.isCollectionNotEmpty(contentTimestamps)) {
+                    isSignatureValueConcernedByFailure(xmlAOV) && Utils.isCollectionNotEmpty(contentTimestamps)) {
 
                 item = item.setNextItem(contentTimestampsPresent(contentTimestamps));
 
@@ -373,7 +374,7 @@ public abstract class AbstractBasicValidationProcess<T extends XmlConstraintsCon
                         if (isValid(timestampValidation)) {
 
                             item = item.setNextItem(timestampNotAfterCryptographicAlgorithmsExpiration(
-                                    timestampWrapper, cryptographicValidation));
+                                    timestampWrapper, xmlAOV.getSignatureCryptographicValidation()));
 
                         }
                     }
@@ -381,7 +382,7 @@ public abstract class AbstractBasicValidationProcess<T extends XmlConstraintsCon
                 }
             }
 
-            if (!isValidConclusion(xmlSAV.getConclusion())) {
+            if (!isValid(xmlSAV)) {
                 item = item.setNextItem(basicValidationProcess(xmlSAV.getConclusion()));
             }
 
@@ -530,8 +531,9 @@ public abstract class AbstractBasicValidationProcess<T extends XmlConstraintsCon
         return null;
     }
 
-    private boolean isSignatureValueConcernedByFailure(XmlCryptographicValidation cryptographicValidation) {
-        return token.getId().equals(cryptographicValidation.getConcernedMaterial());
+    private boolean isSignatureValueConcernedByFailure(XmlAOV xmlAOV) {
+        XmlCryptographicValidation cryptographicValidation = xmlAOV.getSignatureCryptographicValidation();
+        return cryptographicValidation != null && !isValidConclusion(cryptographicValidation.getConclusion());
     }
 
     @Override

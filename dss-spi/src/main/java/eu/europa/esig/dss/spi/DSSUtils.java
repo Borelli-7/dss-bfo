@@ -24,7 +24,6 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.ObjectIdentifierQualifier;
 import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
-import eu.europa.esig.dss.enumerations.X520Attributes;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.Digest;
@@ -34,6 +33,8 @@ import eu.europa.esig.dss.model.SignatureValue;
 import eu.europa.esig.dss.model.UserNotice;
 import eu.europa.esig.dss.model.identifier.TokenIdentifier;
 import eu.europa.esig.dss.model.x509.CertificateToken;
+import eu.europa.esig.dss.spi.security.DSSCertificateTokenSecurityFactory;
+import eu.europa.esig.dss.spi.security.DSSP7CCertificatesSecurityFactory;
 import eu.europa.esig.dss.utils.Utils;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSException;
@@ -63,16 +64,15 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -83,6 +83,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -93,7 +95,7 @@ public final class DSSUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(DSSUtils.class);
 
 	static {
-		Security.addProvider(DSSSecurityProvider.getSecurityProvider());
+		DSSSecurityProvider.initSystemProviders();
 	}
 
 	/** Empty byte array */
@@ -118,7 +120,11 @@ public final class DSSUtils {
 	private static final byte[] LINE_BREAK_CHARS = { CARRIAGE_RETURN, LINE_FEED };
 
 	/** The URN OID prefix (RFC 3061) */
-	public static final String OID_NAMESPACE_PREFIX = "urn:oid:";
+	private static final String OID_NAMESPACE_PREFIX = "urn:oid:";
+
+	/** URI regex defined in RFC 3986 Appendix B */
+	private static final Pattern RFC3986_URI_PATTERN = Pattern.compile(
+			"^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
 
 	/**
 	 * This class is a utility class and cannot be instantiated.
@@ -267,18 +273,43 @@ public final class DSSUtils {
 	 * <p>
 	 * If the certificate is provided in Base64 encoding, it must be bounded at the beginning by
 	 * {@code -----BEGIN CERTIFICATE-----}, and must be bounded at the end by {@code -----END CERTIFICATE-----}.
+	 * <p>
+	 * This method will at first try to load the certificate with a default security Provider,
+	 * if it fails, it will try to load the certificate using alternative security providers, until the first success.
+	 * In case of a success, the first obtained implementation of a certificate is returned, otherwise,
+	 * if all security providers fail to load the certificate, an exception is thrown.
 	 * 
 	 * @param file
 	 *            the file with the certificate
 	 * @return the certificate token
 	 */
 	public static CertificateToken loadCertificate(final File file) {
-		try {
-			final InputStream inputStream = Files.newInputStream(file.toPath());
-			return loadCertificate(inputStream);
-		} catch (IOException e) {
-			throw new DSSException(String.format("Unable to find a file '%s' : %s", file.getAbsolutePath(), e.getMessage()), e);
-		}
+		Objects.requireNonNull(file, "Input file cannot be null");
+		return DSSCertificateTokenSecurityFactory.FILE_INSTANCE.build(file);
+	}
+
+	/**
+	 * This method loads a certificate from the byte array. The certificate must be DER-encoded and may be supplied in
+	 * binary or printable (Base64) encoding.
+	 * <p>
+	 * If the certificate is provided in Base64 encoding, it must be bounded at the beginning by
+	 * -----BEGIN CERTIFICATE-----, and
+	 * must be bounded at the end by -----END CERTIFICATE-----. It throws an {@code DSSException} or return {@code null}
+	 * when the
+	 * certificate cannot be loaded.
+	 * <p>
+	 * This method will at first try to load the certificate with a default security Provider,
+	 * if it fails, it will try to load the certificate using alternative security providers, until the first success.
+	 * In case of a success, the first obtained implementation of a certificate is returned, otherwise,
+	 * if all security providers fail to load the certificate, an exception is thrown.
+	 *
+	 * @param input
+	 *            array of bytes containing the certificate
+	 * @return the certificate token
+	 */
+	public static CertificateToken loadCertificate(final byte[] input) {
+		Objects.requireNonNull(input, "Input binary cannot be null");
+		return DSSCertificateTokenSecurityFactory.BINARY_INSTANCE.build(input);
 	}
 
 	/**
@@ -287,68 +318,66 @@ public final class DSSUtils {
 	 * <p>
 	 * If the certificate is provided in Base64 encoding, it must be bounded at the beginning by
 	 * {@code -----BEGIN CERTIFICATE-----}, and must be bounded at the end by {@code -----END CERTIFICATE-----}.
+	 * <p>
+	 * NOTE: As the certificate is provided in the form of an {@code InputStream}, only single reading of the stream is possible.
+	 *       Therefore, the method uses only a default security provider to load a certificate.
+	 *       Should you need to use an alternative security provider, please use
+	 *       {@code #loadCertificate(InputStream inputStream, String providerName)} method instead.
 	 * 
 	 * @param inputStream
 	 *            input stream containing the certificate
 	 * @return the certificate token
 	 */
 	public static CertificateToken loadCertificate(final InputStream inputStream) {
-		List<CertificateToken> certificates = loadCertificates(inputStream);
-		if (certificates.size() == 1) {
-			return certificates.get(0);
-		}
-		throw new DSSException("Could not parse certificate");
+		Objects.requireNonNull(inputStream, "InputStream cannot be null");
+		return DSSCertificateTokenSecurityFactory.INPUT_STREAM_INSTANCE.build(inputStream);
 	}
 
 	/**
-	 * Loads a collection of certificates from a p7c source
+	 * Loads a collection of certificates from a p7c file
+	 * <p>
+	 * This method will at first try to load the certificate with a default security Provider,
+	 * if it fails, it will try to load the certificate using alternative security providers, until the first success.
+	 * In case of a success, the first obtained implementation of a certificate is returned, otherwise,
+	 * if all security providers fail to load the certificate, an exception is thrown.
+	 *
+	 * @param file {@link File} p7c
+	 * @return a list of {@link CertificateToken}s
+	 */
+	public static List<CertificateToken> loadCertificateFromP7c(File file) {
+		Objects.requireNonNull(file, "Input file cannot be null");
+		return DSSP7CCertificatesSecurityFactory.FILE_INSTANCE.build(file);
+	}
+
+	/**
+	 * Loads a collection of certificates from a p7c byte array
+	 * <p>
+	 * This method will at first try to load the certificate with a default security Provider,
+	 * if it fails, it will try to load the certificate using alternative security providers, until the first success.
+	 * In case of a success, the first obtained implementation of a certificate is returned, otherwise,
+	 * if all security providers fail to load the certificate, an exception is thrown.
+	 *
+	 * @param input {@link InputStream} p7c
+	 * @return a list of {@link CertificateToken}s
+	 */
+	public static List<CertificateToken> loadCertificateFromP7c(byte[] input) {
+		Objects.requireNonNull(input, "Input binary cannot be null");
+		return DSSP7CCertificatesSecurityFactory.BINARY_INSTANCE.build(input);
+	}
+
+	/**
+	 * Loads a collection of certificates from a p7c {@code InputStream}
+	 * <p>
+	 * NOTE: As the certificate is provided in the form of an {@code InputStream}, only single reading of the stream is possible.
+	 *       Therefore, the method uses only a default security provider to load p7c certificates.
+	 *       Should you need to use an alternative security provider, please use
+	 *       {@code #loadCertificateFromP7c(InputStream inputStream, String providerName)} method instead.
 	 *
 	 * @param inputStream {@link InputStream} p7c
 	 * @return a list of {@link CertificateToken}s
 	 */
 	public static List<CertificateToken> loadCertificateFromP7c(InputStream inputStream) {
-		return loadCertificates(inputStream);
-	}
-
-	private static List<CertificateToken> loadCertificates(InputStream inputStream) {
-		final List<CertificateToken> certificates = new ArrayList<>();
-		try (InputStream is = inputStream) {
-			@SuppressWarnings("unchecked")
-			final Collection<X509Certificate> certificatesCollection = (Collection<X509Certificate>) CertificateFactory
-					.getInstance("X.509", DSSSecurityProvider.getSecurityProviderName()).generateCertificates(is);
-			if (certificatesCollection != null) {
-				for (X509Certificate cert : certificatesCollection) {
-					certificates.add(new CertificateToken(cert));
-				}
-			}
-			if (certificates.isEmpty()) {
-				throw new DSSException("No certificate found in the InputStream");
-			}
-			return certificates;
-		} catch (DSSException e) {
-		  	throw e;
-		} catch (Exception e) {
-			throw new DSSException("Unable to load certificate(s) : " + e.getMessage(), e);
-		}
-	}
-
-	/**
-	 * This method loads a certificate from the byte array. The certificate must be DER-encoded and may be supplied in
-	 * binary or printable
-	 * (Base64) encoding. If the certificate is provided in Base64 encoding, it must be bounded at the beginning by
-	 * -----BEGIN CERTIFICATE-----, and
-	 * must be bounded at the end by -----END CERTIFICATE-----. It throws an {@code DSSException} or return {@code null}
-	 * when the
-	 * certificate cannot be loaded.
-	 *
-	 * @param input
-	 *            array of bytes containing the certificate
-	 * @return the certificate token
-	 */
-	public static CertificateToken loadCertificate(final byte[] input) {
-		Objects.requireNonNull(input, "Input binary cannot be null");
-		final InputStream inputStream = new ByteArrayInputStream(input); // closed inside
-		return loadCertificate(inputStream);
+		return DSSP7CCertificatesSecurityFactory.INPUT_STREAM_INSTANCE.build(inputStream);
 	}
 
 	/**
@@ -772,14 +801,11 @@ public final class DSSUtils {
 	 * @param x500PrincipalString
 	 *            a {@code String} representation of the {@code X500Principal}
 	 * @return {@code X500Principal} or null
+	 * @deprecated since DSS 6.4. Please use {@code DSSASN1Utils#getX500PrincipalOrNull} method instead.
 	 */
+	@Deprecated
 	public static X500Principal getX500PrincipalOrNull(final String x500PrincipalString) {
-		try {
-			return new X500Principal(x500PrincipalString, X520Attributes.getUppercaseDescriptionForOids());
-		} catch (Exception e) {
-			LOG.warn("Unable to create an instance of X500Principal : {}", e.getMessage());
-			return null;
-		} 
+		return DSSASN1Utils.getX500PrincipalOrNull(x500PrincipalString);
 	}
 
 	/**
@@ -853,34 +879,41 @@ public final class DSSUtils {
 	}
 	
 	/**
-	 * This method encodes a URI to be compliant with the RFC 3986 (see DSS-1475 for details)
+	 * This method encodes a URI (e.g. to be used within a ds:Reference element).
+	 * NOTE: This method aims for compliance with the RFC 2396 / RFC 3986 (see DSS-1475 and DSS-3750 for details),
+	 * but keeps non Unicode letter characters in their plain representation as they are allowed for definition within
+	 * filenames and/or XML elements.
 	 *
 	 * @param fileURI the uri to be encoded
 	 * @return the encoded result
 	 */
 	public static String encodeURI(String fileURI) {
-		StringBuilder sb = new StringBuilder();
-		String uriDelimiter = "";
-		final String[] uriParts = fileURI.split("/");
-		for (String part : uriParts) {
-			sb.append(uriDelimiter);
-			sb.append(encodePartURI(part));
-			uriDelimiter = "/";
+		if (fileURI == null) {
+			return null;
 		}
-		return sb.toString();
-	}
-	
-	/**
-	 * This method encodes a partial URI to be compliant with the RFC 3986 (see DSS-1475 for details)
-	 * @param uriPart the partial uri to be encoded
-	 * @return the encoded result
-	 */
-	private static String encodePartURI(String uriPart) {
+
+        Matcher matcher = RFC3986_URI_PATTERN.matcher(fileURI);
+		if (!matcher.matches()) {
+			LOG.warn("URI does not match RFC 3986 pattern: {}. Original URI is returned.", fileURI);
+			return fileURI;
+		}
+
+		String scheme = matcher.group(2);
+		String authority = matcher.group(4);
+		String path = matcher.group(5);
+		String query = matcher.group(7);
+		String fragment = matcher.group(9);
 		try {
-			return URLEncoder.encode(uriPart, UTF8_ENCODING).replace("+", "%20");
-		} catch (Exception e) {
-			LOG.warn("Unable to encode uri '{}' : {}", uriPart, e.getMessage());
-			return uriPart;
+			URI safeUri = new URI(scheme, authority, path, query, fragment);
+			return safeUri.toString();
+		} catch (URISyntaxException e) {
+			String errorMessage = "URI does not match RFC 3986 pattern: {}. Reason {}. Original URI is returned.";
+			if (LOG.isDebugEnabled()) {
+				LOG.warn(errorMessage, fileURI, e.getMessage(), e);
+			} else {
+				LOG.warn(errorMessage, fileURI, e.getMessage());
+			}
+			return fileURI;
 		}
 	}
 	
@@ -1259,6 +1292,34 @@ public final class DSSUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Gets host name based on the given URL string.
+	 * E.g. for "ldap://ldap.infonotary.com/dc=identity-ca,dc=infonotary,dc=com" returns -> "ldap.infonotary.com"
+	 *
+	 * @param urlString {@link String}
+	 * @return {@link String} corresponding to a host name
+	 */
+	public static String getHost(String urlString) {
+		if (Utils.isStringEmpty(urlString)) {
+			return "";
+		}
+
+		int doubleslash = urlString.indexOf("//");
+		if (doubleslash == -1) {
+			doubleslash = 0;
+		} else {
+			doubleslash += 2;
+		}
+
+		int end = urlString.indexOf('/', doubleslash);
+		end = end >= 0 ? end : urlString.length();
+
+		int port = urlString.indexOf(':', doubleslash);
+		end = (port > 0 && port < end) ? port : end;
+
+		return urlString.substring(doubleslash, end);
 	}
 
 }

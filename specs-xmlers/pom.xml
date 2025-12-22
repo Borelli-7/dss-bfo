@@ -4,7 +4,7 @@
     <parent>
         <artifactId>sd-dss</artifactId>
         <groupId>eu.europa.ec.joinup.sd-dss</groupId>
-        <version>6.4-SNAPSHOT</version>
+        <version>6.4.RC1</version>
     </parent>
 
     <artifactId>specs-xmlers</artifactId>
@@ -114,12 +114,9 @@
                         </goals>
                         <configuration>
                             <target>
-                                <replaceregexp
-                                        match="\{@link byte\[\]\}"
-                                        replace="{@code byte[]}"
-                                        flags="g">
+                                <replaceregexp match="\{@link byte\[\]\}" replace="{@code byte[]}" flags="g">
                                     <fileset dir="${project.build.directory}/generated-sources/xjc">
-                                        <include name="**/*.java"/>
+                                        <include name="**/*.java" />
                                     </fileset>
                                 </replaceregexp>
                             </target>
